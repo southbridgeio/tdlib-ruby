@@ -60,7 +60,7 @@
 #
 #   p @me
 class TD::Client
-  def initialize(td_client = Api.client_create,
+  def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client))
     @td_client = td_client
     @update_manager = update_manager
