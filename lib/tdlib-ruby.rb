@@ -25,6 +25,7 @@ module TD
   end
 end
 
+require 'tdlib/errors'
 require 'tdlib/api'
 require 'tdlib/utils'
 require 'tdlib/client'
