@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'tdlib'
+require 'tdlib-ruby'
 
 describe TD do
   it "should have a VERSION constant" do

@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'tdlib'
+require 'tdlib-ruby'
 require 'support/update_manager_stub'
 
 Thread.abort_on_exception = true
