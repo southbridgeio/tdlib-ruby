@@ -1,4 +1,4 @@
 require 'rspec'
 require 'tdlib/version'
 
-include Tdlib
+include TD

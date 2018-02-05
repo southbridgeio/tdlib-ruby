@@ -6,12 +6,12 @@ require 'tdlib/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "tdlib-ruby"
-  gem.version       = Tdlib::VERSION
-  gem.summary       = %q{TODO: Summary}
-  gem.description   = %q{TODO: Description}
+  gem.version       = TD::VERSION
+  gem.summary       = 'Ruby bindings and client for TDlib'
+  gem.description   = %q{Description}
   gem.license       = "MIT"
-  gem.authors       = ["Vladislav Yashin"]
-  gem.email         = "v.yashin.work@gmail.com"
+  gem.authors       = ["Southbridge"]
+  gem.email         = "ask@southbridge.io"
   gem.homepage      = "https://rubygems.org/gems/tdlib-ruby"
 
   gem.files         = `git ls-files`.split($/)
@@ -29,9 +29,12 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ['lib']
 
+  gem.add_runtime_dependency 'dry-configurable', '~> 0.7'
+
   gem.add_development_dependency 'bundler', '~> 1.10'
   gem.add_development_dependency 'rake', '~> 10.0'
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'rubygems-tasks', '~> 0.2'
   gem.add_development_dependency 'yard', '~> 0.8'
+  gem.add_development_dependency 'pry', '~> 0.11'
 end

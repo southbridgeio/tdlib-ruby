@@ -4,3 +4,5 @@
 /doc/
 /pkg/
 /vendor/cache/*.gem
+/.vscode/
+/.yardoc/
