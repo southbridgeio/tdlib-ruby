@@ -145,8 +145,11 @@ class TD::Client
     }
     encryption_key_query = {
       '@type' => 'checkDatabaseEncryptionKey',
-      'encryption_key' => TD.config.encryption_key
     }
+
+    if TD.config.encryption_key
+      encryption_key_query['encryption_key'] = TD.config.encryption_key
+    end
 
     handler = ->(update) do
       return unless update['@type'] == 'updateAuthorizationState'
