@@ -109,10 +109,6 @@ class TD::Client
     TD::Api.client_execute(@td_client, query)
   end
 
-  def set_log_verbosity_level(level)
-    TD::Api.set_log_verbosity_level(level)
-  end
-
   # Returns current authorization state (it's offline request)
   # @return [Hash]
   def authorization_state
