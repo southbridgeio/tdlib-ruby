@@ -6,17 +6,36 @@
 
 Ruby bindings and client for TDLib.
 
+## Requirements
+
+* Ruby 2.3+
+* Compiled [tdlib](https://github.com/tdlib/td)
+
+## Install
+
+Add to your gemfile:
+
+```ruby
+gem 'tdlib-ruby'
+```
+and run *bundle install*.
+
+
+Or just run *gem install tdlib-ruby*
+
 ## Basic example
 
 ```ruby
 require 'tdlib-ruby'
 
 TD.configure do |config|
-  config.lib_path = 'path_to_tdlibjson'
+  config.lib_path = 'path_to_dir_containing_tdlibjson'
 
   config.client.api_id = your_api_id
   config.client.api_hash = 'your_api_hash'
 end
+
+TD::Api.set_log_verbosity_level(1)
 
 client = TD::Client.new
 
@@ -69,26 +88,11 @@ end
 p @me
 ```
 
-## Requirements
-
-* Ruby 2.3+
-* Compiled [tdlib](https://github.com/tdlib/td)
-
-## Install
-
-Add to your gemfile:
-
-```ruby
-gem 'tdlib-ruby'
-```
-
-or run *gem install tdlib-ruby*
-
 ## Configuration
 
 ```ruby
 TD.configure do |config|
-  config.lib_path = 'path/to/tdlibjson'
+  config.lib_path = 'path/to/dir_containing_libtdjson' # libtdson will be searched in this directory (*.so, *.dylib, *.dll are valid extensions)
   config.encryption_key = 'your_encryption_key' # it's not required
 
   config.client.api_id = 12345
@@ -108,6 +112,31 @@ TD.configure do |config|
 end
 ```
 
-## Copyright
+## Advanced
 
-Copyright (c) 2018 Southbridge
+You can get rid of large tdlib log with
+
+```ruby
+TD::Api.set_log_verbosity_level(1)
+```
+
+You can also set log file path:
+
+```ruby
+TD::Api.set_log_file_path('path/to/log_file')
+```
+
+Additional options can be passed to client:
+
+```ruby
+TD::Client.new(database_directory: 'will override value from config',
+               files_directory: 'will override value from config')
+```
+
+## License
+
+[MIT](https://github.com/centosadmin/tdlib-ruby/blob/master/LICENSE.txt)
+
+## Authors
+
+The plugin is designed by [Southbridge](https://southbridge.io)
