@@ -1,7 +1,5 @@
 # Simple client for TDLib.
 # @example
-#   require 'tdlib'
-#
 #   TD.configure do |config|
 #     config.lib_path = 'path_to_tdlibjson'
 #     config.encryption_key = 'your_encryption_key'
@@ -61,9 +59,11 @@
 #   p @me
 class TD::Client
   def initialize(td_client = TD::Api.client_create,
-                 update_manager = TD::UpdateManager.new(td_client))
+                 update_manager = TD::UpdateManager.new(td_client),
+                 **extra_config)
     @td_client = td_client
     @update_manager = update_manager
+    @config = TD.config.client.to_h.merge(extra_config)
     authorize
   end
 
@@ -137,7 +137,7 @@ class TD::Client
   def authorize
     tdlib_params_query = {
       '@type' => 'setTdlibParameters',
-      parameters: { '@type' => 'tdlibParameters', **TD.config.client.to_h }
+      parameters: { '@type' => 'tdlibParameters', **@config }
     }
     encryption_key_query = {
       '@type' => 'checkDatabaseEncryptionKey',
