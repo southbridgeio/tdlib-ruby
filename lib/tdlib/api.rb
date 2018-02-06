@@ -41,7 +41,7 @@ module TD::Api
     def method_missing(method_name, *args)
       raise TD::MissingLibPathError unless TD.config.lib_path
 
-      dlload TD.config.lib_path
+      dlload Dir.glob(File.join(TD.config.lib_path, 'libtdjson.{so,dylib,dll}')).first
 
       extern 'void* td_json_client_create()'
       extern 'void* td_json_client_send(void*, char*)'
