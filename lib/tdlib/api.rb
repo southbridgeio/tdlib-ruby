@@ -33,10 +33,6 @@ module TD::Api
     Dl.td_set_log_file_path(path)
   end
 
-  def set_log_max_file_size(size)
-    Dl.td_set_log_max_file_size(size)
-  end
-
   module Dl
     extend Fiddle::Importer
 
@@ -54,7 +50,6 @@ module TD::Api
       extern 'void td_set_log_verbosity_level(int)'
       extern 'void td_json_client_destroy(void*)'
       extern 'void td_set_log_file_path(char*)'
-      extern 'void td_set_log_max_file_size(int)'
 
       undef method_missing
       public_send(method_name, *args)
