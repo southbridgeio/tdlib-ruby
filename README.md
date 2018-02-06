@@ -139,4 +139,4 @@ TD::Client.new(database_directory: 'will override value from config',
 
 ## Authors
 
-The plugin is designed by [Southbridge](https://southbridge.io)
+The gem is designed by [Southbridge](https://southbridge.io)
