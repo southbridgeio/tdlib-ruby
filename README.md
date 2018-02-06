@@ -89,7 +89,7 @@ or run *gem install tdlib-ruby*
 ```ruby
 TD.configure do |config|
   config.lib_path = 'path/to/tdlibjson'
-  config.encryption_key # it's not required
+  config.encryption_key = 'your_encryption_key' # it's not required
 
   config.client.api_id = 12345
   config.client.api_hash = 'your_api_hash'
