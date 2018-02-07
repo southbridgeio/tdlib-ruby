@@ -41,7 +41,7 @@ module TD::Api
     def method_missing(method_name, *args)
       raise TD::MissingLibPathError unless TD.config.lib_path
 
-      dlload Dir.glob(File.join(TD.config.lib_path, 'libtdjson.{so,dylib,dll}')).first
+      dlload(find_lib)
 
       extern 'void* td_json_client_create()'
       extern 'void* td_json_client_send(void*, char*)'
@@ -53,6 +53,33 @@ module TD::Api
 
       undef method_missing
       public_send(method_name, *args)
+    end
+
+    def find_lib
+      lib_extension =
+        case os
+        when :windows then 'dll'
+        when :macos then 'dylib'
+        when :linux then 'so'
+        else raise "#{os} OS is not supported"
+        end
+      File.join(TD.config.lib_path, "libtdjson.#{lib_extension}")
+    end
+
+    def os
+      host_os = RbConfig::CONFIG['host_os']
+      case host_os
+      when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+        :windows
+      when /darwin|mac os/
+        :macos
+      when /linux/
+        :linux
+      when /solaris|bsd/
+        :unix
+      else
+        raise "Unknown os: #{host_os.inspect}"
+      end
     end
   end
 

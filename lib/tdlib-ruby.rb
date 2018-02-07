@@ -4,7 +4,13 @@ require 'dry/configurable'
 module TD
   extend Dry::Configurable
 
-  setting :lib_path
+  module_function
+
+  def root_path
+    __dir__
+  end
+
+  setting :lib_path, File.join(root_path, '..', 'libtdjson')
   setting :encryption_key
 
   setting :client do
