@@ -4,7 +4,14 @@ require 'dry/configurable'
 module TD
   extend Dry::Configurable
 
+  module_function
+
+  def root_path
+    __dir__
+  end
+
   setting :lib_path
+
   setting :encryption_key
 
   setting :client do
