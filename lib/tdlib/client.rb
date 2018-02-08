@@ -58,6 +58,7 @@
 #
 #   p @me
 class TD::Client
+  TIMEOUT = 5
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
                  **extra_config)
@@ -94,10 +95,12 @@ class TD::Client
     @update_manager.add_handler(handler)
     query['@extra'] = extra
     TD::Api.client_send(@td_client, query)
-    loop do
-      if result
-        @update_manager.remove_handler(handler)
-        return result
+    Timeout.timeout(TIMEOUT) do
+      loop do
+        if result
+          @update_manager.remove_handler(handler)
+          return result
+        end
       end
     end
   end
