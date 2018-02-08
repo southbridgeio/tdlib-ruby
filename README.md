@@ -4,7 +4,7 @@
 
 ## Description
 
-Ruby bindings and client for TDLib.
+Ruby bindings and client for TDLib (Telegram database library).
 
 ## Requirements
 
@@ -92,7 +92,7 @@ p @me
 
 ```ruby
 TD.configure do |config|
-  config.lib_path = 'path/to/dir_containing_libtdjson' # libtdson will be searched in this directory (*.so, *.dylib, *.dll are valid extensions)
+  config.lib_path = 'path/to/dir_containing_libtdjson' # libtdson will be searched in this directory (*.so, *.dylib, *.dll are valid extensions). For Rails projects, if not set, will be considered as project_root_path/vendor
   config.encryption_key = 'your_encryption_key' # it's not required
 
   config.client.api_id = 12345
