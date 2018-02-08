@@ -58,7 +58,8 @@
 #
 #   p @me
 class TD::Client
-  TIMEOUT = 5
+  TIMEOUT = 10
+
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
                  **extra_config)
