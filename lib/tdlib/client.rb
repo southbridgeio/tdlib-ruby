@@ -112,7 +112,7 @@ class TD::Client
   # Returns current authorization state (it's offline request)
   # @return [Hash]
   def authorization_state
-    broadcast_and_receive('getAuthorizationState')
+    broadcast_and_receive('@type' => 'getAuthorizationState')
   end
 
   # Binds passed block as a handler for updates with type of *update_type*
