@@ -56,7 +56,7 @@ module TD::Api
     end
 
     def lib_path
-      TD.config.lib_path || defined?(Rails) ? Rails.root.join('vendor').to_s : nil
+      TD.config.lib_path || (defined?(Rails) ? Rails.root.join('vendor').to_s : nil)
     end
 
     def find_lib
