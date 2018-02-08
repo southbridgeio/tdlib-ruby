@@ -10,7 +10,8 @@ module TD
     __dir__
   end
 
-  setting :lib_path, File.join(root_path, '..', 'libtdjson')
+  setting :lib_path, defined?(Rails) ? File.join(Rails.root, 'vendor') : nil
+
   setting :encryption_key
 
   setting :client do
