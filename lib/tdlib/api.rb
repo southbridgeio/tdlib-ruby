@@ -39,7 +39,7 @@ module TD::Api
     module_function
 
     def method_missing(method_name, *args)
-      raise TD::MissingLibPathError unless TD.config.lib_path
+      raise TD::MissingLibPathError unless lib_path
 
       dlload(find_lib)
 
@@ -55,6 +55,10 @@ module TD::Api
       public_send(method_name, *args)
     end
 
+    def lib_path
+      TD.config.lib_path || defined?(Rails) ? Rails.root.join('vendor').to_s : nil
+    end
+
     def find_lib
       lib_extension =
         case os
@@ -63,7 +67,7 @@ module TD::Api
         when :linux then 'so'
         else raise "#{os} OS is not supported"
         end
-      File.join(TD.config.lib_path, "libtdjson.#{lib_extension}")
+      File.join(lib_path, "libtdjson.#{lib_extension}")
     end
 
     def os

@@ -10,7 +10,7 @@ module TD
     __dir__
   end
 
-  setting :lib_path, defined?(Rails) ? File.join(Rails.root, 'vendor') : nil
+  setting :lib_path
 
   setting :encryption_key
 
