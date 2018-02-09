@@ -130,6 +130,14 @@ class TD::Client
     @update_manager.add_handler(handler)
   end
 
+  def on_ready(&_)
+    Timeout.timeout(TIMEOUT) do
+      until @ready do
+      end
+    end
+    yield self
+  end
+
   # Stops update manager and destroys TDLib client
   def close
     @update_manager.stop
@@ -160,6 +168,7 @@ class TD::Client
         broadcast(encryption_key_query)
       else
         @update_manager.remove_handler(handler)
+        @ready = true
       end
     end
     @update_manager.add_handler(handler)
