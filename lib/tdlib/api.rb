@@ -39,8 +39,6 @@ module TD::Api
     module_function
 
     def method_missing(method_name, *args)
-      raise TD::MissingLibPathError unless lib_path
-
       dlload(find_lib)
 
       extern 'void* td_json_client_create()'
@@ -55,19 +53,27 @@ module TD::Api
       public_send(method_name, *args)
     end
 
-    def lib_path
-      TD.config.lib_path || (defined?(Rails) ? Rails.root.join('vendor').to_s : nil)
+    def find_lib
+      file_name = "libtdjson.#{lib_extension}"
+      lib_path =
+        if TD.config.lib_path
+          TD.config.lib_path
+        elsif defined?(Rails) && File.exist?(Rails.root.join('vendor', file_name))
+          Rails.root.join('vendor')
+        elsif os == :linux
+          `ldconfig -p | grep libtdjson`[/=> (.*?)\n/m, 1]
+        end
+      raise TD::MissingLibPathError unless lib_path
+      File.join(lib_path, file_name)
     end
 
-    def find_lib
-      lib_extension =
-        case os
-        when :windows then 'dll'
-        when :macos then 'dylib'
-        when :linux then 'so'
-        else raise "#{os} OS is not supported"
-        end
-      File.join(lib_path, "libtdjson.#{lib_extension}")
+    def lib_extension
+      case os
+      when :windows then 'dll'
+      when :macos then 'dylib'
+      when :linux then 'so'
+      else raise "#{os} OS is not supported"
+      end
     end
 
     def os
