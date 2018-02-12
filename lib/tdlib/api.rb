@@ -91,6 +91,4 @@ module TD::Api
       end
     end
   end
-
-  private_constant :Dl
 end
