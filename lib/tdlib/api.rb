@@ -60,9 +60,8 @@ module TD::Api
           TD.config.lib_path
         elsif defined?(Rails) && File.exist?(Rails.root.join('vendor', file_name))
           Rails.root.join('vendor')
-        elsif os == :linux
-          return `ldconfig -p | grep libtdjson`[/=> (.*?)\n/m, 1]
         end
+      return `ldconfig -p | grep libtdjson`[/=> (.*?)\n/m, 1] if os == :linux && lib_path.nil?
       raise TD::MissingLibPathError unless lib_path
       File.join(lib_path, file_name)
     end
