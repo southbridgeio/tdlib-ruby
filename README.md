@@ -11,6 +11,18 @@ Ruby bindings and client for TDLib (Telegram database library).
 * Ruby 2.3+
 * Compiled [tdlib](https://github.com/tdlib/td)
 
+We have precompiled versions for CentOS 6 & 7 in our repositories:
+
+http://rpms.southbridge.ru/rhel7/stable/x86_64/
+
+http://rpms.southbridge.ru/rhel6/stable/x86_64/
+
+And also SRPMS:
+
+http://rpms.southbridge.ru/rhel7/stable/SRPMS/
+
+http://rpms.southbridge.ru/rhel6/stable/SRPMS/
+
 ## Install
 
 Add to your gemfile:
@@ -92,7 +104,7 @@ p @me
 
 ```ruby
 TD.configure do |config|
-  config.lib_path = 'path/to/dir_containing_libtdjson' # libtdson will be searched in this directory (*.so, *.dylib, *.dll are valid extensions). For Rails projects, if not set, will be considered as project_root_path/vendor
+  config.lib_path = 'path/to/dir_containing_libtdjson' # libtdson will be searched in this directory (*.so, *.dylib, *.dll are valid extensions). For Rails projects, if not set, will be considered as project_root_path/vendor. If not set and file doesn't exist in vendor, it will try to find lib by ldconfig (only on Linux).
   config.encryption_key = 'your_encryption_key' # it's not required
 
   config.client.api_id = 12345
