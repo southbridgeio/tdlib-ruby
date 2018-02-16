@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.license       = "MIT"
   gem.authors       = ["Southbridge"]
   gem.email         = "ask@southbridge.io"
-  gem.homepage      = "https://rubygems.org/gems/tdlib-ruby"
+  gem.homepage      = "https://github.com/centosadmin/tdlib-ruby"
 
   gem.files         = `git ls-files`.split($/)
 
