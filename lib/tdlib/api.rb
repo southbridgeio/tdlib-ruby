@@ -36,21 +36,26 @@ module TD::Api
   module Dl
     extend Fiddle::Importer
 
+    @mutex = Mutex.new
+
     module_function
 
     def method_missing(method_name, *args)
-      dlload(find_lib)
+      @mutex.synchronize do
+        return if respond_to?(method_name)
+        dlload(find_lib)
 
-      extern 'void* td_json_client_create()'
-      extern 'void* td_json_client_send(void*, char*)'
-      extern 'char* td_json_client_receive(void*, double)'
-      extern 'char* td_json_client_execute(void*, char*)'
-      extern 'void td_set_log_verbosity_level(int)'
-      extern 'void td_json_client_destroy(void*)'
-      extern 'void td_set_log_file_path(char*)'
+        extern 'void* td_json_client_create()'
+        extern 'void* td_json_client_send(void*, char*)'
+        extern 'char* td_json_client_receive(void*, double)'
+        extern 'char* td_json_client_execute(void*, char*)'
+        extern 'void td_set_log_verbosity_level(int)'
+        extern 'void td_json_client_destroy(void*)'
+        extern 'void td_set_log_file_path(char*)'
 
-      undef method_missing
-      public_send(method_name, *args)
+        undef method_missing
+        public_send(method_name, *args)
+      end
     end
 
     def find_lib
