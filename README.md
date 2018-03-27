@@ -1,6 +1,6 @@
 # tdlib-ruby
 
-[![Build Status](https://travis-ci.org/centosadmin/tdlib-ruby.svg?branch=master)](https://travis-ci.org/centosadmin/tdlib-ruby)
+[![Maintainability](https://api.codeclimate.com/v1/badges/9362ca2682b7edbae205/maintainability)](https://codeclimate.com/github/centosadmin/tdlib-ruby/maintainability) [![Build Status](https://travis-ci.org/centosadmin/tdlib-ruby.svg?branch=master)](https://travis-ci.org/centosadmin/tdlib-ruby)
 
 ## Description
 
