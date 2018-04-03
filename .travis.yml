@@ -16,4 +16,4 @@ before_install:
   - bash -x ./travis.sh
 
 cache:
-  directories: [ 'home/travis/td/build' ]
+  directories: [ 'td/build' ]
