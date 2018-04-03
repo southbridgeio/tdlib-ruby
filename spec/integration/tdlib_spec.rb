@@ -19,7 +19,7 @@ describe TD::Client do
   after(:each) { client.close }
 
   describe '#on_ready' do
-    subject { client.on_ready { |client| [client, 'ready'] } }
+    subject { client.on_ready { [client, 'ready'] } }
 
     it { is_expected.to include(client) }
     it { is_expected.to include('ready') }
@@ -37,7 +37,7 @@ describe TD::Client do
 
       it 'runs block on update' do
         subject
-        sleep 2
+        sleep 3
         expect(@result).to include('@type', 'entities')
       end
     end
@@ -59,7 +59,7 @@ describe TD::Client do
 
     it 'runs block on update' do
       subject
-      sleep 2
+      sleep 3
       expect(@result).to include('@type', 'entities')
     end
   end
