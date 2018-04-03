@@ -5,7 +5,7 @@ rvm:
   - 2.5.0
 
 before_install:
-  - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main"
+  - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main"
   - sudo apt-get -qq update
   - sudo apt-get install -y gperf cmake openssl clang-5.0 lldb-5.0
   - bash -x ./travis.sh
