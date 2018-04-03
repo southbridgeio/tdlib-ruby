@@ -2,7 +2,7 @@
 
 set -e
 
-cd /home/travis
+cd home/travis
 
 git init ./td
 cd td
