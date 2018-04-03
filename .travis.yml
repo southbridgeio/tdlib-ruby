@@ -2,14 +2,14 @@
 language: ruby
 rvm:
   - 2.3.6
-  - 2.5.0
+  - 2.3.8
 
 before_install:
-  - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main"
+  - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.8 main"
   - sudo apt-get -qq update
-  - sudo apt-get install -y gperf cmake openssl clang-5.0 lldb-5.0 --allow-unauthenticated
-  - export CC=clang-5.0
-  - export CXX=clang-5.0
+  - sudo apt-get install -y gperf cmake openssl clang-3.8 lldb-3.8 --allow-unauthenticated
+  - export CC=clang-3.8
+  - export CXX=clang-3.8
   - export CXX_STANDARD=14
   - bash -x ./travis.sh
 
