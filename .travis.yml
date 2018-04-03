@@ -4,4 +4,7 @@ rvm:
   - 2.3.6
   - 2.5.0
 
-before_install: './travis.sh'
+before_install:
+  - bash -x ./travis.sh
+
+before_script: './travis.sh'
