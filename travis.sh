@@ -14,4 +14,4 @@ mkdir build
 cd build
 
 cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build . -- - j 4
+cmake --build . -- -j 4
