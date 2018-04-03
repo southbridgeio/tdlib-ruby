@@ -2,14 +2,14 @@
 language: ruby
 rvm:
   - 2.3.6
-  - 2.3.8
+  - 2.5.0
+
+addons:
+  apt:
+    sources:  [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.8' ]
+    packages: [ 'g++-5', 'clang-3.8','libc++-dev', 'libc++abi-dev', 'gperf']
 
 before_install:
-  - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.8 main"
-  - sudo apt-get -qq update
-  - sudo apt-get install -y gperf cmake openssl clang-3.8 lldb-3.8 g++-5 libc++-dev libc++abi-dev --allow-unauthenticated
-  - export CC=clang-3.8
-  - export CXX=clang-3.8
   - bash -x ./travis.sh
 
 before_script: './travis.sh'
