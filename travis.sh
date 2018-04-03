@@ -2,8 +2,7 @@
 
 set -e
 
-export TESTSPACE=`pwd`/testspace
-mkdir $TESTSPACE
+mkdir -p $TESTSPACE
 
 cd $TESTSPACE
 
