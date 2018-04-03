@@ -2,9 +2,7 @@
 
 set -e
 
-mkdir -p $TESTSPACE
-
-cd $TESTSPACE
+cd /home/travis
 
 git init ./td
 cd td
