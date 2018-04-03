@@ -1,5 +1,29 @@
----
 language: ruby
 rvm:
-  - 2.3.6
-  - 2.5.0
+- 2.3.6
+- 2.5.0
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.8
+    packages:
+    - g++-5
+    - clang-3.8
+    - libc++-dev
+    - libc++abi-dev
+    - gperf
+env:
+  matrix:
+  - CXX=clang++-3.8 CC=clang-3.8
+  global:
+    secure: DmAoRsr+dTPVNs486nBXzChjzCCVdoxfmSbvqMBBl0v8uuUIZD1rSfYKcEaL5pmE7vgYq3X+3Dk0gf4ef/p2xPVKqFKrkBiF/7t06WgQTH7003gHMLq3aC7R9+1xvqJDzpoc6UB59Y1fOJBe5YfqDuw1dT9a46tzY2uzoVpEpbN8M/hssaKf6Wuzvpz5yekFeXq2raPwi3aOqvkSG+ODoacVdYQgJ4Vn0//CI2HzWijkQCvdsefWQUKkbgtuLWRp3UNy8AEhVWzQnTcSM7oc+MwMsOI/90DZkTP5n2WJl/CFTM5b70VyrIciG92SvTAhhBo/p7t3QBJa6kJMPXAHh5q+3wqVQA411+CoVF48bO5rKjKY3Ply49uqAzVJRh+Tkhf5uC1pHiZ6QKGxu1Czde+mKItBpaDmJFmQi0CSdv2WYXLnJWOQIO6vc2P3liwpMDRDyaGWOQtUYS+gHAlRbD4NPycIkGjkcjmLMqSEEO1TdCpM+CYwTvNTkRS+9HrWXZNdEfWORDYHgYohoIP6kY6XWSgunUb6F6pVxLoPWJNEBEVuIMZeOa/s9oklxBzD5XXIzBx4QsPYanvfxoN1uOcXlBXbOGqwiqb+urokNDw+BzWhbA+xY03U2+yO0Ujh3HQDyMDtrXEQfaPC0SxpEvIINVYwznG4sMKvbOaCVSo=
+before_install:
+- set -e
+- git clone https://github.com/tdlib/td
+- cd td
+- mkdir -p build
+- cd build
+- cmake -DCMAKE_BUILD_TYPE=Release ..
+- cmake --build . -- -j 4
+cache: ccache
