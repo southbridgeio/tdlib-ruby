@@ -2,11 +2,9 @@
 
 set -e
 
-git init ./td
-cd td
-git remote add origin https://github.com/tdlib/td
-git pull origin master
+git clone https://github.com/tdlib/td
 
+mkdir -p build
 cd build
 
 cmake -DCMAKE_BUILD_TYPE=Release ..
