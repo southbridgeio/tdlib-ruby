@@ -26,4 +26,7 @@ before_install:
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Release ..
 - cmake --build . -- -j 4
-cache: ccache
+cache:
+  bundler: true
+  directories:
+    - $HOME/.ccache
