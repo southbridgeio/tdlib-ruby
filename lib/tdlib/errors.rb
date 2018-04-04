@@ -3,3 +3,6 @@ class TD::MissingLibPathError < StandardError
     super
   end
 end
+
+class TD::TimeoutError < Timeout::Error
+end
