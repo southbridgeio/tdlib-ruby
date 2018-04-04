@@ -11,12 +11,11 @@ describe TD::Client do
 
       config.client.api_id = ENV['TD_API_ID']
       config.client.api_hash = ENV['TD_API_HASH']
+      config.client.use_test_dc = true
     end
 
     TD::Api.set_log_verbosity_level(1)
   end
-
-  after { client.close }
 
   describe '#on_ready' do
     subject { client.on_ready { [client, 'ready'] } }
