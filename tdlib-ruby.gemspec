@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.name          = "tdlib-ruby"
   gem.version       = TD::VERSION
   gem.summary       = 'Ruby bindings and client for TDlib'
-  gem.description   = %q{Description}
+  gem.description   = 'Ruby bindings and client for TDlib'
   gem.license       = "MIT"
   gem.authors       = ["Southbridge"]
   gem.email         = "ask@southbridge.io"
@@ -30,9 +30,10 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.add_runtime_dependency 'dry-configurable', '~> 0.7'
+  gem.add_runtime_dependency 'concurrent-ruby', '~> 1.0'
 
   gem.add_development_dependency 'bundler', '~> 1.10'
-  gem.add_development_dependency 'rake', '~> 10.0'
+  gem.add_development_dependency 'rake', '12.3.1'
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'rubygems-tasks', '~> 0.2'
   gem.add_development_dependency 'yard', '~> 0.9'
