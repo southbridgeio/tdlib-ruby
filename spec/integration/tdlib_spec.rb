@@ -16,7 +16,7 @@ describe TD::Client do
     TD::Api.set_log_verbosity_level(1)
   end
 
-  after(:suite) { client.close }
+  after { client.close }
 
   describe '#on_ready' do
     subject { client.on_ready { [client, 'ready'] } }
