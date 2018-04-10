@@ -60,7 +60,7 @@
 class TD::Client
   include Concurrent
 
-  TIMEOUT = 20
+  TIMEOUT = 10
 
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
@@ -91,7 +91,7 @@ class TD::Client
   # Sends asynchronous request to the TDLib client and returns received update synchronously
   # @param [Hash] query
   # @return [Hash]
-  def broadcast_and_receive(query)
+  def broadcast_and_receive(query, timeout: TIMEOUT)
     result = nil
     extra = TD::Utils.generate_extra(query)
     handler = ->(update) { result = update if update['@extra'] == extra }
@@ -102,7 +102,7 @@ class TD::Client
       until result do end
       result
     end
-    promise.execute.value(TIMEOUT) || (raise TD::TimeoutError)
+    promise.execute.value(timeout) || (raise TD::TimeoutError)
   end
 
   # Synchronously executes TDLib request
@@ -129,8 +129,8 @@ class TD::Client
     @update_manager.add_handler(handler)
   end
 
-  def on_ready(&_)
-    raise TD::TimeoutError unless Promise.execute { until @ready do end }.then { self }.execute.value(TIMEOUT)
+  def on_ready(timeout: TIMEOUT, &_)
+    raise TD::TimeoutError unless Promise.execute { until @ready do end }.then { self }.execute.value(timeout)
     yield self
   end
 
