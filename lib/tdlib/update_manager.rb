@@ -4,7 +4,6 @@ class TD::UpdateManager
   def initialize(td_client)
     @td_client = td_client
     @handlers = []
-    @handlers_for_removal = []
     @mutex = Mutex.new
     init_update_loop
   end
