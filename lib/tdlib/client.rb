@@ -99,7 +99,8 @@ class TD::Client
     query['@extra'] = extra
     TD::Api.client_send(@td_client, query)
     promise = Promise.new do
-      until result do end
+      time_start = Time.now
+      until result || Time.now - time_start > timeout do end
       result
     end
     promise.execute.value(timeout) || (raise TD::TimeoutError)
@@ -130,7 +131,11 @@ class TD::Client
   end
 
   def on_ready(timeout: TIMEOUT, &_)
-    raise TD::TimeoutError unless Promise.execute { until @ready do end }.then { self }.execute.value(timeout)
+    promise = Promise.new do
+      time_start = Time.now
+      until @ready || Time.now - time_start > timeout do end
+    end
+    raise TD::TimeoutError unless promise.execute.then { self }.execute.value(timeout)
     yield self
   end
 
