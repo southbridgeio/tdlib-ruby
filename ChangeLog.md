@@ -1,4 +1,9 @@
-### 0.3.0 / 2018-02-16
+### 0.4.0 / 2018-04-12
+
+* Add configurable timeout
+* Fix hanging threads after timeout
+
+### 0.3.0 / 2018-04-04
 
 * Use Concurrent::Promise instead of timeout module
 * Add integration tests
