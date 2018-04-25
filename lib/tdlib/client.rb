@@ -132,11 +132,12 @@ class TD::Client
   end
 
   def on_ready(timeout: TIMEOUT, &_)
-    promise = Promise.new do
-      time_start = Time.now
-      until @ready || Time.now - time_start > timeout do end
+    time_start = Time.now
+    loop do
+      sleep 0.1
+      break if @ready
+      raise TD::TimeoutError if Time.now - time_start > timeout
     end
-    raise TD::TimeoutError unless promise.execute.then { self }.execute.value(timeout)
     yield self
   end
 
