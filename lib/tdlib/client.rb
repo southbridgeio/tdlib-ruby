@@ -99,12 +99,12 @@ class TD::Client
     @update_manager.add_handler(handler)
     query['@extra'] = extra
     TD::Api.client_send(@td_client, query)
-    promise = Promise.new do
-      time_start = Time.now
-      until result || Time.now - time_start > timeout do end
-      result
+    loop do
+      sleep 0.1
+      break if result
+      raise TD::TimeoutError if Time.now - time_start > timeout
     end
-    promise.execute.value(timeout) || (raise TD::TimeoutError)
+    result
   end
 
   # Synchronously executes TDLib request

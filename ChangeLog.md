@@ -1,6 +1,6 @@
-### 0.6.0 / 2018-04-25
+### 0.7.0 / 2018-04-25
 
-* Fix authorization flow
+* Fix await methods
 
 ### 0.4.0 / 2018-04-12
 
