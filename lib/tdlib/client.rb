@@ -69,6 +69,7 @@ class TD::Client
     @update_manager = update_manager
     @config = TD.config.client.to_h.merge(extra_config)
     authorize
+    @update_manager.run
   end
 
   # Sends asynchronous request to the TDLib client

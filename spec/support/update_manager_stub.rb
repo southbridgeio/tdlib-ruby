@@ -5,6 +5,9 @@ class UpdateManagerStub
     @td_client, @update, @handlers = td_client, update, []
   end
 
+  def run
+  end
+
   def add_handler(handler)
     @handlers << handler
     handler.call(@update)

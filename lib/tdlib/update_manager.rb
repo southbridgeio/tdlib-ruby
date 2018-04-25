@@ -5,7 +5,6 @@ class TD::UpdateManager
     @td_client = td_client
     @handlers = []
     @mutex = Mutex.new
-    init_update_loop
   end
 
   def add_handler(handler)
@@ -18,6 +17,12 @@ class TD::UpdateManager
     end
   end
 
+  def run
+    @update_loop_thread = Thread.start do
+      loop { stopped? ? break : handle_update }
+    end
+  end
+
   def stop
     @stopped = true
   end
@@ -27,12 +32,6 @@ class TD::UpdateManager
   end
 
   private
-
-  def init_update_loop
-    @update_loop_thread = Thread.start do
-      loop { stopped? ? break : handle_update }
-    end
-  end
 
   def handle_update
     update = TD::Api.client_receive(@td_client, 10)
