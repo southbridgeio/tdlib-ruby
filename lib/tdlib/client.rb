@@ -99,6 +99,7 @@ class TD::Client
     @update_manager.add_handler(handler)
     query['@extra'] = extra
     TD::Api.client_send(@td_client, query)
+    time_start = Time.now
     loop do
       sleep 0.1
       break if result
