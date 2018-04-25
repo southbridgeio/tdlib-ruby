@@ -1,3 +1,7 @@
+### 0.5.0 / 2018-04-25
+
+* Fix authorization flow
+
 ### 0.4.0 / 2018-04-12
 
 * Add configurable timeout
