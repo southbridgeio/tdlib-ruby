@@ -58,10 +58,6 @@
 #
 #   p @me
 class TD::Client
-  include Celluloid
-
-  execute_block_on_receiver :on, :broadcast
-
   TIMEOUT = 10
 
   def initialize(td_client = TD::Api.client_create,
@@ -142,7 +138,6 @@ class TD::Client
   def close
     @update_manager.stop
     TD::Api.client_destroy(@td_client)
-    terminate
   end
 
   private
