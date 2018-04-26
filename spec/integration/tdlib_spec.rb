@@ -36,7 +36,7 @@ describe TD::Client do
 
       it 'runs block on update' do
         subject
-        sleep 3
+        sleep 1
         expect(@result).to include('@type', 'entities')
       end
     end
@@ -58,7 +58,7 @@ describe TD::Client do
 
     it 'runs block on update' do
       subject
-      sleep 3
+      sleep 1
       expect(@result).to include('@type', 'entities')
     end
   end
