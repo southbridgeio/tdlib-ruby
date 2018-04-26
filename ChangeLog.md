@@ -1,3 +1,6 @@
+### 0.9.0 / 2018-04-25
+* Use Celluloid
+
 ### 0.8.0 / 2018-04-25
 
 * Fix await methods

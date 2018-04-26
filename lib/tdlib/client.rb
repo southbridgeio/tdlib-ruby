@@ -58,7 +58,9 @@
 #
 #   p @me
 class TD::Client
-  include Concurrent
+  include Celluloid
+
+  execute_block_on_receiver :on, :broadcast
 
   TIMEOUT = 10
 
@@ -68,6 +70,7 @@ class TD::Client
     @td_client = td_client
     @update_manager = update_manager
     @config = TD.config.client.to_h.merge(extra_config)
+    @ready = Celluloid::Condition.new
     authorize
     @update_manager.run
   end
@@ -93,19 +96,15 @@ class TD::Client
   # @param [Hash] query
   # @return [Hash]
   def broadcast_and_receive(query, timeout: TIMEOUT)
-    result = nil
+    condition = Celluloid::Condition.new
     extra = TD::Utils.generate_extra(query)
-    handler = ->(update) { result = update if update['@extra'] == extra }
+    handler = ->(update) { condition.signal(update) if update['@extra'] == extra }
     @update_manager.add_handler(handler)
     query['@extra'] = extra
     TD::Api.client_send(@td_client, query)
-    time_start = Time.now
-    loop do
-      sleep 0.1
-      break if result
-      raise TD::TimeoutError if Time.now - time_start > timeout
-    end
-    result
+    condition.wait(timeout)
+  rescue Celluloid::ConditionError
+    raise TD::TimeoutError
   end
 
   # Synchronously executes TDLib request
@@ -133,19 +132,17 @@ class TD::Client
   end
 
   def on_ready(timeout: TIMEOUT, &_)
-    time_start = Time.now
-    loop do
-      sleep 0.1
-      break if @ready
-      raise TD::TimeoutError if Time.now - time_start > timeout
-    end
+    @ready.wait(timeout)
     yield self
+  rescue Celluloid::ConditionError
+    raise TD::TimeoutError
   end
 
   # Stops update manager and destroys TDLib client
   def close
     @update_manager.stop
     TD::Api.client_destroy(@td_client)
+    terminate
   end
 
   private
@@ -172,7 +169,7 @@ class TD::Client
         broadcast(encryption_key_query)
       else
         @update_manager.remove_handler(handler)
-        @ready = true
+        @ready.signal(true)
       end
     end
     @update_manager.add_handler(handler)
