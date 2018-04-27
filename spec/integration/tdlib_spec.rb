@@ -43,7 +43,7 @@ describe TD::Client do
   end
 
   describe '#broadcast_and_receive' do
-    subject { client.on_ready { client.broadcast_and_receive(payload ) } }
+    subject { client.on_ready { client.broadcast_and_receive(payload) } }
 
     it { is_expected.to include('@type', 'entities') }
   end

@@ -66,7 +66,7 @@ class TD::Client
     @td_client = td_client
     @update_manager = update_manager
     @config = TD.config.client.to_h.merge(extra_config)
-    @ready = Celluloid::Condition.new
+    @ready_condition = Celluloid::Condition.new
     authorize
     @update_manager.run
   end
@@ -128,8 +128,7 @@ class TD::Client
   end
 
   def on_ready(timeout: TIMEOUT, &_)
-    @ready.wait(timeout)
-    yield self
+    yield self if @ready || @ready_condition.wait(timeout)
   rescue Celluloid::ConditionError
     raise TD::TimeoutError
   end
@@ -164,7 +163,8 @@ class TD::Client
         broadcast(encryption_key_query)
       else
         @update_manager.remove_handler(handler)
-        @ready.signal(true)
+        @ready = true
+        @ready_condition.signal(true)
       end
     end
     @update_manager.add_handler(handler)
