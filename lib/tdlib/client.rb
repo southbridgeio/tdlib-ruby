@@ -58,7 +58,7 @@
 #
 #   p @me
 class TD::Client
-  TIMEOUT = 10
+  TIMEOUT = 20
 
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
@@ -66,7 +66,8 @@ class TD::Client
     @td_client = td_client
     @update_manager = update_manager
     @config = TD.config.client.to_h.merge(extra_config)
-    @ready_condition = Celluloid::Condition.new
+    @ready_condition_mutex = Mutex.new
+    @ready_condition = ConditionVariable.new
     authorize
     @update_manager.run
   end
@@ -92,15 +93,25 @@ class TD::Client
   # @param [Hash] query
   # @return [Hash]
   def broadcast_and_receive(query, timeout: TIMEOUT)
-    condition = Celluloid::Condition.new
+    condition = ConditionVariable.new
     extra = TD::Utils.generate_extra(query)
-    handler = ->(update) { condition.signal(update) if update['@extra'] == extra }
+    result = nil
+    mutex = Mutex.new
+    handler = ->(update) do
+      next unless update['@extra'] == extra
+      mutex.synchronize do
+        result = update
+        condition.signal
+      end
+    end
     @update_manager.add_handler(handler)
     query['@extra'] = extra
-    TD::Api.client_send(@td_client, query)
-    condition.wait(timeout)
-  rescue Celluloid::ConditionError
-    raise TD::TimeoutError
+    mutex.synchronize do
+      TD::Api.client_send(@td_client, query)
+      condition.wait(mutex, timeout)
+      raise TD::TimeoutError if result.nil?
+      result
+    end
   end
 
   # Synchronously executes TDLib request
@@ -128,9 +139,10 @@ class TD::Client
   end
 
   def on_ready(timeout: TIMEOUT, &_)
-    yield self if @ready || @ready_condition.wait(timeout)
-  rescue Celluloid::ConditionError
-    raise TD::TimeoutError
+    @ready_condition_mutex.synchronize do
+      return(yield self) if @ready || (@ready_condition.wait(@ready_condition_mutex, timeout) && @ready)
+      raise TD::TimeoutError
+    end
   end
 
   # Stops update manager and destroys TDLib client
@@ -163,8 +175,10 @@ class TD::Client
         broadcast(encryption_key_query)
       else
         @update_manager.remove_handler(handler)
-        @ready = true
-        @ready_condition.signal(true)
+        @ready_condition_mutex.synchronize do
+          @ready = true
+          @ready_condition.broadcast
+        end
       end
     end
     @update_manager.add_handler(handler)
