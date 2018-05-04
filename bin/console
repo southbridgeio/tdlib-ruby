@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'tdlib-ruby'
+
+TD.configure do |config|
+  config.lib_path = File.join(File.expand_path("#{TD.root_path}/../"), 'td', 'build')
+
+  config.client.api_id = ENV['TD_API_ID']
+  config.client.api_hash = ENV['TD_API_HASH']
+  config.client.use_test_dc = true
+end
+
+TD::Api.set_log_verbosity_level(1)
+
+require 'irb'
+IRB.start(__FILE__)
