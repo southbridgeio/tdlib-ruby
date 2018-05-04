@@ -62,10 +62,12 @@ class TD::Client
 
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
+                 proxy: { '@type' => 'proxyEmpty' },
                  **extra_config)
     @td_client = td_client
     @update_manager = update_manager
     @config = TD.config.client.to_h.merge(extra_config)
+    @proxy = proxy
     @ready_condition_mutex = Mutex.new
     @ready_condition = ConditionVariable.new
     authorize
@@ -98,9 +100,10 @@ class TD::Client
     result = nil
     mutex = Mutex.new
     handler = ->(update) do
-      next unless update['@extra'] == extra
+      return unless update['@extra'] == extra
       mutex.synchronize do
         result = update
+        @update_manager.remove_handler(handler)
         condition.signal
       end
     end
@@ -174,6 +177,7 @@ class TD::Client
       when 'authorizationStateWaitEncryptionKey'
         broadcast(encryption_key_query)
       else
+        broadcast('@type' => 'setProxy', 'proxy' => @proxy)
         @update_manager.remove_handler(handler)
         @ready_condition_mutex.synchronize do
           @ready = true
