@@ -30,7 +30,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.add_runtime_dependency 'dry-configurable', '~> 0.7'
-  gem.add_runtime_dependency 'celluloid', '~> 0.17'
 
   gem.add_development_dependency 'bundler', '~> 1.10'
   gem.add_development_dependency 'rake', '12.3.1'
