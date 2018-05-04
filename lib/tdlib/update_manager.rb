@@ -1,4 +1,6 @@
 class TD::UpdateManager
+  TIMEOUT = 30
+
   attr_reader :handlers
 
   def initialize(td_client)
@@ -34,7 +36,7 @@ class TD::UpdateManager
   private
 
   def handle_update
-    update = TD::Api.client_receive(@td_client, 10)
+    update = TD::Api.client_receive(@td_client, TIMEOUT)
     @mutex.synchronize do
       @handlers.each { |h| h.call(update) } unless update.nil?
     end

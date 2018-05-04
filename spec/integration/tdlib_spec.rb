@@ -22,6 +22,12 @@ describe TD::Client do
 
     it { is_expected.to include(client) }
     it { is_expected.to include('ready') }
+
+    context 'when timeout reached' do
+      subject { client.on_ready(timeout: 0.0001) { [client, 'ready'] } }
+
+      it { expect { subject }.to raise_error(TD::TimeoutError) }
+    end
   end
 
   describe '#broadcast' do
@@ -46,6 +52,12 @@ describe TD::Client do
     subject { client.on_ready { client.broadcast_and_receive(payload) } }
 
     it { is_expected.to include('@type', 'entities') }
+
+    context 'when timeout reached' do
+      subject { client.on_ready(timeout: 0.0001) { client.broadcast_and_receive(payload) } }
+
+      it { expect { subject }.to raise_error(TD::TimeoutError) }
+    end
   end
 
   describe '#on' do
