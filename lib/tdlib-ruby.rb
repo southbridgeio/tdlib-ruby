@@ -1,6 +1,5 @@
 require 'tdlib/version'
 require 'dry/configurable'
-require 'celluloid'
 
 module TD
   extend Dry::Configurable

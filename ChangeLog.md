@@ -1,3 +1,7 @@
+### 0.9.2 / 2018-05-04
+
+* Fix some potential deadlocks
+
 ### 0.9.1 / 2018-04-27
 
 * Fix deadlock in Client#on_ready
