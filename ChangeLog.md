@@ -1,3 +1,7 @@
+### 0.9.3 / 2018-05-04
+
+* Add proxy support
+
 ### 0.9.2 / 2018-05-04
 
 * Fix some potential deadlocks
