@@ -1,3 +1,7 @@
+### 0.9.4 / 2018-05-16
+
+* Fix recursive locking in nested handlers
+
 ### 0.9.3 / 2018-05-04
 
 * Add proxy support
