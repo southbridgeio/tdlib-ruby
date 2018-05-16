@@ -37,8 +37,7 @@ class TD::UpdateManager
 
   def handle_update
     update = TD::Api.client_receive(@td_client, TIMEOUT)
-    @mutex.synchronize do
-      @handlers.each { |h| h.call(update) } unless update.nil?
-    end
+    @mutex.synchronize { handlers = @handlers.dup }
+    handlers.each { |h| h.call(update) } unless update.nil?
   end
 end
