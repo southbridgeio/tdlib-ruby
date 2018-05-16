@@ -74,4 +74,19 @@ describe TD::Client do
       expect(@result).to include('@type', 'entities')
     end
   end
+
+  describe 'nested handlers' do
+    before { Thread.abort_on_exception = true }
+
+    subject do
+      client.on_ready do
+        client.broadcast(payload) do
+          client.broadcast_and_receive(payload)
+        end
+        sleep 1
+      end
+    end
+
+    it { expect { subject }.not_to raise_error(Exception) }
+  end
 end
