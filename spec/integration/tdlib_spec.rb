@@ -35,16 +35,9 @@ describe TD::Client do
       subject { client.on_ready { client.broadcast(payload) } }
 
       it { expect { subject }.not_to raise_error(Exception) }
-    end
-
-    context 'when block given' do
-      subject { client.on_ready { client.broadcast(payload) { |update| @result = update } } }
-
-      it 'runs block on update' do
-        subject
-        sleep 1
-        expect(@result).to include('@type', 'entities')
-      end
+      it { is_expected.to satisfy { |result| result.state == :pending } }
+      it { is_expected.to satisfy { |result| sleep 1; result.state == :fulfilled } }
+      it { is_expected.to satisfy { |result| sleep 1; result.value['@type'] == 'textEntities' } }
     end
   end
 
