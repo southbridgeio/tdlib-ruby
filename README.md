@@ -100,6 +100,14 @@ end
 p @me
 ```
 
+## TD::Client#broadcast
+
+From version 1.0 TD::Client##broadcast returns [Concurrent::Promise](http://ruby-concurrency.github.io/concurrent-ruby/Concurrent/Promise.html) object.
+
+```ruby
+  me = client.broadcast('@type' => 'getMe').then { |result| puts result }.rescue { |error| puts error }.value
+```
+
 ## Configuration
 
 ```ruby

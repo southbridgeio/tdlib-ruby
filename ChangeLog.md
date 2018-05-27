@@ -1,3 +1,8 @@
+### 1.0.0 / 2018-05-27
+
+* Return promises from TD::Client#broadcast
+* Add #fetch as alias to #broadcast_and_receive
+
 ### 0.9.4 / 2018-05-16
 
 * Fix recursive locking in nested handlers
