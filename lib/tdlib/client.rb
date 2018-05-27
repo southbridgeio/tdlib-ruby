@@ -58,6 +58,8 @@
 #
 #   p @me
 class TD::Client
+  include Concurrent
+
   TIMEOUT = 20
 
   def initialize(td_client = TD::Api.client_create,
@@ -74,48 +76,46 @@ class TD::Client
     @update_manager.run
   end
 
-  # Sends asynchronous request to the TDLib client
+  # Sends asynchronous request to the TDLib client and returns Promise object
+  # @see https://www.rubydoc.info/github/ruby-concurrency/concurrent-ruby/Concurrent/Promise)
+  # @example
+  #   client.broadcast(some_query).then { |result| puts result }.rescue
   # @param [Hash] query
-  # @yield [update] yields update to the block as soon as it's received
-  def broadcast(query)
-    if block_given?
+  # @param [Numeric] timeout
+  # @return [Concurrent::Promise]
+  def broadcast(query, timeout: TIMEOUT)
+    Promise.execute do
+      condition = ConditionVariable.new
       extra = TD::Utils.generate_extra(query)
+      result = nil
+      mutex = Mutex.new
       handler = ->(update) do
         return unless update['@extra'] == extra
-        yield update
-        @update_manager.remove_handler(handler)
+        mutex.synchronize do
+          result = update
+          @update_manager.remove_handler(handler)
+          condition.signal
+        end
       end
       @update_manager.add_handler(handler)
       query['@extra'] = extra
+      mutex.synchronize do
+        TD::Api.client_send(@td_client, query)
+        condition.wait(mutex, timeout)
+        raise TD::TimeoutError if result.nil?
+        result
+      end
     end
-    TD::Api.client_send(@td_client, query)
   end
 
   # Sends asynchronous request to the TDLib client and returns received update synchronously
   # @param [Hash] query
   # @return [Hash]
-  def broadcast_and_receive(query, timeout: TIMEOUT)
-    condition = ConditionVariable.new
-    extra = TD::Utils.generate_extra(query)
-    result = nil
-    mutex = Mutex.new
-    handler = ->(update) do
-      return unless update['@extra'] == extra
-      mutex.synchronize do
-        result = update
-        @update_manager.remove_handler(handler)
-        condition.signal
-      end
-    end
-    @update_manager.add_handler(handler)
-    query['@extra'] = extra
-    mutex.synchronize do
-      TD::Api.client_send(@td_client, query)
-      condition.wait(mutex, timeout)
-      raise TD::TimeoutError if result.nil?
-      result
-    end
+  def fetch(query, timeout: TIMEOUT)
+    broadcast(query, timeout: timeout).value
   end
+
+  alias broadcast_and_receive fetch
 
   # Synchronously executes TDLib request
   # Only a few requests can be executed synchronously
