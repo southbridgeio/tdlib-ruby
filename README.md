@@ -118,17 +118,17 @@ TD.configure do |config|
   config.client.api_id = 12345
   config.client.api_hash = 'your_api_hash'
   config.client.use_test_dc = true # default: false
-  config.database_directory = 'path/to/db/dir' # default: "#{Dir.home}/.tdlib-ruby/db"
-  config.files_directory = 'path/to/files/dir' # default: "#{Dir.home}/.tdlib-ruby/files"
+  config.client.database_directory = 'path/to/db/dir' # default: "#{Dir.home}/.tdlib-ruby/db"
+  config.client.files_directory = 'path/to/files/dir' # default: "#{Dir.home}/.tdlib-ruby/files"
   config.client.use_chat_info_database = true # default: true
-  config.use_secret_chats = true # default: true
-  config.use_message_database = true # default: true
-  config.system_language_code = 'ru' # default: 'en'
-  config.device_model = 'Some device model' # default: 'Ruby TD client'
-  config.system_version = '42' # default: 'Unknown'
-  config.application_version = '1.0' # default: '1.0'
-  config.enable_storage_optimizer = true # default: true
-  config.ignore_file_names = true # default: false
+  config.client.use_secret_chats = true # default: true
+  config.client.use_message_database = true # default: true
+  config.client.system_language_code = 'ru' # default: 'en'
+  config.client.device_model = 'Some device model' # default: 'Ruby TD client'
+  config.client.system_version = '42' # default: 'Unknown'
+  config.client.application_version = '1.0' # default: '1.0'
+  config.client.enable_storage_optimizer = true # default: true
+  config.client.ignore_file_names = true # default: false
 end
 ```
 
