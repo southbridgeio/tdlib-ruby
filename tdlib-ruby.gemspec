@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.email         = "ask@southbridge.io"
   gem.homepage      = "https://github.com/centosadmin/tdlib-ruby"
 
-  gem.files         = `git ls-files`.split($/)
+  gem.files         = `git ls-files`.split($/) - ['lib/tdlib/td_api_tl_parser.rb']
 
   `git submodule --quiet foreach --recursive pwd`.split($/).each do |submodule|
     submodule.sub!("#{Dir.pwd}/",'')
