@@ -54,25 +54,25 @@ client = TD::Client.new
 begin
   state = nil
 
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitPhoneNumber'
-    state = :wait_phone
-  end
-
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitCode'
-    state = :wait_code
-  end
-
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateReady'
-    state = :ready
+  client.on(TD::Types::Update::AuthorizationState) do |update|
+    state = case update.authorization_state
+            when TD::Types::AuthorizationState::WaitPhoneNumber
+              :wait_phone_number
+            when TD::Types::AuthorizationState::WaitCode
+              :wait_code
+            when TD::Types::AuthorizationState::WaitPassword
+              :wait_password
+            when TD::Types::AuthorizationState::Ready
+              :ready
+            else
+              nil
+            end
   end
 
   loop do
     case state
-    when :wait_phone
-      p 'Please, enter your phone number:'
+    when :wait_phone_number
+      puts 'Please, enter your phone number:'
       phone = STDIN.gets.strip
       params = {
         '@type' => 'setAuthenticationPhoneNumber',
@@ -80,11 +80,19 @@ begin
       }
       client.broadcast_and_receive(params)
     when :wait_code
-      p 'Please, enter code from SMS:'
+      puts 'Please, enter code from SMS:'
       code = STDIN.gets.strip
       params = {
         '@type' => 'checkAuthenticationCode',
         'code' => code
+      }
+      client.broadcast_and_receive(params)
+    when :wait_password
+      puts 'Please, enter 2FA password:'
+      password = STDIN.gets.strip
+      params = {
+        '@type' => 'checkAuthenticationPassword',
+        'password' => password
       }
       client.broadcast_and_receive(params)
     when :ready
