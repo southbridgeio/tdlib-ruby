@@ -169,3 +169,5 @@ TD::Client.new(database_directory: 'will override value from config',
 ## Authors
 
 The gem is designed by [Southbridge](https://southbridge.io)
+
+Typeization made by [Yuri Mikhaylov](https://github.com/yurijmi) 
