@@ -120,6 +120,7 @@ TD.configure do |config|
   config.client.use_test_dc = true # default: false
   config.client.database_directory = 'path/to/db/dir' # default: "#{Dir.home}/.tdlib-ruby/db"
   config.client.files_directory = 'path/to/files/dir' # default: "#{Dir.home}/.tdlib-ruby/files"
+  config.client.use_file_database = true # default: true
   config.client.use_chat_info_database = true # default: true
   config.client.use_secret_chats = true # default: true
   config.client.use_message_database = true # default: true

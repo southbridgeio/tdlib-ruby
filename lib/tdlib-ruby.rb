@@ -20,6 +20,7 @@ module TD
     setting :use_test_dc, false
     setting :database_directory, "#{Dir.home}/.tdlib-ruby/db"
     setting :files_directory, "#{Dir.home}/.tdlib-ruby/data"
+    setting :use_file_database, true
     setting :use_chat_info_database, true
     setting :use_secret_chats, true
     setting :use_message_database, true
