@@ -89,8 +89,10 @@ class TD::Client
       extra = TD::Utils.generate_extra(query)
       result = nil
       mutex = Mutex.new
-      handler = ->(update) do
-        return unless update['@extra'] == extra
+      
+      handler = ->(update, update_extra) do
+        return unless update_extra == extra
+        
         mutex.synchronize do
           result = update
           @update_manager.remove_handler(handler)
@@ -98,7 +100,9 @@ class TD::Client
         end
       end
       @update_manager.add_handler(handler)
+      
       query['@extra'] = extra
+      
       mutex.synchronize do
         TD::Api.client_send(@td_client, query)
         condition.wait(mutex, timeout)
@@ -131,11 +135,24 @@ class TD::Client
   end
 
   # Binds passed block as a handler for updates with type of *update_type*
-  # @param [String] update_type
+  # @param [Class] update_type
   # @yield [update] yields update to the block as soon as it's received
   def on(update_type, &_)
-    handler = ->(update) do
-      return unless update['@type'] == update_type
+    if update_type.is_a?(String)
+      if (type_const = TD::Types::LOOKUP_TABLE[update_type])
+        update_type = TD::Types.const_get("TD::Types::#{type_const}")
+      else
+        raise ArgumentError.new("Can't find class for #{update_type}")
+      end
+    end
+    
+    unless update_type < TD::Types::Update
+      raise ArgumentError.new("Wrong type specified (#{update_type}). Should be of kind TD::Types::Update")
+    end
+    
+    handler = ->(update, _) do
+      return unless update.is_a?(update_type)
+      
       yield update
     end
     @update_manager.add_handler(handler)
@@ -159,26 +176,30 @@ class TD::Client
   def authorize
     tdlib_params_query = {
       '@type' => 'setTdlibParameters',
-      parameters: { '@type' => 'tdlibParameters', **@config }
+      parameters: TD::Types::TdlibParameters.new(**@config)
     }
+    
     encryption_key_query = {
       '@type' => 'checkDatabaseEncryptionKey',
     }
-
+    
     if TD.config.encryption_key
       encryption_key_query['encryption_key'] = TD.config.encryption_key
     end
-
-    handler = ->(update) do
-      return unless update['@type'] == 'updateAuthorizationState'
-      case update.dig('authorization_state', '@type')
-      when 'authorizationStateWaitTdlibParameters'
+    
+    handler = ->(update, _) do
+      return unless update.is_a?(TD::Types::Update::AuthorizationState)
+      
+      case update.authorization_state
+      when TD::Types::AuthorizationState::WaitTdlibParameters
         broadcast(tdlib_params_query)
-      when 'authorizationStateWaitEncryptionKey'
+      when TD::Types::AuthorizationState::WaitEncryptionKey
         broadcast(encryption_key_query)
       else
         broadcast('@type' => 'setProxy', 'proxy' => @proxy)
+        
         @update_manager.remove_handler(handler)
+        
         @ready_condition_mutex.synchronize do
           @ready = true
           @ready_condition.broadcast
