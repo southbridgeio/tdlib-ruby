@@ -74,29 +74,17 @@ begin
     when :wait_phone_number
       puts 'Please, enter your phone number:'
       phone = STDIN.gets.strip
-      params = {
-        '@type' => 'setAuthenticationPhoneNumber',
-        'phone_number' => phone
-      }
-      client.broadcast_and_receive(params)
+      client.set_authentication_phone_number(phone).value
     when :wait_code
       puts 'Please, enter code from SMS:'
       code = STDIN.gets.strip
-      params = {
-        '@type' => 'checkAuthenticationCode',
-        'code' => code
-      }
-      client.broadcast_and_receive(params)
+      client.check_authentication_code(code).value
     when :wait_password
       puts 'Please, enter 2FA password:'
       password = STDIN.gets.strip
-      params = {
-        '@type' => 'checkAuthenticationPassword',
-        'password' => password
-      }
-      client.broadcast_and_receive(params)
+      client.check_authentication_password(password).value
     when :ready
-      @me = client.broadcast_and_receive('@type' => 'getMe')
+      @me = client.get_me.value
       break
     end
   end
