@@ -67,6 +67,7 @@
 #   p @me
 class TD::Client
   include Concurrent
+  include TD::ClientMethods
 
   TIMEOUT = 20
 
@@ -85,7 +86,9 @@ class TD::Client
   end
 
   # Sends asynchronous request to the TDLib client and returns Promise object
-  # @see https://www.rubydoc.info/github/ruby-concurrency/concurrent-ruby/Concurrent/Promise)
+  # @see TD::ClientMethods List of available queries as methods
+  # @see https://www.rubydoc.info/github/ruby-concurrency/concurrent-ruby/Concurrent/Promise
+  #   Concurrent::Promise documentation
   # @example
   #   client.broadcast(some_query).then { |result| puts result }.rescue
   # @param [Hash] query
@@ -136,12 +139,6 @@ class TD::Client
     TD::Api.client_execute(@td_client, query)
   end
 
-  # Returns current authorization state (it's offline request)
-  # @return [Hash]
-  def authorization_state
-    broadcast_and_receive('@type' => 'getAuthorizationState')
-  end
-
   # Binds passed block as a handler for updates with type of *update_type*
   # @param [Class] update_type
   # @yield [update] yields update to the block as soon as it's received
@@ -182,27 +179,14 @@ class TD::Client
   private
 
   def authorize
-    tdlib_params_query = {
-      '@type' => 'setTdlibParameters',
-      parameters: TD::Types::TdlibParameters.new(**@config)
-    }
-    
-    encryption_key_query = {
-      '@type' => 'checkDatabaseEncryptionKey',
-    }
-    
-    if TD.config.encryption_key
-      encryption_key_query['encryption_key'] = TD.config.encryption_key
-    end
-    
     handler = ->(update, _) do
       return unless update.is_a?(TD::Types::Update::AuthorizationState)
       
       case update.authorization_state
       when TD::Types::AuthorizationState::WaitTdlibParameters
-        broadcast(tdlib_params_query)
+        set_tdlib_parameters(TD::Types::TdlibParameters.new(**@config))
       when TD::Types::AuthorizationState::WaitEncryptionKey
-        broadcast(encryption_key_query)
+        check_database_encryption_key(TD.config.encryption_key)
       else
         broadcast('@type' => 'setProxy', 'proxy' => @proxy)
         

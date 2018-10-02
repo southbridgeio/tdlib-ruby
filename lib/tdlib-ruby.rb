@@ -36,5 +36,7 @@ end
 require 'tdlib/errors'
 require 'tdlib/api'
 require 'tdlib/utils'
+require 'tdlib/types'
+require 'tdlib/client_methods'
 require 'tdlib/client'
 require 'tdlib/update_manager'
