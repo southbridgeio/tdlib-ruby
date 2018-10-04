@@ -4,8 +4,8 @@ module TD::Types
   # @attr type [TD::Types::PassportElementType] Type of Telegram Passport element.
   # @attr data [String] Encrypted JSON-encoded data about the user.
   # @attr front_side [TD::Types::DatedFile] The front side of an identity document.
-  # @attr reverse_side [TD::Types::DatedFile] The reverse side of an identity document; may be null.
-  # @attr selfie [TD::Types::DatedFile] Selfie with the document; may be null.
+  # @attr reverse_side [TD::Types::DatedFile, nil] The reverse side of an identity document; may be null.
+  # @attr selfie [TD::Types::DatedFile, nil] Selfie with the document; may be null.
   # @attr translation [Array<TD::Types::DatedFile>] List of files containing a certified English translation of the
   #   document.
   # @attr files [Array<TD::Types::DatedFile>] List of attached files.

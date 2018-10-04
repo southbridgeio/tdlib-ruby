@@ -2,7 +2,7 @@ module TD::Types
   # A sticker message.
   #
   # @attr sticker [TD::Types::InputFile] Sticker to be sent.
-  # @attr thumbnail [TD::Types::InputThumbnail] Sticker thumbnail, if available.
+  # @attr thumbnail [TD::Types::InputThumbnail, nil] Sticker thumbnail, if available.
   # @attr width [Integer] Sticker width.
   # @attr height [Integer] Sticker height.
   class InputMessageContent::Sticker < InputMessageContent

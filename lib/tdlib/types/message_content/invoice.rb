@@ -3,7 +3,7 @@ module TD::Types
   #
   # @attr title [String] Product title.
   # @attr description [String] Product description.
-  # @attr photo [TD::Types::Photo] Product photo; may be null.
+  # @attr photo [TD::Types::Photo, nil] Product photo; may be null.
   # @attr currency [String] Currency for the product price.
   # @attr total_amount [Integer] Product total price in the minimal quantity of the currency.
   # @attr start_parameter [String] Unique invoice bot start_parameter.

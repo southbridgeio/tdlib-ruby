@@ -7,7 +7,7 @@ module TD::Types
   # @attr username [String] Username of the user.
   # @attr phone_number [String] Phone number of the user.
   # @attr status [TD::Types::UserStatus] Current online status of the user.
-  # @attr profile_photo [TD::Types::ProfilePhoto] Profile photo of the user; may be null.
+  # @attr profile_photo [TD::Types::ProfilePhoto, nil] Profile photo of the user; may be null.
   # @attr outgoing_link [TD::Types::LinkState] Relationship from the current user to the other user.
   # @attr incoming_link [TD::Types::LinkState] Relationship from the other user to the current user.
   # @attr is_verified [Boolean] True, if the user is verified.

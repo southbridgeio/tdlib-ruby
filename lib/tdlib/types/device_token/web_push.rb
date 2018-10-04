@@ -1,7 +1,7 @@
 module TD::Types
   # A token for web Push API.
   #
-  # @attr endpoint [String] Absolute URL exposed by the push service where the application server can send push
+  # @attr endpoint [String, nil] Absolute URL exposed by the push service where the application server can send push
   #   messages; may be empty to de-register a device.
   # @attr p256dh_base64url [String] Base64url-encoded P-256 elliptic curve Diffie-Hellman public key.
   # @attr auth_base64url [String] Base64url-encoded authentication secret.

@@ -2,7 +2,7 @@ module TD::Types
   # The file generation process needs to be started by the client.
   #
   # @attr generation_id [Integer] Unique identifier for the generation process.
-  # @attr original_path [String] The path to a file from which a new file is generated; may be empty.
+  # @attr original_path [String, nil] The path to a file from which a new file is generated; may be empty.
   # @attr destination_path [String] The path to a file that should be created and where the new file should be
   #   generated.
   # @attr conversion [String] String specifying the conversion applied to the original file.

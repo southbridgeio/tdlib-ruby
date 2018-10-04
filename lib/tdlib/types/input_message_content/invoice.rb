@@ -4,7 +4,7 @@ module TD::Types
   # @attr invoice [TD::Types::Invoice] Invoice.
   # @attr title [String] Product title; 1-32 characters.
   # @attr description [String] Product description; 0-255 characters.
-  # @attr photo_url [String] Product photo URL; optional.
+  # @attr photo_url [String, nil] Product photo URL; optional.
   # @attr photo_size [Integer] Product photo size.
   # @attr photo_width [Integer] Product photo width.
   # @attr photo_height [Integer] Product photo height.

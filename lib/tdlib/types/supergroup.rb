@@ -6,7 +6,7 @@ module TD::Types
   # Unlike supergroups, channels can have an unlimited number of subscribers.
   #
   # @attr id [Integer] Supergroup or channel identifier.
-  # @attr username [String] Username of the supergroup or channel; empty for private supergroups or channels.
+  # @attr username [String, nil] Username of the supergroup or channel; empty for private supergroups or channels.
   # @attr date [Integer] Point in time (Unix timestamp) when the current user joined, or the point in time when the
   #   supergroup or channel was created, in case the user is not a member.
   # @attr status [TD::Types::ChatMemberStatus] Status of the current user in the supergroup or channel.

@@ -1,7 +1,7 @@
 module TD::Types
   # Represents a local file.
   #
-  # @attr path [String] Local path to the locally available file part; may be empty.
+  # @attr path [String, nil] Local path to the locally available file part; may be empty.
   # @attr can_be_downloaded [Boolean] True, if it is possible to try to download or generate the file.
   # @attr can_be_deleted [Boolean] True, if the file can be deleted.
   # @attr is_downloading_active [Boolean] True, if the file is currently being downloaded (or a local copy is being

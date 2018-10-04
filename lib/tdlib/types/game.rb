@@ -8,7 +8,7 @@ module TD::Types
   # @attr text [TD::Types::FormattedText] Game text, usually containing scoreboards for a game.
   # @attr description [String] Game description.
   # @attr photo [TD::Types::Photo] Game photo.
-  # @attr animation [TD::Types::Animation] Game animation; may be null.
+  # @attr animation [TD::Types::Animation, nil] Game animation; may be null.
   class Game < Base
     attribute :id, TD::Types::Integer
     attribute :short_name, TD::Types::String

@@ -6,7 +6,7 @@ module TD::Types
   #   unknown.
   # @attr joined_chat_date [Integer] Point in time (Unix timestamp) when the user joined a chat.
   # @attr status [TD::Types::ChatMemberStatus] Status of the member in the chat.
-  # @attr bot_info [TD::Types::BotInfo] If the user is a bot, information about the bot; may be null.
+  # @attr bot_info [TD::Types::BotInfo, nil] If the user is a bot, information about the bot; may be null.
   #   Can be null even for a bot if the bot is not a chat member.
   class ChatMember < Base
     attribute :user_id, TD::Types::Integer

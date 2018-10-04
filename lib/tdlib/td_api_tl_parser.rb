@@ -195,9 +195,12 @@ end
 def attrs_to_yard_comment(attrs, key = 'attr')
   attrs.map do |attr, info|
     type = type_to_comment_type(info[:type])
+    description = info[:description].gsub(@lookup_regex) do |m|
+      @lookup_table[m.strip] ? "#{m[0]}{TD::Types::#{@lookup_table[m.strip]}}#{m[-1]}" : m
+    end
     
-    wrap_comment(info[:description], "  ",
-                 first_start_sequence: "  # @#{key} #{attr} [#{type}] ",
+    wrap_comment(description, "  ",
+                 first_start_sequence: "  # @#{key} #{attr} [#{type}#{", nil" if info[:optional]}] ",
                  start_sequence: "  #   ", break_sequence: "\n  #   ")
   end.join("\n")
 end
@@ -259,6 +262,8 @@ puts "Converting classes into Ruby types"
 @classes = @classes.map { |c| parse_tl_entry(c) }
 @class_names = @classes.map { |c| normalize_class_name(c[:class], c[:super_class]) }
 @class_hierarchy = build_hierarchy(@classes)
+@lookup_table = build_lookup_table(@classes)
+@lookup_regex = Regexp.union(@lookup_table.keys.select { |k| k.match?(/[a-z]+[A-Z][a-z]+/) }.map { |k| /\W#{k}\W/ })
 
 @classes.each do |class_info|
   class_name       = normalize_class_name(class_info[:class], class_info[:super_class])
@@ -315,10 +320,9 @@ end
 
 puts "Generating Types class"
 
-lookup_table = build_lookup_table(@classes)
-lt_max_length = lookup_table.max_by { |k,_| k.length }[0].length
+lt_max_length = @lookup_table.max_by { |k,_| k.length }[0].length
 
-lookup_table = lookup_table.map do |k,v|
+lookup_table = @lookup_table.map do |k,v|
   indent = " " * (lt_max_length - k.length + 1)
   
   "'#{k}'#{indent}=> '#{v}'"

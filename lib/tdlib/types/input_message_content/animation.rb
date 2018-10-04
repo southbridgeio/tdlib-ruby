@@ -2,7 +2,7 @@ module TD::Types
   # An animation message (GIF-style)..
   #
   # @attr animation [TD::Types::InputFile] Animation file to be sent.
-  # @attr thumbnail [TD::Types::InputThumbnail] Animation thumbnail, if available.
+  # @attr thumbnail [TD::Types::InputThumbnail, nil] Animation thumbnail, if available.
   # @attr duration [Integer] Duration of the animation, in seconds.
   # @attr width [Integer] Width of the animation; may be replaced by the server.
   # @attr height [Integer] Height of the animation; may be replaced by the server.

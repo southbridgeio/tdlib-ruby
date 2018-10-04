@@ -2,10 +2,10 @@ module TD::Types
   # An identity document.
   #
   # @attr number [String] Document number; 1-24 characters.
-  # @attr expiry_date [TD::Types::Date] Document expiry date; may be null.
+  # @attr expiry_date [TD::Types::Date, nil] Document expiry date; may be null.
   # @attr front_side [TD::Types::DatedFile] Front side of the document.
   # @attr reverse_side [TD::Types::DatedFile] Reverse side of the document; only for driver license and identity card.
-  # @attr selfie [TD::Types::DatedFile] Selfie with the document; may be null.
+  # @attr selfie [TD::Types::DatedFile, nil] Selfie with the document; may be null.
   # @attr translation [Array<TD::Types::DatedFile>] List of files containing a certified English translation of the
   #   document.
   class IdentityDocument < Base

@@ -1,9 +1,9 @@
 module TD::Types
   # An embedded web page.
   #
-  # @attr url [String] Web page URL, if available.
+  # @attr url [String, nil] Web page URL, if available.
   # @attr html [String] HTML-markup of the embedded page.
-  # @attr poster_photo [TD::Types::Photo] Poster photo, if available; may be null.
+  # @attr poster_photo [TD::Types::Photo, nil] Poster photo, if available; may be null.
   # @attr width [Integer] Block width.
   # @attr height [Integer] Block height.
   # @attr caption [TD::Types::RichText] Block caption.

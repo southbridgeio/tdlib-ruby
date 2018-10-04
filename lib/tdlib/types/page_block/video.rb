@@ -1,7 +1,7 @@
 module TD::Types
   # A video.
   #
-  # @attr video [TD::Types::Video] Video file; may be null.
+  # @attr video [TD::Types::Video, nil] Video file; may be null.
   # @attr caption [TD::Types::RichText] Video caption.
   # @attr need_autoplay [Boolean] True, if the video should be played automatically.
   # @attr is_looped [Boolean] True, if the video should be looped.

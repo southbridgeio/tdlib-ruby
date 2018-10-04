@@ -6,8 +6,8 @@ module TD::Types
   # @attr height [Integer] Sticker height; as defined by the sender.
   # @attr emoji [String] Emoji corresponding to the sticker.
   # @attr is_mask [Boolean] True, if the sticker is a mask.
-  # @attr mask_position [TD::Types::MaskPosition] Position where the mask should be placed; may be null.
-  # @attr thumbnail [TD::Types::PhotoSize] Sticker thumbnail in WEBP or JPEG format; may be null.
+  # @attr mask_position [TD::Types::MaskPosition, nil] Position where the mask should be placed; may be null.
+  # @attr thumbnail [TD::Types::PhotoSize, nil] Sticker thumbnail in WEBP or JPEG format; may be null.
   # @attr sticker [TD::Types::File] File containing the sticker.
   class Sticker < Base
     attribute :set_id, TD::Types::Integer

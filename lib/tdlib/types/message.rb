@@ -5,8 +5,8 @@ module TD::Types
   # @attr sender_user_id [Integer] Identifier of the user who sent the message; 0 if unknown.
   #   It is unknown for channel posts.
   # @attr chat_id [Integer] Chat identifier.
-  # @attr sending_state [TD::Types::MessageSendingState] Information about the sending state of the message; may be
-  #   null.
+  # @attr sending_state [TD::Types::MessageSendingState, nil] Information about the sending state of the message; may
+  #   be null.
   # @attr is_outgoing [Boolean] True, if the message is outgoing.
   # @attr can_be_edited [Boolean] True, if the message can be edited.
   # @attr can_be_forwarded [Boolean] True, if the message can be forwarded.
@@ -18,19 +18,19 @@ module TD::Types
   # @attr contains_unread_mention [Boolean] True, if the message contains an unread mention for the current user.
   # @attr date [Integer] Point in time (Unix timestamp) when the message was sent.
   # @attr edit_date [Integer] Point in time (Unix timestamp) when the message was last edited.
-  # @attr forward_info [TD::Types::MessageForwardInfo] Information about the initial message sender; may be null.
+  # @attr forward_info [TD::Types::MessageForwardInfo, nil] Information about the initial message sender; may be null.
   # @attr reply_to_message_id [Integer] If non-zero, the identifier of the message this message is replying to; can be
   #   the identifier of a deleted message.
   # @attr ttl [Integer] For self-destructing messages, the message's TTL (Time To Live), in seconds; 0 if none.
-  #   TDLib will send updateDeleteMessages or updateMessageContent once the TTL expires.
+  #   TDLib will send {TD::Types::Update::DeleteMessages} or {TD::Types::Update::MessageContent} once the TTL expires.
   # @attr ttl_expires_in [Float] Time left before the message expires, in seconds.
   # @attr via_bot_user_id [Integer] If non-zero, the user identifier of the bot through which this message was sent.
-  # @attr author_signature [String] For channel posts, optional author signature.
+  # @attr author_signature [String, nil] For channel posts, optional author signature.
   # @attr views [Integer] Number of times this message was viewed.
   # @attr media_album_id [Integer] Unique identifier of an album this message belongs to.
   #   Only photos and videos can be grouped together in albums.
   # @attr content [TD::Types::MessageContent] Content of the message.
-  # @attr reply_markup [TD::Types::ReplyMarkup] Reply markup for the message; may be null.
+  # @attr reply_markup [TD::Types::ReplyMarkup, nil] Reply markup for the message; may be null.
   class Message < Base
     attribute :id, TD::Types::Integer
     attribute :sender_user_id, TD::Types::Integer

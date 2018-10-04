@@ -7,7 +7,7 @@ module TD::Types
   # @attr performer [String] Performer of the audio; as defined by the sender.
   # @attr file_name [String] Original name of the file; as defined by the sender.
   # @attr mime_type [String] The MIME type of the file; as defined by the sender.
-  # @attr album_cover_thumbnail [TD::Types::PhotoSize] The thumbnail of the album cover; as defined by the sender.
+  # @attr album_cover_thumbnail [TD::Types::PhotoSize, nil] The thumbnail of the album cover; as defined by the sender.
   #   The full size thumbnail should be extracted from the downloaded file; may be null.
   # @attr audio [TD::Types::File] File containing the audio.
   class Audio < Base

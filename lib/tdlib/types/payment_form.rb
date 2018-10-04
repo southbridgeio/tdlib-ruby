@@ -3,11 +3,11 @@ module TD::Types
   #
   # @attr invoice [TD::Types::Invoice] Full information of the invoice.
   # @attr url [String] Payment form URL.
-  # @attr payments_provider [TD::Types::PaymentsProviderStripe] Contains information about the payment provider, if
-  #   available, to support it natively without the need for opening the URL; may be null.
-  # @attr saved_order_info [TD::Types::OrderInfo] Saved server-side order information; may be null.
-  # @attr saved_credentials [TD::Types::SavedCredentials] Contains information about saved card credentials; may be
-  #   null.
+  # @attr payments_provider [TD::Types::PaymentsProviderStripe, nil] Contains information about the payment provider,
+  #   if available, to support it natively without the need for opening the URL; may be null.
+  # @attr saved_order_info [TD::Types::OrderInfo, nil] Saved server-side order information; may be null.
+  # @attr saved_credentials [TD::Types::SavedCredentials, nil] Contains information about saved card credentials; may
+  #   be null.
   # @attr can_save_credentials [Boolean] True, if the user can choose to save credentials.
   # @attr need_password [Boolean] True, if the user will be able to save credentials protected by a password they set
   #   up.

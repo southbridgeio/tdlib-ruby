@@ -2,7 +2,7 @@ module TD::Types
   # A video message.
   #
   # @attr video [TD::Types::InputFile] Video to be sent.
-  # @attr thumbnail [TD::Types::InputThumbnail] Video thumbnail, if available.
+  # @attr thumbnail [TD::Types::InputThumbnail, nil] Video thumbnail, if available.
   # @attr added_sticker_file_ids [Array<Integer>] File identifiers of the stickers added to the video, if applicable.
   # @attr duration [Integer] Duration of the video, in seconds.
   # @attr width [Integer] Video width.
