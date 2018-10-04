@@ -9,11 +9,10 @@ module TD::Types
   # @attr thumbnail_url [String] URL of the result thumbnail, if it exists.
   # @attr thumbnail_width [Integer] Thumbnail width, if known.
   # @attr thumbnail_height [Integer] Thumbnail height, if known.
-  # @attr reply_markup [TD::Types::ReplyMarkup] The message reply markup.
-  #   Must be of type replyMarkupInlineKeyboard or null.
-  # @attr input_message_content [TD::Types::InputMessageContent] The content of the message to be sent.
-  #   Must be one of the following types: InputMessageText, InputMessageLocation, InputMessageVenue or
-  #   InputMessageContact.
+  # @attr reply_markup [TD::Types::ReplyMarkup::InlineKeyboard, nil] The message reply markup.
+  # @attr input_message_content [TD::Types::InputMessageContent::Text, TD::Types::InputMessageContent::Location,
+  #   TD::Types::InputMessageContent::Venue, TD::Types::InputMessageContent::Contact] The content of the message to be
+  #   sent.
   class InputInlineQueryResult::Location < InputInlineQueryResult
     attribute :id, TD::Types::String
     attribute :location, TD::Types::Location

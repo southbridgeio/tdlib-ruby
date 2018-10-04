@@ -11,11 +11,10 @@ module TD::Types
   # @attr video_width [Integer] Width of the video.
   # @attr video_height [Integer] Height of the video.
   # @attr video_duration [Integer] Video duration, in seconds.
-  # @attr reply_markup [TD::Types::ReplyMarkup] The message reply markup.
-  #   Must be of type replyMarkupInlineKeyboard or null.
-  # @attr input_message_content [TD::Types::InputMessageContent] The content of the message to be sent.
-  #   Must be one of the following types: InputMessageText, InputMessageVideo, InputMessageLocation, InputMessageVenue
-  #   or InputMessageContact.
+  # @attr reply_markup [TD::Types::ReplyMarkup::InlineKeyboard, nil] The message reply markup.
+  # @attr input_message_content [TD::Types::InputMessageContent::Text, TD::Types::InputMessageContent::Video,
+  #   TD::Types::InputMessageContent::Location, TD::Types::InputMessageContent::Venue,
+  #   TD::Types::InputMessageContent::Contact] The content of the message to be sent.
   class InputInlineQueryResult::Video < InputInlineQueryResult
     attribute :id, TD::Types::String
     attribute :title, TD::Types::String
