@@ -4,7 +4,7 @@ module TD::Types
   # @attr chat_id [Integer] Chat identifier; 0 if none.
   # @attr size [Integer] Total size of the files in the chat.
   # @attr count [Integer] Total number of files in the chat.
-  # @attr by_file_type [Array<StorageStatisticsByFileType>] Statistics split by file types.
+  # @attr by_file_type [Array<TD::Types::StorageStatisticsByFileType>] Statistics split by file types.
   class StorageStatisticsByChat < Base
     attribute :chat_id, TD::Types::Integer
     attribute :size, TD::Types::Integer

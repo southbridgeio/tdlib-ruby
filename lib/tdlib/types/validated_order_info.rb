@@ -3,7 +3,7 @@ module TD::Types
   # Also contains the available shipping options.
   #
   # @attr order_info_id [String] Temporary identifier of the order information.
-  # @attr shipping_options [Array<ShippingOption>] Available shipping options.
+  # @attr shipping_options [Array<TD::Types::ShippingOption>] Available shipping options.
   class ValidatedOrderInfo < Base
     attribute :order_info_id, TD::Types::String
     attribute :shipping_options, TD::Types::Array.of(TD::Types::ShippingOption)

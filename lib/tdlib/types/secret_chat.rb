@@ -3,7 +3,7 @@ module TD::Types
   #
   # @attr id [Integer] Secret chat identifier.
   # @attr user_id [Integer] Identifier of the chat partner.
-  # @attr state [SecretChatState] State of the secret chat.
+  # @attr state [TD::Types::SecretChatState] State of the secret chat.
   # @attr is_outbound [Boolean] True, if the chat was created by the current user; otherwise false.
   # @attr ttl [Integer] Current message Time To Live setting (self-destruct timer) for the chat, in seconds.
   # @attr key_hash [String] Hash of the currently used key for comparison with the hash of the chat partner's key.

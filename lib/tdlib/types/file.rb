@@ -6,8 +6,8 @@ module TD::Types
   # @attr expected_size [Integer] Expected file size in case the exact file size is unknown, but an approximate size is
   #   known.
   #   Can be used to show download/upload progress.
-  # @attr local [LocalFile] Information about the local copy of the file.
-  # @attr remote [RemoteFile] Information about the remote copy of the file.
+  # @attr local [TD::Types::LocalFile] Information about the local copy of the file.
+  # @attr remote [TD::Types::RemoteFile] Information about the remote copy of the file.
   class File < Base
     attribute :id, TD::Types::Integer
     attribute :size, TD::Types::Integer

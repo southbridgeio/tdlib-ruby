@@ -3,10 +3,10 @@ module TD::Types
   #
   # @attr url [String] Web page URL.
   # @attr author [String] Post author.
-  # @attr author_photo [Photo] Post author photo.
+  # @attr author_photo [TD::Types::Photo] Post author photo.
   # @attr date [Integer] Point in time (Unix timestamp) when the post was created; 0 if unknown.
-  # @attr page_blocks [Array<PageBlock>] Post content.
-  # @attr caption [RichText] Post caption.
+  # @attr page_blocks [Array<TD::Types::PageBlock>] Post content.
+  # @attr caption [TD::Types::RichText] Post caption.
   class PageBlock::EmbeddedPost < PageBlock
     attribute :url, TD::Types::String
     attribute :author, TD::Types::String

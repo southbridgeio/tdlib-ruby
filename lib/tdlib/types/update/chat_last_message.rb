@@ -4,7 +4,7 @@ module TD::Types
   # Some new unknown messages might be added to the chat in this case.
   #
   # @attr chat_id [Integer] Chat identifier.
-  # @attr last_message [Message] The new last message in the chat; may be null.
+  # @attr last_message [TD::Types::Message] The new last message in the chat; may be null.
   # @attr order [Integer] New value of the chat order.
   class Update::ChatLastMessage < Update
     attribute :chat_id, TD::Types::Integer

@@ -6,7 +6,7 @@ module TD::Types
   # @attr duration [Integer] Duration of the voice note, in seconds; as defined by the sender.
   # @attr waveform [String] A waveform representation of the voice note in 5-bit format.
   # @attr mime_type [String] MIME type of the file; as defined by the sender.
-  # @attr voice [File] File containing the voice note.
+  # @attr voice [TD::Types::File] File containing the voice note.
   class VoiceNote < Base
     attribute :duration, TD::Types::Integer
     attribute :waveform, TD::Types::String

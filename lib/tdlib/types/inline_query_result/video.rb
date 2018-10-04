@@ -2,7 +2,7 @@ module TD::Types
   # Represents a video.
   #
   # @attr id [String] Unique identifier of the query result.
-  # @attr video [Video] Video.
+  # @attr video [TD::Types::Video] Video.
   # @attr title [String] Title of the video.
   # @attr description [String] Description of the video.
   class InlineQueryResult::Video < InlineQueryResult

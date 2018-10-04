@@ -11,7 +11,8 @@ module TD::Types
   # @attr is_masks [Boolean] True, if the stickers in the set are masks.
   # @attr is_viewed [Boolean] True for already viewed trending sticker sets.
   # @attr size [Integer] Total number of stickers in the set.
-  # @attr covers [Array<Sticker>] Contains up to the first 5 stickers from the set, depending on the context.
+  # @attr covers [Array<TD::Types::Sticker>] Contains up to the first 5 stickers from the set, depending on the
+  #   context.
   #   If the client needs more stickers the full set should be requested.
   class StickerSetInfo < Base
     attribute :id, TD::Types::Integer

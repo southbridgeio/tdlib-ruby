@@ -2,7 +2,7 @@ module TD::Types
   # A thumbnail to be sent along with a file; should be in JPEG or WEBP format for stickers, and less than 200 kB in
   #   size.
   #
-  # @attr thumbnail [InputFile] Thumbnail file to send.
+  # @attr thumbnail [TD::Types::InputFile] Thumbnail file to send.
   #   Sending thumbnails by file_id is currently not supported.
   # @attr width [Integer] Thumbnail width, usually shouldn't exceed 90.
   #   Use 0 if unknown.

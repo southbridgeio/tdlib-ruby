@@ -2,7 +2,7 @@ module TD::Types
   # Represents a document.
   #
   # @attr id [String] Unique identifier of the query result.
-  # @attr document [Document] Document.
+  # @attr document [TD::Types::Document] Document.
   # @attr title [String] Document title.
   # @attr description [String] Document description.
   class InlineQueryResult::Document < InlineQueryResult

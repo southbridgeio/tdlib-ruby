@@ -5,7 +5,7 @@ module TD::Types
   # @attr inline_query_id [Integer] Unique identifier of the inline query.
   # @attr next_offset [String] The offset for the next request.
   #   If empty, there are no more results.
-  # @attr results [Array<InlineQueryResult>] Results of the query.
+  # @attr results [Array<TD::Types::InlineQueryResult>] Results of the query.
   # @attr switch_pm_text [String] If non-empty, this text should be shown on the button, which opens a private chat
   #   with the bot and sends the bot a start message with the switch_pm_parameter.
   # @attr switch_pm_parameter [String] Parameter for the bot start message.

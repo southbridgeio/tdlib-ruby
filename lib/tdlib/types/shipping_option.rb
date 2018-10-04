@@ -3,7 +3,8 @@ module TD::Types
   #
   # @attr id [String] Shipping option identifier.
   # @attr title [String] Option title.
-  # @attr price_parts [Array<LabeledPricePart>] A list of objects used to calculate the total shipping costs.
+  # @attr price_parts [Array<TD::Types::LabeledPricePart>] A list of objects used to calculate the total shipping
+  #   costs.
   class ShippingOption < Base
     attribute :id, TD::Types::String
     attribute :title, TD::Types::String

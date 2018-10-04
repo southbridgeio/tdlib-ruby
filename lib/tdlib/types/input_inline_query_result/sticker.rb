@@ -6,9 +6,9 @@ module TD::Types
   # @attr sticker_url [String] The URL of the WEBP sticker (sticker file size must not exceed 5MB).
   # @attr sticker_width [Integer] Width of the sticker.
   # @attr sticker_height [Integer] Height of the sticker.
-  # @attr reply_markup [ReplyMarkup] The message reply markup.
+  # @attr reply_markup [TD::Types::ReplyMarkup] The message reply markup.
   #   Must be of type replyMarkupInlineKeyboard or null.
-  # @attr input_message_content [InputMessageContent] The content of the message to be sent.
+  # @attr input_message_content [TD::Types::InputMessageContent] The content of the message to be sent.
   #   Must be one of the following types: InputMessageText, inputMessageSticker, InputMessageLocation,
   #   InputMessageVenue or InputMessageContact.
   class InputInlineQueryResult::Sticker < InputInlineQueryResult

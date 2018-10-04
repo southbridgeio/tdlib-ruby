@@ -6,7 +6,7 @@ module TD::Types
   # @attr chat_id [Integer] Identifier of the chat, in which the query was sent.
   # @attr message_id [Integer] Identifier of the message, from which the query originated.
   # @attr chat_instance [Integer] Identifier that uniquely corresponds to the chat to which the message was sent.
-  # @attr payload [CallbackQueryPayload] Query payload.
+  # @attr payload [TD::Types::CallbackQueryPayload] Query payload.
   class Update::NewCallbackQuery < Update
     attribute :id, TD::Types::Integer
     attribute :sender_user_id, TD::Types::Integer

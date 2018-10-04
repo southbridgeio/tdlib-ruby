@@ -8,7 +8,7 @@ module TD::Types
   # @attr invoice_payload [String] Invoice payload.
   # @attr shipping_option_id [String] Identifier of the shipping option chosen by the user; may be empty if not
   #   applicable.
-  # @attr order_info [OrderInfo] Information about the order; may be null.
+  # @attr order_info [TD::Types::OrderInfo] Information about the order; may be null.
   # @attr telegram_payment_charge_id [String] Telegram payment identifier.
   # @attr provider_payment_charge_id [String] Provider payment identifier.
   class MessageContent::PaymentSuccessfulBot < MessageContent

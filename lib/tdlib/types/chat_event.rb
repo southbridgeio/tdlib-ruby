@@ -4,7 +4,7 @@ module TD::Types
   # @attr id [Integer] Chat event identifier.
   # @attr date [Integer] Point in time (Unix timestamp) when the event happened.
   # @attr user_id [Integer] Identifier of the user who performed the action that triggered the event.
-  # @attr action [ChatEventAction] Action performed by the user.
+  # @attr action [TD::Types::ChatEventAction] Action performed by the user.
   class ChatEvent < Base
     attribute :id, TD::Types::Integer
     attribute :date, TD::Types::Integer

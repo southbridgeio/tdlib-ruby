@@ -2,7 +2,7 @@ module TD::Types
   # Photo description.
   #
   # @attr type [String] Thumbnail type (see https://core.telegram.org/constructor/photoSize).
-  # @attr photo [File] Information about the photo file.
+  # @attr photo [TD::Types::File] Information about the photo file.
   # @attr width [Integer] Photo width.
   # @attr height [Integer] Photo height.
   class PhotoSize < Base

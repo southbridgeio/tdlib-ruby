@@ -3,7 +3,7 @@ module TD::Types
   # Be aware that some messages being sent can be irrecoverably deleted, in which case updateDeleteMessages will be
   #   received instead of this update.
   #
-  # @attr message [Message] Contains information about the message that failed to send.
+  # @attr message [TD::Types::Message] Contains information about the message that failed to send.
   # @attr old_message_id [Integer] The previous temporary message identifier.
   # @attr error_code [Integer] An error code.
   # @attr error_message [String] Error message.

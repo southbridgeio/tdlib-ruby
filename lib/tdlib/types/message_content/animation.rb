@@ -1,8 +1,8 @@
 module TD::Types
   # An animation message (GIF-style)..
   #
-  # @attr animation [Animation] Message content.
-  # @attr caption [FormattedText] Animation caption.
+  # @attr animation [TD::Types::Animation] Message content.
+  # @attr caption [TD::Types::FormattedText] Animation caption.
   # @attr is_secret [Boolean] True, if the animation thumbnail must be blurred and the animation must be shown only
   #   while tapped.
   class MessageContent::Animation < MessageContent

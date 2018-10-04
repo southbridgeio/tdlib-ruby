@@ -4,7 +4,7 @@ module TD::Types
   # If the user has changed the content of the draft, this update shouldn't be applied.
   #
   # @attr chat_id [Integer] Chat identifier.
-  # @attr draft_message [DraftMessage] The new draft message; may be null.
+  # @attr draft_message [TD::Types::DraftMessage] The new draft message; may be null.
   # @attr order [Integer] New value of the chat order.
   class Update::ChatDraftMessage < Update
     attribute :chat_id, TD::Types::Integer

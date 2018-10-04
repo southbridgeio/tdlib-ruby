@@ -8,9 +8,9 @@ module TD::Types
   # @attr gif_duration [Integer] Duration of the GIF, in seconds.
   # @attr gif_width [Integer] Width of the GIF.
   # @attr gif_height [Integer] Height of the GIF.
-  # @attr reply_markup [ReplyMarkup] The message reply markup.
+  # @attr reply_markup [TD::Types::ReplyMarkup] The message reply markup.
   #   Must be of type replyMarkupInlineKeyboard or null.
-  # @attr input_message_content [InputMessageContent] The content of the message to be sent.
+  # @attr input_message_content [TD::Types::InputMessageContent] The content of the message to be sent.
   #   Must be one of the following types: InputMessageText, InputMessageAnimation, InputMessageLocation,
   #   InputMessageVenue or InputMessageContact.
   class InputInlineQueryResult::AnimatedGif < InputInlineQueryResult

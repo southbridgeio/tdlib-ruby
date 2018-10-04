@@ -3,8 +3,8 @@ module TD::Types
   #
   # @attr id [Integer] Photo identifier; 0 for an empty photo.
   #   Can be used to find a photo in a list of userProfilePhotos.
-  # @attr small [File] A small (160x160) user profile photo.
-  # @attr big [File] A big (640x640) user profile photo.
+  # @attr small [TD::Types::File] A small (160x160) user profile photo.
+  # @attr big [TD::Types::File] A big (640x640) user profile photo.
   class ProfilePhoto < Base
     attribute :id, TD::Types::Integer
     attribute :small, TD::Types::File

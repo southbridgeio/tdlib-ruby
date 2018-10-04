@@ -3,7 +3,7 @@ module TD::Types
   # This update is guaranteed to come before the chat identifier is returned to the client.
   # The chat field changes will be reported through separate updates.
   #
-  # @attr chat [Chat] The chat.
+  # @attr chat [TD::Types::Chat] The chat.
   class Update::NewChat < Update
     attribute :chat, TD::Types::Chat
   end

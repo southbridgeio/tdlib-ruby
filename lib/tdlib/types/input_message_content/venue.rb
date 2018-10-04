@@ -1,7 +1,7 @@
 module TD::Types
   # A message with information about a venue.
   #
-  # @attr venue [Venue] Venue to send.
+  # @attr venue [TD::Types::Venue] Venue to send.
   class InputMessageContent::Venue < InputMessageContent
     attribute :venue, TD::Types::Venue
   end

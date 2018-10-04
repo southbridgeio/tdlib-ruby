@@ -2,7 +2,8 @@ module TD::Types
   # Product invoice.
   #
   # @attr currency [String] ISO 4217 currency code.
-  # @attr price_parts [Array<LabeledPricePart>] A list of objects used to calculate the total price of the product.
+  # @attr price_parts [Array<TD::Types::LabeledPricePart>] A list of objects used to calculate the total price of the
+  #   product.
   # @attr is_test [Boolean] True, if the payment is a test payment.
   # @attr need_name [Boolean] True, if the user's name is needed for payment.
   # @attr need_phone_number [Boolean] True, if the user's phone number is needed for payment.

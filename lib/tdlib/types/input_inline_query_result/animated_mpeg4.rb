@@ -9,9 +9,9 @@ module TD::Types
   # @attr mpeg4_duration [Integer] Duration of the video, in seconds.
   # @attr mpeg4_width [Integer] Width of the video.
   # @attr mpeg4_height [Integer] Height of the video.
-  # @attr reply_markup [ReplyMarkup] The message reply markup.
+  # @attr reply_markup [TD::Types::ReplyMarkup] The message reply markup.
   #   Must be of type replyMarkupInlineKeyboard or null.
-  # @attr input_message_content [InputMessageContent] The content of the message to be sent.
+  # @attr input_message_content [TD::Types::InputMessageContent] The content of the message to be sent.
   #   Must be one of the following types: InputMessageText, InputMessageAnimation, InputMessageLocation,
   #   InputMessageVenue or InputMessageContact.
   class InputInlineQueryResult::AnimatedMpeg4 < InputInlineQueryResult

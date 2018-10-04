@@ -4,7 +4,7 @@ module TD::Types
   # @attr name [String] Name of the user.
   # @attr phone_number [String] Phone number of the user.
   # @attr email_address [String] Email address of the user.
-  # @attr shipping_address [Address] Shipping address for this order; may be null.
+  # @attr shipping_address [TD::Types::Address] Shipping address for this order; may be null.
   class OrderInfo < Base
     attribute :name, TD::Types::String
     attribute :phone_number, TD::Types::String

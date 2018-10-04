@@ -1,13 +1,14 @@
 module TD::Types
   # Contains information about an encrypted Telegram Passport element; for bots only.
   #
-  # @attr type [PassportElementType] Type of Telegram Passport element.
+  # @attr type [TD::Types::PassportElementType] Type of Telegram Passport element.
   # @attr data [String] Encrypted JSON-encoded data about the user.
-  # @attr front_side [DatedFile] The front side of an identity document.
-  # @attr reverse_side [DatedFile] The reverse side of an identity document; may be null.
-  # @attr selfie [DatedFile] Selfie with the document; may be null.
-  # @attr translation [Array<DatedFile>] List of files containing a certified English translation of the document.
-  # @attr files [Array<DatedFile>] List of attached files.
+  # @attr front_side [TD::Types::DatedFile] The front side of an identity document.
+  # @attr reverse_side [TD::Types::DatedFile] The reverse side of an identity document; may be null.
+  # @attr selfie [TD::Types::DatedFile] Selfie with the document; may be null.
+  # @attr translation [Array<TD::Types::DatedFile>] List of files containing a certified English translation of the
+  #   document.
+  # @attr files [Array<TD::Types::DatedFile>] List of attached files.
   # @attr value [String] Unencrypted data, phone number or email address.
   # @attr hash [String] Hash of the entire element.
   class EncryptedPassportElement < Base

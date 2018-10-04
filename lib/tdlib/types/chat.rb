@@ -3,10 +3,10 @@ module TD::Types
   # (Can be a private chat, basic group, supergroup, or secret chat).
   #
   # @attr id [Integer] Chat unique identifier.
-  # @attr type [ChatType] Type of the chat.
+  # @attr type [TD::Types::ChatType] Type of the chat.
   # @attr title [String] Chat title.
-  # @attr photo [ChatPhoto] Chat photo; may be null.
-  # @attr last_message [Message] Last message in the chat; may be null.
+  # @attr photo [TD::Types::ChatPhoto] Chat photo; may be null.
+  # @attr last_message [TD::Types::Message] Last message in the chat; may be null.
   # @attr order [Integer] Descending parameter by which chats are sorted in the main chat list.
   #   If the order number of two chats is the same, they must be sorted in descending order by ID.
   #   If 0, the position of the chat in the list is undetermined.
@@ -20,10 +20,10 @@ module TD::Types
   # @attr last_read_inbox_message_id [Integer] Identifier of the last read incoming message.
   # @attr last_read_outbox_message_id [Integer] Identifier of the last read outgoing message.
   # @attr unread_mention_count [Integer] Number of unread messages with a mention/reply in the chat.
-  # @attr notification_settings [ChatNotificationSettings] Notification settings for this chat.
+  # @attr notification_settings [TD::Types::ChatNotificationSettings] Notification settings for this chat.
   # @attr reply_markup_message_id [Integer] Identifier of the message from which reply markup needs to be used; 0 if
   #   there is no default custom reply markup in the chat.
-  # @attr draft_message [DraftMessage] A draft of a message in the chat; may be null.
+  # @attr draft_message [TD::Types::DraftMessage] A draft of a message in the chat; may be null.
   # @attr client_data [String] Contains client-specific data associated with the chat.
   #   (For example, the chat position or local chat notification settings can be stored here.) Persistent if a message
   #   database is used.

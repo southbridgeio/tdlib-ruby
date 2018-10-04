@@ -1,7 +1,7 @@
 module TD::Types
   # A text message.
   #
-  # @attr text [FormattedText] Formatted text to be sent; 1-GetOption("message_text_length_max") characters.
+  # @attr text [TD::Types::FormattedText] Formatted text to be sent; 1-GetOption("message_text_length_max") characters.
   #   Only Bold, Italic, Code, Pre, PreCode and TextUrl entities are allowed to be specified manually.
   # @attr disable_web_page_preview [Boolean] True, if rich web page previews for URLs in the message text should be
   #   disabled.

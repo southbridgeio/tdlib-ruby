@@ -1,7 +1,7 @@
 module TD::Types
   # Describes a venue.
   #
-  # @attr location [Location] Venue location; as defined by the sender.
+  # @attr location [TD::Types::Location] Venue location; as defined by the sender.
   # @attr title [String] Venue name; as defined by the sender.
   # @attr address [String] Venue address; as defined by the sender.
   # @attr provider [String] Provider of the venue database; as defined by the sender.

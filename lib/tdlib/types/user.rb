@@ -6,10 +6,10 @@ module TD::Types
   # @attr last_name [String] Last name of the user.
   # @attr username [String] Username of the user.
   # @attr phone_number [String] Phone number of the user.
-  # @attr status [UserStatus] Current online status of the user.
-  # @attr profile_photo [ProfilePhoto] Profile photo of the user; may be null.
-  # @attr outgoing_link [LinkState] Relationship from the current user to the other user.
-  # @attr incoming_link [LinkState] Relationship from the other user to the current user.
+  # @attr status [TD::Types::UserStatus] Current online status of the user.
+  # @attr profile_photo [TD::Types::ProfilePhoto] Profile photo of the user; may be null.
+  # @attr outgoing_link [TD::Types::LinkState] Relationship from the current user to the other user.
+  # @attr incoming_link [TD::Types::LinkState] Relationship from the other user to the current user.
   # @attr is_verified [Boolean] True, if the user is verified.
   # @attr restriction_reason [String] If non-empty, it contains the reason why access to this user must be restricted.
   #   The format of the string is "{type}: {description}".
@@ -20,7 +20,7 @@ module TD::Types
   # @attr have_access [Boolean] If false, the user is inaccessible, and the only information known about the user is
   #   inside this class.
   #   It can't be passed to any method except GetUser.
-  # @attr type [UserType] Type of the user.
+  # @attr type [TD::Types::UserType] Type of the user.
   # @attr language_code [String] IETF language tag of the user's language; only available to bots.
   class User < Base
     attribute :id, TD::Types::Integer

@@ -10,8 +10,8 @@ module TD::Types
   # @attr is_official [Boolean] True, if the sticker set is official.
   # @attr is_masks [Boolean] True, if the stickers in the set are masks.
   # @attr is_viewed [Boolean] True for already viewed trending sticker sets.
-  # @attr stickers [Array<Sticker>] List of stickers in this set.
-  # @attr emojis [Array<StickerEmojis>] A list of emoji corresponding to the stickers in the same order.
+  # @attr stickers [Array<TD::Types::Sticker>] List of stickers in this set.
+  # @attr emojis [Array<TD::Types::StickerEmojis>] A list of emoji corresponding to the stickers in the same order.
   class StickerSet < Base
     attribute :id, TD::Types::Integer
     attribute :title, TD::Types::String

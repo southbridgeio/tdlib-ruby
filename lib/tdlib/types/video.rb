@@ -8,8 +8,8 @@ module TD::Types
   # @attr mime_type [String] MIME type of the file; as defined by the sender.
   # @attr has_stickers [Boolean] True, if stickers were added to the photo.
   # @attr supports_streaming [Boolean] True, if the video should be tried to be streamed.
-  # @attr thumbnail [PhotoSize] Video thumbnail; as defined by the sender; may be null.
-  # @attr video [File] File containing the video.
+  # @attr thumbnail [TD::Types::PhotoSize] Video thumbnail; as defined by the sender; may be null.
+  # @attr video [TD::Types::File] File containing the video.
   class Video < Base
     attribute :duration, TD::Types::Integer
     attribute :width, TD::Types::Integer

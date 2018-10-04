@@ -9,7 +9,7 @@ module TD::Types
   # @attr username [String] Username of the supergroup or channel; empty for private supergroups or channels.
   # @attr date [Integer] Point in time (Unix timestamp) when the current user joined, or the point in time when the
   #   supergroup or channel was created, in case the user is not a member.
-  # @attr status [ChatMemberStatus] Status of the current user in the supergroup or channel.
+  # @attr status [TD::Types::ChatMemberStatus] Status of the current user in the supergroup or channel.
   # @attr member_count [Integer] Member count; 0 if unknown.
   #   Currently it is guaranteed to be known only if the supergroup or channel was found through SearchPublicChats.
   # @attr anyone_can_invite [Boolean] True, if any member of the supergroup can invite other members.

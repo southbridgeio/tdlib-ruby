@@ -2,7 +2,7 @@ module TD::Types
   # Represents an animation file.
   #
   # @attr id [String] Unique identifier of the query result.
-  # @attr animation [Animation] Animation file.
+  # @attr animation [TD::Types::Animation] Animation file.
   # @attr title [String] Animation title.
   class InlineQueryResult::Animation < InlineQueryResult
     attribute :id, TD::Types::String

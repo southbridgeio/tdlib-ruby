@@ -2,7 +2,7 @@ module TD::Types
   # Contains full information about a basic group.
   #
   # @attr creator_user_id [Integer] User identifier of the creator of the group; 0 if unknown.
-  # @attr members [Array<ChatMember>] Group members.
+  # @attr members [Array<TD::Types::ChatMember>] Group members.
   # @attr invite_link [String] Invite link for this group; available only for the group creator and only after it has
   #   been generated at least once.
   class BasicGroupFullInfo < Base

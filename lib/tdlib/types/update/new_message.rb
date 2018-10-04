@@ -1,7 +1,7 @@
 module TD::Types
   # A new message was received; can also be an outgoing message.
   #
-  # @attr message [Message] The new message.
+  # @attr message [TD::Types::Message] The new message.
   # @attr disable_notification [Boolean] True, if this message must not generate a notification.
   # @attr contains_mention [Boolean] True, if the message contains a mention of the current user.
   class Update::NewMessage < Update

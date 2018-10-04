@@ -8,7 +8,7 @@ module TD::Types
   # @attr share_text [String] For bots, the text that is included with the link when users share the bot.
   # @attr group_in_common_count [Integer] Number of group chats where both the other user and the current user are a
   #   member; 0 for the current user.
-  # @attr bot_info [BotInfo] If the user is a bot, information about the bot; may be null.
+  # @attr bot_info [TD::Types::BotInfo] If the user is a bot, information about the bot; may be null.
   class UserFullInfo < Base
     attribute :is_blocked, TD::Types::Bool
     attribute :can_be_called, TD::Types::Bool

@@ -5,7 +5,7 @@ module TD::Types
   # @attr chat_id [Integer] Chat identifier.
   # @attr message_id [Integer] Message identifier.
   # @attr edit_date [Integer] Point in time (Unix timestamp) when the message was edited.
-  # @attr reply_markup [ReplyMarkup] New message reply markup; may be null.
+  # @attr reply_markup [TD::Types::ReplyMarkup] New message reply markup; may be null.
   class Update::MessageEdited < Update
     attribute :chat_id, TD::Types::Integer
     attribute :message_id, TD::Types::Integer

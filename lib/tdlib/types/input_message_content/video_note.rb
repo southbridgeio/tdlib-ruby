@@ -1,8 +1,8 @@
 module TD::Types
   # A video note message.
   #
-  # @attr video_note [InputFile] Video note to be sent.
-  # @attr thumbnail [InputThumbnail] Video thumbnail, if available.
+  # @attr video_note [TD::Types::InputFile] Video note to be sent.
+  # @attr thumbnail [TD::Types::InputThumbnail] Video thumbnail, if available.
   # @attr duration [Integer] Duration of the video, in seconds.
   # @attr length [Integer] Video width and height; must be positive and not greater than 640.
   class InputMessageContent::VideoNote < InputMessageContent

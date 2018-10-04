@@ -8,21 +8,22 @@ module TD::Types
   # @attr site_name [String] Short name of the site (e.g., Google Docs, App Store).
   # @attr title [String] Title of the content.
   # @attr description [String] Description of the content.
-  # @attr photo [Photo] Image representing the content; may be null.
+  # @attr photo [TD::Types::Photo] Image representing the content; may be null.
   # @attr embed_url [String] URL to show in the embedded preview.
   # @attr embed_type [String] MIME type of the embedded preview, (e.g., text/html or video/mp4).
   # @attr embed_width [Integer] Width of the embedded preview.
   # @attr embed_height [Integer] Height of the embedded preview.
   # @attr duration [Integer] Duration of the content, in seconds.
   # @attr author [String] Author of the content.
-  # @attr animation [Animation] Preview of the content as an animation, if available; may be null.
-  # @attr audio [Audio] Preview of the content as an audio file, if available; may be null.
-  # @attr document [Document] Preview of the content as a document, if available (currently only available for small
-  #   PDF files and ZIP archives); may be null.
-  # @attr sticker [Sticker] Preview of the content as a sticker for small WEBP files, if available; may be null.
-  # @attr video [Video] Preview of the content as a video, if available; may be null.
-  # @attr video_note [VideoNote] Preview of the content as a video note, if available; may be null.
-  # @attr voice_note [VoiceNote] Preview of the content as a voice note, if available; may be null.
+  # @attr animation [TD::Types::Animation] Preview of the content as an animation, if available; may be null.
+  # @attr audio [TD::Types::Audio] Preview of the content as an audio file, if available; may be null.
+  # @attr document [TD::Types::Document] Preview of the content as a document, if available (currently only available
+  #   for small PDF files and ZIP archives); may be null.
+  # @attr sticker [TD::Types::Sticker] Preview of the content as a sticker for small WEBP files, if available; may be
+  #   null.
+  # @attr video [TD::Types::Video] Preview of the content as a video, if available; may be null.
+  # @attr video_note [TD::Types::VideoNote] Preview of the content as a video note, if available; may be null.
+  # @attr voice_note [TD::Types::VoiceNote] Preview of the content as a voice note, if available; may be null.
   # @attr has_instant_view [Boolean] True, if the web page has an instant view.
   class WebPage < Base
     attribute :url, TD::Types::String

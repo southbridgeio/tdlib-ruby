@@ -183,10 +183,18 @@ def wrap_params(param_string, max_length, indent_num)
   end
 end
 
+def type_to_comment_type(type)
+  type.gsub('TD::Types::Array.of(', 'Array<').gsub(')', '>').
+       gsub('TD::Types::Integer', 'Integer').
+       gsub('TD::Types::Float',   'Float').
+       gsub('TD::Types::String',  'String').
+       gsub('TD::Types::Bool',    'Boolean')
+end
+
 # Generates YARD documentation comment for each param
 def attrs_to_yard_comment(attrs, key = 'attr')
   attrs.map do |attr, info|
-    type = info[:type].gsub('TD::Types::', '').gsub('Array.of(', 'Array<').gsub(')', '>').gsub('Bool', 'Boolean')
+    type = type_to_comment_type(info[:type])
     
     wrap_comment(info[:description], "  ",
                  first_start_sequence: "  # @#{key} #{attr} [#{type}] ",
@@ -381,7 +389,8 @@ puts "Converting functions"
   method_name  = func[:class].underscore
   params       = func[:arguments]
   description  = func[:description]
-  return_class = func[:super_class].camelcase
+  # TODO: Replace InputMessageContent and others (see #normalize_class_name)
+  return_class = type_to_comment_type("TD::Types::#{func[:super_class].camelcase}")
   
   param_max_length = params.merge({'@type' => nil}).max_by { |k,_| k.length }[0].length
   

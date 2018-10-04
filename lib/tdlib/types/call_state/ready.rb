@@ -1,8 +1,8 @@
 module TD::Types
   # The call is ready to use.
   #
-  # @attr protocol [CallProtocol] Call protocols supported by the peer.
-  # @attr connections [Array<CallConnection>] Available UDP reflectors.
+  # @attr protocol [TD::Types::CallProtocol] Call protocols supported by the peer.
+  # @attr connections [Array<TD::Types::CallConnection>] Available UDP reflectors.
   # @attr config [String] A JSON-encoded call config.
   # @attr encryption_key [String] Call encryption key.
   # @attr emojis [Array<String>] Encryption key emojis fingerprint.

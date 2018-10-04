@@ -1,7 +1,7 @@
 module TD::Types
   # A message with an invoice; can be used only by bots and only in private chats.
   #
-  # @attr invoice [Invoice] Invoice.
+  # @attr invoice [TD::Types::Invoice] Invoice.
   # @attr title [String] Product title; 1-32 characters.
   # @attr description [String] Product description; 0-255 characters.
   # @attr photo_url [String] Product photo URL; optional.

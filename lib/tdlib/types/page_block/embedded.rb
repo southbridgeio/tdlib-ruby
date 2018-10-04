@@ -3,10 +3,10 @@ module TD::Types
   #
   # @attr url [String] Web page URL, if available.
   # @attr html [String] HTML-markup of the embedded page.
-  # @attr poster_photo [Photo] Poster photo, if available; may be null.
+  # @attr poster_photo [TD::Types::Photo] Poster photo, if available; may be null.
   # @attr width [Integer] Block width.
   # @attr height [Integer] Block height.
-  # @attr caption [RichText] Block caption.
+  # @attr caption [TD::Types::RichText] Block caption.
   # @attr is_full_width [Boolean] True, if the block should be full width.
   # @attr allow_scrolling [Boolean] True, if scrolling should be allowed.
   class PageBlock::Embedded < PageBlock

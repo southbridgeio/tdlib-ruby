@@ -7,7 +7,7 @@ module TD::Types
   # @attr native_first_name [String] Native first name of the user; 1-255 characters.
   # @attr native_middle_name [String] Native middle name of the user; 0-255 characters.
   # @attr native_last_name [String] Native last name of the user; 1-255 characters.
-  # @attr birthdate [Date] Birthdate of the user.
+  # @attr birthdate [TD::Types::Date] Birthdate of the user.
   # @attr gender [String] Gender of the user, "male" or "female".
   # @attr country_code [String] A two-letter ISO 3166-1 alpha-2 country code of the user's country.
   # @attr residence_country_code [String] A two-letter ISO 3166-1 alpha-2 country code of the user's residence country.

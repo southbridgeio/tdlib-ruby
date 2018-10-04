@@ -3,7 +3,7 @@ module TD::Types
   #
   # @attr chat_id [Integer] Chat identifier.
   # @attr user_id [Integer] Identifier of a user performing an action.
-  # @attr action [ChatAction] The action description.
+  # @attr action [TD::Types::ChatAction] The action description.
   class Update::UserChatAction < Update
     attribute :chat_id, TD::Types::Integer
     attribute :user_id, TD::Types::Integer
