@@ -126,7 +126,7 @@ class TD::Client
   end
 
   # Binds passed block as a handler for updates with type of *update_type*
-  # @param [Class] update_type
+  # @param [String, Class] update_type
   # @yield [update] yields update to the block as soon as it's received
   def on(update_type, &_)
     if update_type.is_a?(String)
@@ -137,8 +137,8 @@ class TD::Client
       end
     end
     
-    unless update_type < TD::Types::Update
-      raise ArgumentError.new("Wrong type specified (#{update_type}). Should be of kind TD::Types::Update")
+    unless update_type < TD::Types::Base
+      raise ArgumentError.new("Wrong type specified (#{update_type}). Should be of kind TD::Types::Base")
     end
     
     handler = ->(update, _) do

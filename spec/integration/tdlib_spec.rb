@@ -37,14 +37,14 @@ describe TD::Client do
       it { expect { subject }.not_to raise_error(Exception) }
       it { is_expected.to satisfy { |result| result.state == :pending } }
       it { is_expected.to satisfy { |result| sleep 1; result.state == :fulfilled } }
-      it { is_expected.to satisfy { |result| sleep 1; result.value['@type'] == 'textEntities' } }
+      it { is_expected.to satisfy { |result| sleep 1; result.value.is_a?(TD::Types::TextEntities) } }
     end
   end
 
   describe '#broadcast_and_receive' do
     subject { client.on_ready { client.broadcast_and_receive(payload) } }
 
-    it { is_expected.to include('@type', 'entities') }
+    it { respond_to?(:entities) }
 
     context 'when timeout reached' do
       subject { client.on_ready(timeout: 0.0001) { client.broadcast_and_receive(payload) } }
@@ -64,7 +64,7 @@ describe TD::Client do
     it 'runs block on update' do
       subject
       sleep 1
-      expect(@result).to include('@type', 'entities')
+      expect(@result).respond_to?(:entities)
     end
   end
 
