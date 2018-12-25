@@ -61,9 +61,11 @@ class TD::Client
 
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
+                 timeout: TIMEOUT,
                  **extra_config)
     @td_client = td_client
     @update_manager = update_manager
+    @timeout = timeout
     @config = TD.config.client.to_h.merge(extra_config)
     @ready_condition_mutex = Mutex.new
     @ready_condition = ConditionVariable.new
@@ -76,11 +78,10 @@ class TD::Client
   # @see https://www.rubydoc.info/github/ruby-concurrency/concurrent-ruby/Concurrent/Promise
   #   Concurrent::Promise documentation
   # @example
-  #   client.broadcast(some_query).then { |result| puts result }.rescue
+  #   client.broadcast(some_query).then { |result| puts result }.rescue { |error| puts [error.code, error.message] }
   # @param [Hash] query
-  # @param [Numeric] timeout
   # @return [Concurrent::Promise]
-  def broadcast(query, timeout: TIMEOUT)
+  def broadcast(query)
     Promise.execute do
       condition = ConditionVariable.new
       extra = TD::Utils.generate_extra(query)
@@ -100,8 +101,11 @@ class TD::Client
       
       mutex.synchronize do
         TD::Api.client_send(@td_client, query)
-        condition.wait(mutex, timeout)
-        raise TD::TimeoutError if result.nil?
+        condition.wait(mutex, @timeout)
+        error = nil
+        error = result if result.is_a?(TD::Types::Error)
+        error = TD::Types::Error.new(code: 0, message: 'Unknown error. Please, see TDlib logs.') if result.nil?
+        raise TD::ErrorProxy.new(error) if error
         result
       end
     end
@@ -110,8 +114,8 @@ class TD::Client
   # Sends asynchronous request to the TDLib client and returns received update synchronously
   # @param [Hash] query
   # @return [Hash]
-  def fetch(query, timeout: TIMEOUT)
-    broadcast(query, timeout: timeout).value
+  def fetch(query)
+    broadcast(query).value
   end
 
   alias broadcast_and_receive fetch
@@ -147,10 +151,10 @@ class TD::Client
     @update_manager.add_handler(handler)
   end
 
-  def on_ready(timeout: TIMEOUT, &_)
+  def on_ready(&_)
     @ready_condition_mutex.synchronize do
-      return(yield self) if @ready || (@ready_condition.wait(@ready_condition_mutex, timeout) && @ready)
-      raise TD::TimeoutError
+      return(yield self) if @ready || (@ready_condition.wait(@ready_condition_mutex, @timeout) && @ready)
+      raise TD::ErrorProxy.new(timeout_error)
     end
   end
 
@@ -181,5 +185,9 @@ class TD::Client
       end
     end
     @update_manager.add_handler(handler)
+  end
+
+  def timeout_error
+    TD::Types::Error.new(code: 0, message: 'Unknown error')
   end
 end
