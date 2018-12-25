@@ -86,18 +86,16 @@ class TD::Client
       extra = TD::Utils.generate_extra(query)
       result = nil
       mutex = Mutex.new
-      
+
       handler = ->(update, update_extra) do
         return unless update_extra == extra
-        
-        mutex.synchronize do
-          result = update
-          @update_manager.remove_handler(handler)
-          condition.signal
-        end
+
+        result = update
+        @update_manager.remove_handler(handler)
+        condition.signal
       end
       @update_manager.add_handler(handler)
-      
+
       query['@extra'] = extra
       
       mutex.synchronize do
@@ -136,14 +134,14 @@ class TD::Client
         raise ArgumentError.new("Can't find class for #{update_type}")
       end
     end
-    
+
     unless update_type < TD::Types::Base
       raise ArgumentError.new("Wrong type specified (#{update_type}). Should be of kind TD::Types::Base")
     end
-    
+
     handler = ->(update, _) do
       return unless update.is_a?(update_type)
-      
+
       yield update
     end
     @update_manager.add_handler(handler)
@@ -167,7 +165,7 @@ class TD::Client
   def authorize
     handler = ->(update, _) do
       return unless update.is_a?(TD::Types::Update::AuthorizationState)
-      
+
       case update.authorization_state
       when TD::Types::AuthorizationState::WaitTdlibParameters
         set_tdlib_parameters(TD::Types::TdlibParameters.new(**@config))
