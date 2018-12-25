@@ -16,15 +16,6 @@ Gem::Specification.new do |gem|
 
   gem.files         = `git ls-files`.split($/) - ['lib/tdlib/td_api_tl_parser.rb']
 
-  `git submodule --quiet foreach --recursive pwd`.split($/).each do |submodule|
-    submodule.sub!("#{Dir.pwd}/",'')
-
-    Dir.chdir(submodule) do
-      `git ls-files`.split($/).map do |subpath|
-        gem.files << File.join(submodule,subpath)
-      end
-    end
-  end
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ['lib']
