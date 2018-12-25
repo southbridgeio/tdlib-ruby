@@ -54,41 +54,37 @@ client = TD::Client.new
 begin
   state = nil
 
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitPhoneNumber'
-    state = :wait_phone
-  end
-
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitCode'
-    state = :wait_code
-  end
-
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateReady'
-    state = :ready
+  client.on(TD::Types::Update::AuthorizationState) do |update|
+    state = case update.authorization_state
+            when TD::Types::AuthorizationState::WaitPhoneNumber
+              :wait_phone_number
+            when TD::Types::AuthorizationState::WaitCode
+              :wait_code
+            when TD::Types::AuthorizationState::WaitPassword
+              :wait_password
+            when TD::Types::AuthorizationState::Ready
+              :ready
+            else
+              nil
+            end
   end
 
   loop do
     case state
-    when :wait_phone
-      p 'Please, enter your phone number:'
+    when :wait_phone_number
+      puts 'Please, enter your phone number:'
       phone = STDIN.gets.strip
-      params = {
-        '@type' => 'setAuthenticationPhoneNumber',
-        'phone_number' => phone
-      }
-      client.broadcast_and_receive(params)
+      client.set_authentication_phone_number(phone).value
     when :wait_code
-      p 'Please, enter code from SMS:'
+      puts 'Please, enter code from SMS:'
       code = STDIN.gets.strip
-      params = {
-        '@type' => 'checkAuthenticationCode',
-        'code' => code
-      }
-      client.broadcast_and_receive(params)
+      client.check_authentication_code(code).value
+    when :wait_password
+      puts 'Please, enter 2FA password:'
+      password = STDIN.gets.strip
+      client.check_authentication_password(password).value
     when :ready
-      @me = client.broadcast_and_receive('@type' => 'getMe')
+      @me = client.get_me.value
       break
     end
   end
@@ -120,6 +116,7 @@ TD.configure do |config|
   config.client.use_test_dc = true # default: false
   config.client.database_directory = 'path/to/db/dir' # default: "#{Dir.home}/.tdlib-ruby/db"
   config.client.files_directory = 'path/to/files/dir' # default: "#{Dir.home}/.tdlib-ruby/files"
+  config.client.use_file_database = true # default: true
   config.client.use_chat_info_database = true # default: true
   config.client.use_secret_chats = true # default: true
   config.client.use_message_database = true # default: true
@@ -160,3 +157,5 @@ TD::Client.new(database_directory: 'will override value from config',
 ## Authors
 
 The gem is designed by [Southbridge](https://southbridge.io)
+
+Typeization made by [Yuri Mikhaylov](https://github.com/yurijmi) 

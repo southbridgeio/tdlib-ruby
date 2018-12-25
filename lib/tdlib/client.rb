@@ -13,41 +13,37 @@
 #   begin
 #     state = nil
 #
-#     client.on('updateAuthorizationState') do |update|
-#       next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitPhoneNumber'
-#       state = :wait_phone
-#     end
-#
-#     client.on('updateAuthorizationState') do |update|
-#       next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitCode'
-#       state = :wait_code
-#     end
-#
-#     client.on('updateAuthorizationState') do |update|
-#       next unless update.dig('authorization_state', '@type') == 'authorizationStateReady'
-#       state = :ready
+#     client.on(TD::Types::Update::AuthorizationState) do |update|
+#       state = case update.authorization_state
+#               when TD::Types::AuthorizationState::WaitPhoneNumber
+#                 :wait_phone_number
+#               when TD::Types::AuthorizationState::WaitCode
+#                 :wait_code
+#               when TD::Types::AuthorizationState::WaitPassword
+#                 :wait_password
+#               when TD::Types::AuthorizationState::Ready
+#                 :ready
+#               else
+#                 nil
+#               end
 #     end
 #
 #     loop do
 #       case state
-#       when :wait_phone
-#         p 'Please, enter your phone number:'
+#       when :wait_phone_number
+#         puts 'Please, enter your phone number:'
 #         phone = STDIN.gets.strip
-#         params = {
-#           '@type' => 'setAuthenticationPhoneNumber',
-#           'phone_number' => phone
-#         }
-#         client.broadcast_and_receive(params)
+#         client.set_authentication_phone_number(phone).value
 #       when :wait_code
-#         p 'Please, enter code from SMS:'
+#         puts 'Please, enter code from SMS:'
 #         code = STDIN.gets.strip
-#         params = {
-#           '@type' => 'checkAuthenticationCode',
-#           'code' => code
-#         }
-#         client.broadcast_and_receive(params)
+#         client.check_authentication_code(code).value
+#       when :wait_password
+#         puts 'Please, enter 2FA password:'
+#         password = STDIN.gets.strip
+#         client.check_authentication_password(password).value
 #       when :ready
-#         @me = client.broadcast_and_receive('@type' => 'getMe')
+#         @me = client.get_me.value
 #         break
 #       end
 #     end
@@ -59,17 +55,16 @@
 #   p @me
 class TD::Client
   include Concurrent
+  include TD::ClientMethods
 
   TIMEOUT = 20
 
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
-                 proxy: { '@type' => 'proxyEmpty' },
                  **extra_config)
     @td_client = td_client
     @update_manager = update_manager
     @config = TD.config.client.to_h.merge(extra_config)
-    @proxy = proxy
     @ready_condition_mutex = Mutex.new
     @ready_condition = ConditionVariable.new
     authorize
@@ -77,7 +72,9 @@ class TD::Client
   end
 
   # Sends asynchronous request to the TDLib client and returns Promise object
-  # @see https://www.rubydoc.info/github/ruby-concurrency/concurrent-ruby/Concurrent/Promise)
+  # @see TD::ClientMethods List of available queries as methods
+  # @see https://www.rubydoc.info/github/ruby-concurrency/concurrent-ruby/Concurrent/Promise
+  #   Concurrent::Promise documentation
   # @example
   #   client.broadcast(some_query).then { |result| puts result }.rescue
   # @param [Hash] query
@@ -89,8 +86,10 @@ class TD::Client
       extra = TD::Utils.generate_extra(query)
       result = nil
       mutex = Mutex.new
-      handler = ->(update) do
-        return unless update['@extra'] == extra
+      
+      handler = ->(update, update_extra) do
+        return unless update_extra == extra
+        
         mutex.synchronize do
           result = update
           @update_manager.remove_handler(handler)
@@ -98,7 +97,9 @@ class TD::Client
         end
       end
       @update_manager.add_handler(handler)
+      
       query['@extra'] = extra
+      
       mutex.synchronize do
         TD::Api.client_send(@td_client, query)
         condition.wait(mutex, timeout)
@@ -124,18 +125,25 @@ class TD::Client
     TD::Api.client_execute(@td_client, query)
   end
 
-  # Returns current authorization state (it's offline request)
-  # @return [Hash]
-  def authorization_state
-    broadcast_and_receive('@type' => 'getAuthorizationState')
-  end
-
   # Binds passed block as a handler for updates with type of *update_type*
-  # @param [String] update_type
+  # @param [String, Class] update_type
   # @yield [update] yields update to the block as soon as it's received
   def on(update_type, &_)
-    handler = ->(update) do
-      return unless update['@type'] == update_type
+    if update_type.is_a?(String)
+      if (type_const = TD::Types::LOOKUP_TABLE[update_type])
+        update_type = TD::Types.const_get("TD::Types::#{type_const}")
+      else
+        raise ArgumentError.new("Can't find class for #{update_type}")
+      end
+    end
+    
+    unless update_type < TD::Types::Base
+      raise ArgumentError.new("Wrong type specified (#{update_type}). Should be of kind TD::Types::Base")
+    end
+    
+    handler = ->(update, _) do
+      return unless update.is_a?(update_type)
+      
       yield update
     end
     @update_manager.add_handler(handler)
@@ -157,28 +165,17 @@ class TD::Client
   private
 
   def authorize
-    tdlib_params_query = {
-      '@type' => 'setTdlibParameters',
-      parameters: { '@type' => 'tdlibParameters', **@config }
-    }
-    encryption_key_query = {
-      '@type' => 'checkDatabaseEncryptionKey',
-    }
-
-    if TD.config.encryption_key
-      encryption_key_query['encryption_key'] = TD.config.encryption_key
-    end
-
-    handler = ->(update) do
-      return unless update['@type'] == 'updateAuthorizationState'
-      case update.dig('authorization_state', '@type')
-      when 'authorizationStateWaitTdlibParameters'
-        broadcast(tdlib_params_query)
-      when 'authorizationStateWaitEncryptionKey'
-        broadcast(encryption_key_query)
+    handler = ->(update, _) do
+      return unless update.is_a?(TD::Types::Update::AuthorizationState)
+      
+      case update.authorization_state
+      when TD::Types::AuthorizationState::WaitTdlibParameters
+        set_tdlib_parameters(TD::Types::TdlibParameters.new(**@config))
+      when TD::Types::AuthorizationState::WaitEncryptionKey
+        check_database_encryption_key(TD.config.encryption_key)
       else
-        broadcast('@type' => 'setProxy', 'proxy' => @proxy)
         @update_manager.remove_handler(handler)
+        
         @ready_condition_mutex.synchronize do
           @ready = true
           @ready_condition.broadcast
