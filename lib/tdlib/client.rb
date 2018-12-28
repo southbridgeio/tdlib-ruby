@@ -59,18 +59,22 @@ class TD::Client
 
   TIMEOUT = 20
 
+  def self.connect(*args)
+    new(*args).connect
+  end
+
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
                  timeout: TIMEOUT,
                  **extra_config)
     @td_client = td_client
+    @ready = false
+    @alive = true
     @update_manager = update_manager
     @timeout = timeout
     @config = TD.config.client.to_h.merge(extra_config)
     @ready_condition_mutex = Mutex.new
     @ready_condition = ConditionVariable.new
-    authorize
-    @update_manager.run
   end
 
   # Sends asynchronous request to the TDLib client and returns Promise object
@@ -88,17 +92,15 @@ class TD::Client
       result = nil
       mutex = Mutex.new
 
-      handler = ->(update, update_extra) do
-        return unless update_extra == extra
-
-        result = update
-        @update_manager.remove_handler(handler)
-        condition.signal
+      @update_manager << TD::UpdateHandler.new(TD::Types::Base, extra, disposable: true) do |update|
+        mutex.synchronize do
+          result = update
+          condition.signal
+        end
       end
-      @update_manager.add_handler(handler)
 
       query['@extra'] = extra
-      
+
       mutex.synchronize do
         TD::Api.client_send(@td_client, query)
         condition.wait(mutex, @timeout)
@@ -115,7 +117,7 @@ class TD::Client
   # @param [Hash] query
   # @return [Hash]
   def fetch(query)
-    broadcast(query).value
+    broadcast(query).value!
   end
 
   alias broadcast_and_receive fetch
@@ -130,7 +132,7 @@ class TD::Client
   # Binds passed block as a handler for updates with type of *update_type*
   # @param [String, Class] update_type
   # @yield [update] yields update to the block as soon as it's received
-  def on(update_type, &_)
+  def on(update_type, &action)
     if update_type.is_a?(String)
       if (type_const = TD::Types::LOOKUP_TABLE[update_type])
         update_type = TD::Types.const_get("TD::Types::#{type_const}")
@@ -143,48 +145,65 @@ class TD::Client
       raise ArgumentError.new("Wrong type specified (#{update_type}). Should be of kind TD::Types::Base")
     end
 
-    handler = ->(update, _) do
-      return unless update.is_a?(update_type)
-
-      yield update
-    end
-    @update_manager.add_handler(handler)
+    @update_manager << TD::UpdateHandler.new(update_type, &action)
   end
 
-  def on_ready(&_)
-    @ready_condition_mutex.synchronize do
-      return(yield self) if @ready || (@ready_condition.wait(@ready_condition_mutex, @timeout) && @ready)
-      raise TD::ErrorProxy.new(timeout_error)
+  def connect
+    return Promise.reject(StandardError) if dead?
+    return Promise.fulfill(self) if ready?
+
+    authorize
+    @update_manager.run
+
+    Promise.execute do
+      @ready_condition_mutex.synchronize do
+        next self if @ready || (@ready_condition.wait(@ready_condition_mutex, @timeout) && @ready)
+        raise TD::ErrorProxy.new(timeout_error)
+      end
     end
+  end
+
+  # @deprecated
+  def on_ready(&action)
+    connect.then(&action).value!
   end
 
   # Stops update manager and destroys TDLib client
-  def close
+  def flush
     @update_manager.stop
+    @alive = false
+    @ready = false
     TD::Api.client_destroy(@td_client)
+  end
+
+  def alive?
+    @alive
+  end
+
+  def dead?
+    !alive?
+  end
+
+  def ready?
+    @ready
   end
 
   private
 
   def authorize
-    handler = ->(update, _) do
-      return unless update.is_a?(TD::Types::Update::AuthorizationState)
-
+    on TD::Types::Update::AuthorizationState do |update|
       case update.authorization_state
       when TD::Types::AuthorizationState::WaitTdlibParameters
         set_tdlib_parameters(TD::Types::TdlibParameters.new(**@config))
       when TD::Types::AuthorizationState::WaitEncryptionKey
         check_database_encryption_key(TD.config.encryption_key)
-      else
-        @update_manager.remove_handler(handler)
-        
+      when TD::Types::AuthorizationState::Ready
         @ready_condition_mutex.synchronize do
           @ready = true
           @ready_condition.broadcast
         end
       end
     end
-    @update_manager.add_handler(handler)
   end
 
   def timeout_error

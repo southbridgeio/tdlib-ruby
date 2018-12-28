@@ -42,7 +42,7 @@ module TD::Api
 
     def method_missing(method_name, *args)
       @mutex.synchronize do
-        return if respond_to?(method_name)
+        return public_send(method_name, *args) if respond_to?(method_name)
         dlload(find_lib)
 
         extern 'void* td_json_client_create()'

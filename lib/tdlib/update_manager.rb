@@ -1,11 +1,9 @@
 class TD::UpdateManager
   TIMEOUT = 30
 
-  attr_reader :handlers
-
   def initialize(td_client)
     @td_client = td_client
-    @handlers = []
+    @handlers = Concurrent::Array.new
     @mutex = Mutex.new
   end
 
@@ -13,20 +11,17 @@ class TD::UpdateManager
     @mutex.synchronize { @handlers << handler }
   end
 
-  def remove_handler(handler)
-    Thread.start do
-      @mutex.synchronize { @handlers.delete(handler) }
-    end
-  end
+  alias << add_handler
 
   def run
-    @update_loop_thread = Thread.start do
+    Thread.start do
       loop { stopped? ? break : handle_update }
     end
   end
 
   def stop
     @stopped = true
+    @mutex.synchronize { @handlers = [] }
   end
 
   def stopped?
@@ -35,15 +30,24 @@ class TD::UpdateManager
 
   private
 
+  attr_reader :handlers
+
   def handle_update
     update = TD::Api.client_receive(@td_client, TIMEOUT)
-    
+
     unless update.nil?
       extra  = update.delete('@extra')
       update = TD::Types.wrap(update)
-      
-      @mutex.synchronize { handlers = @handlers.dup }
-      handlers.each { |h| h.call(update, extra) }
+
+      match_handlers!(update, extra).each { |h| h.async.run(update) }
+    end
+  end
+
+  def match_handlers!(update, extra)
+    @mutex.synchronize do
+      matched_handlers = handlers.select { |h| h.match?(update, extra) }
+      matched_handlers.each { |h| handlers.delete(h) if h.disposable? }
+      matched_handlers
     end
   end
 end

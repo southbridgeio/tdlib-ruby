@@ -19,8 +19,10 @@ module TD
       @td_error.respond_to?(*args)
     end
 
-    def inspect
+    def to_s
       @td_error.inspect
     end
+
+    alias inspect to_s
   end
 end
