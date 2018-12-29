@@ -68,11 +68,10 @@ module TD::Api
         elsif defined?(Rails) && File.exist?(Rails.root.join('vendor', file_name))
           Rails.root.join('vendor')
         end
-      full_path = File.join(lib_path, file_name)
+      full_path = File.join(lib_path.to_s, file_name)
       ffi_lib full_path
       full_path
     rescue LoadError
-      puts 'l'
       ffi_lib 'tdjson'
       ffi_libraries.first.name
     end
