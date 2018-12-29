@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'tdlib-ruby'
 
 describe TD::Client do
-  let(:client) { TD::Client.new(timeout: timeout) }
+  let(:client) { TD::Client.new(timeout: timeout).tap(&:connect) }
   let!(:payload) { { '@type' => 'getTextEntities', 'text' => text } }
   let!(:text) { '@telegram' }
   let(:timeout) { TD::Client::TIMEOUT }

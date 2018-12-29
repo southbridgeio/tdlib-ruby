@@ -77,8 +77,25 @@ class TD::Client
     @config = TD.config.client.to_h.merge(extra_config)
     @ready_condition_mutex = Mutex.new
     @ready_condition = ConditionVariable.new
+  end
 
-    configure
+  def connect
+    on TD::Types::Update::AuthorizationState do |update|
+      case update.authorization_state
+      when TD::Types::AuthorizationState::WaitTdlibParameters
+        set_tdlib_parameters(TD::Types::TdlibParameters.new(**@config))
+      when TD::Types::AuthorizationState::WaitEncryptionKey
+        check_database_encryption_key(TD.config.encryption_key).then do
+          @ready_condition_mutex.synchronize do
+            @ready = true
+            @ready_condition.broadcast
+          end
+        end
+      else
+        # do nothing
+      end
+    end
+
     @update_manager.run
   end
 
@@ -195,24 +212,6 @@ class TD::Client
   end
 
   private
-
-  def configure
-    on TD::Types::Update::AuthorizationState do |update|
-      case update.authorization_state
-      when TD::Types::AuthorizationState::WaitTdlibParameters
-        set_tdlib_parameters(TD::Types::TdlibParameters.new(**@config))
-      when TD::Types::AuthorizationState::WaitEncryptionKey
-        check_database_encryption_key(TD.config.encryption_key).then do
-          @ready_condition_mutex.synchronize do
-            @ready = true
-            @ready_condition.broadcast
-          end
-        end
-      else
-        # do nothing
-      end
-    end
-  end
 
   def send_to_td_client(query)
     return unless alive?
