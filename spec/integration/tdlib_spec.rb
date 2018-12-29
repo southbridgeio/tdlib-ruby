@@ -3,7 +3,8 @@ require 'tdlib-ruby'
 
 describe TD::Client do
   let(:client) { TD::Client.new(timeout: timeout) }
-  let!(:payload) { { '@type' => 'getTextEntities', 'text' => '@telegram' } }
+  let!(:payload) { { '@type' => 'getTextEntities', 'text' => text } }
+  let!(:text) { '@telegram' }
   let(:timeout) { TD::Client::TIMEOUT }
 
   before do
@@ -35,11 +36,11 @@ describe TD::Client do
 
   describe '#broadcast' do
     context 'when no block given' do
-      subject { client.on_ready { client.broadcast(payload) } }
+      subject { client.connect.flat_map { client.get_text_entities(text) }.wait }
 
       it { expect { subject }.not_to raise_error(Exception) }
-      it { is_expected.to satisfy { |result| sleep 1; result.state == :fulfilled } }
-      it { is_expected.to satisfy { |result| sleep 1; result.value.is_a?(TD::Types::TextEntities) } }
+      it { is_expected.to satisfy(&:fulfilled?) }
+      it { is_expected.to satisfy { |result| result.value.is_a?(TD::Types::TextEntities) } }
     end
   end
 

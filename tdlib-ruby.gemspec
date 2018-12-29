@@ -24,6 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'dry-struct',       '~> 0.5.1'
   gem.add_runtime_dependency 'dry-types',        '~> 0.13.2'
   gem.add_runtime_dependency 'concurrent-ruby',  '~> 1.0'
+  gem.add_runtime_dependency 'ffi',              '~> 1.0'
 
   gem.add_development_dependency 'bundler', '~> 1.10'
   gem.add_development_dependency 'rake', '~> 12.3'

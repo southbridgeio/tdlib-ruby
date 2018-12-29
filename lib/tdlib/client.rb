@@ -1,3 +1,5 @@
+require 'securerandom'
+
 # Simple client for TDLib.
 # @example
 #   TD.configure do |config|
@@ -86,9 +88,11 @@ class TD::Client
   # @param [Hash] query
   # @return [Concurrent::Promise]
   def broadcast(query)
+    return dead_client_promise if dead?
+
     Promise.execute do
       condition = ConditionVariable.new
-      extra = TD::Utils.generate_extra(query)
+      extra = SecureRandom.uuid
       result = nil
       mutex = Mutex.new
 
@@ -102,7 +106,7 @@ class TD::Client
       query['@extra'] = extra
 
       mutex.synchronize do
-        TD::Api.client_send(@td_client, query)
+        send_to_td_client(query)
         condition.wait(mutex, @timeout)
         error = nil
         error = result if result.is_a?(TD::Types::Error)
@@ -126,6 +130,7 @@ class TD::Client
   # Only a few requests can be executed synchronously
   # @param [Hash] query
   def execute(query)
+    return dead_client_promise if dead?
     TD::Api.client_execute(@td_client, query)
   end
 
@@ -169,7 +174,8 @@ class TD::Client
   end
 
   # Stops update manager and destroys TDLib client
-  def flush
+  def destroy_td_client
+    return if dead?
     @update_manager.stop
     @alive = false
     @ready = false
@@ -196,17 +202,28 @@ class TD::Client
       when TD::Types::AuthorizationState::WaitTdlibParameters
         set_tdlib_parameters(TD::Types::TdlibParameters.new(**@config))
       when TD::Types::AuthorizationState::WaitEncryptionKey
-        check_database_encryption_key(TD.config.encryption_key)
-      when TD::Types::AuthorizationState::Ready
-        @ready_condition_mutex.synchronize do
-          @ready = true
-          @ready_condition.broadcast
+        check_database_encryption_key(TD.config.encryption_key).then do
+          @ready_condition_mutex.synchronize do
+            @ready = true
+            @ready_condition.broadcast
+          end
         end
+      else
+        # do nothing
       end
     end
   end
 
+  def send_to_td_client(query)
+    return unless alive?
+    TD::Api.client_send(@td_client, query)
+  end
+
   def timeout_error
     TD::Types::Error.new(code: 0, message: 'Unknown error')
+  end
+
+  def dead_client_promise
+    Promise.reject(TD::ErrorProxy.new(TD::Types::Error.new(code: 0, message: 'TD client is dead')))
   end
 end
