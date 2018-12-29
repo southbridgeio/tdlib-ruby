@@ -61,7 +61,7 @@ class TD::Client
 
   TIMEOUT = 20
 
-  def self.connect(*args)
+  def self.ready(*args)
     new(*args).connect
   end
 
@@ -77,6 +77,9 @@ class TD::Client
     @config = TD.config.client.to_h.merge(extra_config)
     @ready_condition_mutex = Mutex.new
     @ready_condition = ConditionVariable.new
+
+    configure
+    @update_manager.run
   end
 
   # Sends asynchronous request to the TDLib client and returns Promise object
@@ -130,7 +133,7 @@ class TD::Client
   # Only a few requests can be executed synchronously
   # @param [Hash] query
   def execute(query)
-    return dead_client_promise if dead?
+    return dead_client_error if dead?
     TD::Api.client_execute(@td_client, query)
   end
 
@@ -153,12 +156,9 @@ class TD::Client
     @update_manager << TD::UpdateHandler.new(update_type, &action)
   end
 
-  def connect
-    return Promise.reject(StandardError) if dead?
+  def ready
+    return dead_client_promise if dead?
     return Promise.fulfill(self) if ready?
-
-    authorize
-    @update_manager.run
 
     Promise.execute do
       @ready_condition_mutex.synchronize do
@@ -170,11 +170,11 @@ class TD::Client
 
   # @deprecated
   def on_ready(&action)
-    connect.then(&action).value!
+    ready.then(&action).value!
   end
 
   # Stops update manager and destroys TDLib client
-  def destroy_td_client
+  def dispose
     return if dead?
     @update_manager.stop
     @alive = false
@@ -196,7 +196,7 @@ class TD::Client
 
   private
 
-  def authorize
+  def configure
     on TD::Types::Update::AuthorizationState do |update|
       case update.authorization_state
       when TD::Types::AuthorizationState::WaitTdlibParameters
@@ -224,6 +224,10 @@ class TD::Client
   end
 
   def dead_client_promise
-    Promise.reject(TD::ErrorProxy.new(TD::Types::Error.new(code: 0, message: 'TD client is dead')))
+    Promise.reject(dead_client_error)
+  end
+
+  def dead_client_error
+    TD::ErrorProxy.new(TD::Types::Error.new(code: 0, message: 'TD client is dead'))
   end
 end

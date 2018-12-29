@@ -36,7 +36,7 @@ describe TD::Client do
 
   describe '#broadcast' do
     context 'when no block given' do
-      subject { client.connect.flat_map { client.get_text_entities(text) }.wait }
+      subject { client.ready.flat_map { client.get_text_entities(text) }.wait }
 
       it { expect { subject }.not_to raise_error(Exception) }
       it { is_expected.to satisfy(&:fulfilled?) }
