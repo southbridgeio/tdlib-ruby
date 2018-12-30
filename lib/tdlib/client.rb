@@ -110,7 +110,7 @@ class TD::Client
   def broadcast(query)
     return dead_client_promise if dead?
 
-    Promise.execute do
+    Promises.future do
       condition = ConditionVariable.new
       extra = SecureRandom.uuid
       result = nil
@@ -175,9 +175,9 @@ class TD::Client
 
   def ready
     return dead_client_promise if dead?
-    return Promise.fulfill(self) if ready?
+    return Promises.fulfilled_future(self) if ready?
 
-    Promise.execute do
+    Promises.future do
       @ready_condition_mutex.synchronize do
         next self if @ready || (@ready_condition.wait(@ready_condition_mutex, @timeout) && @ready)
         raise TD::ErrorProxy.new(timeout_error)
@@ -223,7 +223,7 @@ class TD::Client
   end
 
   def dead_client_promise
-    Promise.reject(dead_client_error)
+    Promises.rejected_future(dead_client_error)
   end
 
   def dead_client_error
