@@ -23,6 +23,10 @@ module TD
       @td_error.inspect
     end
 
+    def message
+      @td_error.message
+    end
+
     alias inspect to_s
   end
 end
