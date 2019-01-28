@@ -6,7 +6,7 @@ module TD
   end
 
   # Proxy class that is used in failed promises to represent TDlib errors
-  class ErrorProxy < StandardError
+  class Error < StandardError
     def initialize(td_error)
       @td_error = td_error
     end

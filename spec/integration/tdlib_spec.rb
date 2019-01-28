@@ -30,7 +30,7 @@ describe TD::Client do
 
       subject { client.on_ready { [client, 'ready'] } }
 
-      it { expect { subject }.to raise_error(TD::ErrorProxy) }
+      it { expect { subject }.to raise_error(TD::Error) }
     end
   end
 
@@ -54,7 +54,7 @@ describe TD::Client do
 
       subject { client.on_ready { client.fetch(payload) } }
 
-      it { expect { subject }.to raise_error(TD::ErrorProxy) }
+      it { expect { subject }.to raise_error(TD::Error) }
     end
   end
 

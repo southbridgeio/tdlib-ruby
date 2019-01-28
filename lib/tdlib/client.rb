@@ -131,7 +131,7 @@ class TD::Client
         error = nil
         error = result if result.is_a?(TD::Types::Error)
         error = TD::Types::Error.new(code: 0, message: 'Unknown error. Please, see TDlib logs.') if result.nil?
-        raise TD::ErrorProxy.new(error) if error
+        raise TD::Error.new(error) if error
         result
       end
     end
@@ -180,7 +180,7 @@ class TD::Client
     Promises.future do
       @ready_condition_mutex.synchronize do
         next self if @ready || (@ready_condition.wait(@ready_condition_mutex, @timeout) && @ready)
-        raise TD::ErrorProxy.new(timeout_error)
+        raise TD::Error.new(timeout_error)
       end
     end
   end
@@ -219,7 +219,7 @@ class TD::Client
   end
 
   def timeout_error
-    TD::Types::Error.new(code: 0, message: 'Unknown error')
+    TD::Types::Error.new(code: 0, message: 'Timeout error')
   end
 
   def dead_client_promise
@@ -227,6 +227,6 @@ class TD::Client
   end
 
   def dead_client_error
-    TD::ErrorProxy.new(TD::Types::Error.new(code: 0, message: 'TD client is dead'))
+    TD::Error.new(TD::Types::Error.new(code: 0, message: 'TD client is dead'))
   end
 end
