@@ -1,7 +1,9 @@
+#!/usr/bin/env ruby
+
 require 'active_support/all'
 
 AUTOLOAD_BASE_DIR  = 'tdlib/types'
-TD_API_TL_LOCATION = File.join(File.expand_path("../../../../", __FILE__), %w(td td generate scheme td_api.tl))
+TD_API_TL_LOCATION = File.join(File.expand_path("../../", __FILE__), %w(td td generate scheme td_api.tl))
 
 def parse_tl_type(type)
   if (vector = type.scan(/[vV]ector<(.*)>/)).length > 0
@@ -19,17 +21,17 @@ end
 
 def parse_argument_description(argument, description)
   statements = description.split('; ')[1..-1]
-  
+
   if statements.length == 0
     statements = description.split(', ')[1..-1]
   end
-  
+
   optional = nil
-  
+
   if statements.length > 0
     statements.each do |statement|
       statement.downcase!
-      
+
       if statement.match?(/(can be null|may be null|can be empty|may be empty|optional|if empty|empty until|empty for|if available)/)
         optional = true
       elsif statement.match?(/(must be non-empty)/)
@@ -37,7 +39,7 @@ def parse_argument_description(argument, description)
       end
     end
   end
-  
+
   {
       argument => {
           description: description,
@@ -49,12 +51,12 @@ end
 def parse_tl_entry(tl_entry)
   info = {}
   arguments = {}
-  
+
   # A fix for multiline comments
   tl_entry.gsub!("\n//-", " ")
-  
+
   tl_entry.strip!
-  
+
   tl_entry.split("\n").each do |line|
     if line.start_with?('//')
       line.sub('//@', '').split(' @').each do |at_statement|
@@ -67,45 +69,45 @@ def parse_tl_entry(tl_entry)
         else
           argument    = at_statement.split(' ')[0]
           description = at_statement[(argument.length + 1)..-1]
-          
+
           arguments.deep_merge!(parse_argument_description(argument, description))
         end
       end
     else
       args, super_class = line.sub(';', '').split(" = ")
       args = args.split(' ')
-      
+
       info[:class]       = args[0]
       info[:super_class] = super_class
-      
+
       args = (args[1..-1] || []).map do |a|
         arg, type = a.split(':')
-        
+
         { arg => { type: parse_tl_type(type) } }
       end.reduce(&:merge) || {}
-      
+
       arguments.deep_merge!(args)
     end
   end
-  
+
   if !info[:super_class] or info[:class].downcase == info[:super_class].downcase
     info[:super_class] = 'Base'
   end
-  
+
   # Setting all arguments to optional, if at least one argument stated to be required
   # noinspection RubySimplifyBooleanInspection
   if arguments.any? { |_,v| v[:optional] == false }
     arguments.select { |_,v| v[:optional] == nil }.each { |k,_| arguments[k][:optional] = true }
   end
-  
+
   info[:arguments] = arguments
-  
+
   info
 end
 
 def normalize_class_name(class_name, super_class_name)
   class_name = class_name.camelcase
-  
+
   case super_class_name
   when 'ChatEventAction'
     class_name.sub('ChatEvent', '')
@@ -120,28 +122,28 @@ end
 
 def build_hierarchy(classes)
   hierarchy = {}
-  
+
   classes.each do |c|
     (hierarchy[c[:super_class].camelcase] ||= []).push(normalize_class_name(c[:class], c[:super_class]))
   end
-  
+
   hierarchy
 end
 
 def build_lookup_table(classes)
   lookup_table = {}
-  
+
   classes.each do |c|
     class_name       = normalize_class_name(c[:class], c[:super_class])
     super_class_name = c[:super_class].camelcase
-    
+
     unless super_class_name == 'Base'
       class_name = "#{super_class_name}::#{class_name.sub(super_class_name, '')}"
     end
-    
+
     lookup_table[c[:class]] = class_name
   end
-  
+
   lookup_table
 end
 
@@ -149,7 +151,7 @@ end
 def split_tl_file(tl_file, range = 0..-1)
   # A fix for some entries (mainly chatAction ones) having a different structure from the rest
   tl_file.gsub!(";\n//", ";\n\n//")
-  
+
   tl_file.split("\n\n\n")[range].map { |e| e.split("\n\n") }.flatten
 end
 
@@ -160,17 +162,17 @@ def wrap_comment(comment, indent = "  ", line_width: 117,
                  break_sequence: "\n#{indent}#   ")
   comment.split('. ').map.with_index do |sentence, i|
     this_start_sequence = i == 0 ? first_start_sequence : start_sequence
-    
+
     line = "#{this_start_sequence}#{sentence}.".split("\n").collect!.with_index do |line, j|
       this_line_width = j == 0 ? line_width + 2 : line_width
-      
+
       line.length > this_line_width ? line.gsub(/(.{1,#{this_line_width}})(\s+|$)/, "\\1#{break_sequence}") : line
     end.join(break_sequence)
-    
+
     if line.end_with?(break_sequence)
       line = line[0..-(break_sequence.length + 1)]
     end
-    
+
     line
   end.join("\n")
 end
@@ -185,10 +187,10 @@ end
 
 def type_to_comment_type(type)
   type.gsub('TD::Types::Array.of(', 'Array<').gsub(')', '>').
-       gsub('TD::Types::Integer', 'Integer').
-       gsub('TD::Types::Float',   'Float').
-       gsub('TD::Types::String',  'String').
-       gsub('TD::Types::Bool',    'Boolean')
+      gsub('TD::Types::Integer', 'Integer').
+      gsub('TD::Types::Float',   'Float').
+      gsub('TD::Types::String',  'String').
+      gsub('TD::Types::Bool',    'Boolean')
 end
 
 # Generates YARD documentation comment for each param
@@ -198,7 +200,7 @@ def attrs_to_yard_comment(attrs, key = 'attr')
     description = info[:description].gsub(@lookup_regex) do |m|
       @lookup_table[m.strip] ? "#{m[0]}{TD::Types::#{@lookup_table[m.strip]}}#{m[-1]}" : m
     end
-    
+
     wrap_comment(description, "  ",
                  first_start_sequence: "  # @#{key} #{attr} [#{type}#{", nil" if info[:optional]}] ",
                  start_sequence: "  #   ", break_sequence: "\n  #   ")
@@ -243,7 +245,7 @@ module TD::Types
 end
 RUBY
 
-File.write 'types/base.rb', klass
+File.write 'lib/tdlib/types/base.rb', klass
 
 puts "Parsing td_api.tl"
 
@@ -270,7 +272,7 @@ puts "Converting classes into Ruby types"
   attributes       = class_info[:arguments]
   description      = class_info[:description]
   super_class_name = class_info[:super_class].camelcase
-  
+
   if (subclasses = @class_hierarchy[class_info[:class]])
     autoload_statements = <<-RUBY
     %w[
@@ -282,40 +284,40 @@ puts "Converting classes into Ruby types"
   else
     autoload_statements = ""
   end
-  
+
   if super_class_name == 'Base'
     file_name  = class_name.underscore
     class_name = "#{class_name} < Base"
   else
     file_name  = "#{super_class_name.underscore}/#{class_name.sub(super_class_name, '').underscore}"
     class_name = "#{super_class_name}::#{class_name.sub(super_class_name, '')} < #{super_class_name}"
-    
+
     FileUtils.mkdir_p "types/#{super_class_name.underscore}"
   end
-  
+
   if attributes.blank?
     attributes_doc = ""
     attributes     = ""
   else
     attributes_doc = "\n  #\n" + attrs_to_yard_comment(attributes, 'attr')
-    
+
     attributes = "\n    " + attributes.map do |attr, info|
       "attribute :#{attr}, #{info[:type]}#{ ".optional.default(nil)" if info[:optional] }"
     end.join("\n    ")
   end
-  
+
   unless description.blank?
     description = "\n#{wrap_comment(description, "  ")}"
   end
-  
+
   klass = <<-RUBY
 module TD::Types#{description}#{attributes_doc}
   class #{class_name}#{attributes}
 #{autoload_statements}  end
 end
   RUBY
-  
-  File.write "types/#{file_name}.rb", klass
+
+  File.write "lib/tdlib/types/#{file_name}.rb", klass
 end
 
 puts "Generating Types class"
@@ -324,7 +326,7 @@ lt_max_length = @lookup_table.max_by { |k,_| k.length }[0].length
 
 lookup_table = @lookup_table.map do |k,v|
   indent = " " * (lt_max_length - k.length + 1)
-  
+
   "'#{k}'#{indent}=> '#{v}'"
 end
 
@@ -382,7 +384,7 @@ module TD::Types
 end
 RUBY
 
-File.write 'types.rb', klass
+File.write 'lib/tdlib/types.rb', klass
 
 puts "Converting functions"
 
@@ -395,34 +397,34 @@ puts "Converting functions"
   description  = func[:description]
   # TODO: Replace InputMessageContent and others (see #normalize_class_name)
   return_class = type_to_comment_type("TD::Types::#{func[:super_class].camelcase}")
-  
+
   param_max_length = params.merge({'@type' => nil}).max_by { |k,_| k.length }[0].length
-  
+
   if params.blank?
     params_doc      = ""
     method_params   = ""
     func_params = ""
   else
     params_doc = "\n" + attrs_to_yard_comment(params, 'param')
-    
+
     # TODO: Fix mixup of =nil params (only in set_password)
     method_params = params.map do |attr, info|
       "#{attr}#{ " = nil" if info[:optional] }"
     end.join(", ")
-    
+
     method_params = "(#{wrap_params(method_params, 118 - (method_name.length + 5), method_name.length + 7)})"
-    
+
     func_params = ",\n              " + params.map do |attr, info|
       indent = " " * (param_max_length - attr.length + 1)
-      
+
       "'#{attr}'#{indent}=> #{attr}"
     end.join(",\n              ")
   end
-  
+
   unless description.blank?
     description = wrap_comment(description, "  ")
   end
-  
+
   <<-RUBY
 #{description}
   ##{params_doc}
@@ -440,6 +442,6 @@ module TD::ClientMethods
 #{@functions.join("  \n")}end
 RUBY
 
-File.write 'client_methods.rb', klass
+File.write 'lib/tdlib/client_methods.rb', klass
 
 puts "Done. Please look through client_methods.rb carefully, especially the set_password method!"
