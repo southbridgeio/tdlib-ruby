@@ -1,5 +1,5 @@
-require 'fiddle/import'
 require 'json'
+require 'ffi'
 
 module TD::Api
   module_function
@@ -18,7 +18,7 @@ module TD::Api
 
   def client_receive(client, timeout)
     update = Dl.td_json_client_receive(client, timeout)
-    update.null? ? nil : JSON.parse(update.to_s)
+    JSON.parse(update) if update
   end
 
   def client_destroy(client)
@@ -34,7 +34,7 @@ module TD::Api
   end
 
   module Dl
-    extend Fiddle::Importer
+    extend FFI::Library
 
     @mutex = Mutex.new
 
@@ -42,16 +42,18 @@ module TD::Api
 
     def method_missing(method_name, *args)
       @mutex.synchronize do
-        return if respond_to?(method_name)
-        dlload(find_lib)
+        return public_send(method_name, *args) if respond_to?(method_name)
 
-        extern 'void* td_json_client_create()'
-        extern 'void* td_json_client_send(void*, char*)'
-        extern 'char* td_json_client_receive(void*, double)'
-        extern 'char* td_json_client_execute(void*, char*)'
-        extern 'void td_set_log_verbosity_level(int)'
-        extern 'void td_json_client_destroy(void*)'
-        extern 'void td_set_log_file_path(char*)'
+        find_lib
+
+        attach_function :td_json_client_create, [], :pointer
+        attach_function :td_json_client_receive, [:pointer, :double], :string, blocking: true
+        attach_function :td_json_client_send, [:pointer, :string], :pointer, blocking: true
+        attach_function :td_json_client_execute, [:pointer, :string], :string, blocking: true
+        attach_function :td_json_client_destroy, [:pointer], :void
+        attach_function :td_set_log_file_path, [:string], :int
+        attach_function :td_set_log_max_file_size, [:long_long], :void
+        attach_function :td_set_log_verbosity_level, [:int], :void
 
         undef method_missing
         public_send(method_name, *args)
@@ -66,9 +68,12 @@ module TD::Api
         elsif defined?(Rails) && File.exist?(Rails.root.join('vendor', file_name))
           Rails.root.join('vendor')
         end
-      return `ldconfig -p | grep libtdjson`[/=> (.*?)\n/m, 1] if os == :linux && lib_path.nil?
-      raise TD::MissingLibPathError unless lib_path
-      File.join(lib_path, file_name)
+      full_path = File.join(lib_path.to_s, file_name)
+      ffi_lib full_path
+      full_path
+    rescue LoadError
+      ffi_lib 'tdjson'
+      ffi_libraries.first.name
     end
 
     def lib_extension

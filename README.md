@@ -23,6 +23,13 @@ http://rpms.southbridge.ru/rhel7/stable/SRPMS/
 
 http://rpms.southbridge.ru/rhel6/stable/SRPMS/
 
+## Compatibility table
+
+| Gem Version   |   | tdlib version |
+|:-------------:|:-:| :-----------: |
+| 1.x           | → | 1.0 - 1.2     |
+| 2.0           | → | 1.3           |
+
 ## Install
 
 Add to your gemfile:
@@ -35,7 +42,7 @@ and run *bundle install*.
 
 Or just run *gem install tdlib-ruby*
 
-## Basic example
+## Basic authentication example
 
 ```ruby
 require 'tdlib-ruby'
@@ -54,43 +61,42 @@ client = TD::Client.new
 begin
   state = nil
 
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitPhoneNumber'
-    state = :wait_phone
+  client.on(TD::Types::Update::AuthorizationState) do |update|
+    state = case update.authorization_state
+            when TD::Types::AuthorizationState::WaitPhoneNumber
+              :wait_phone_number
+            when TD::Types::AuthorizationState::WaitCode
+              :wait_code
+            when TD::Types::AuthorizationState::WaitPassword
+              :wait_password
+            when TD::Types::AuthorizationState::Ready
+              :ready
+            else
+              nil
+            end
   end
-
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitCode'
-    state = :wait_code
-  end
-
-  client.on('updateAuthorizationState') do |update|
-    next unless update.dig('authorization_state', '@type') == 'authorizationStateReady'
-    state = :ready
-  end
+  
+  client.connect
 
   loop do
     case state
-    when :wait_phone
-      p 'Please, enter your phone number:'
+    when :wait_phone_number
+      puts 'Please, enter your phone number:'
       phone = STDIN.gets.strip
-      params = {
-        '@type' => 'setAuthenticationPhoneNumber',
-        'phone_number' => phone
-      }
-      client.broadcast_and_receive(params)
+      client.set_authentication_phone_number(phone).wait
     when :wait_code
-      p 'Please, enter code from SMS:'
+      puts 'Please, enter code from SMS:'
       code = STDIN.gets.strip
-      params = {
-        '@type' => 'checkAuthenticationCode',
-        'code' => code
-      }
-      client.broadcast_and_receive(params)
+      client.check_authentication_code(code).wait
+    when :wait_password
+      puts 'Please, enter 2FA password:'
+      password = STDIN.gets.strip
+      client.check_authentication_password(password).wait
     when :ready
-      @me = client.broadcast_and_receive('@type' => 'getMe')
+      client.get_me.then { |user| @me = user }.rescue { |err| puts "error: #{err}" }.wait
       break
     end
+    sleep 0.1
   end
 
 ensure
@@ -100,13 +106,7 @@ end
 p @me
 ```
 
-## TD::Client#broadcast
-
-From version 1.0 TD::Client#broadcast returns [Concurrent::Promise](http://ruby-concurrency.github.io/concurrent-ruby/Concurrent/Promise.html) object.
-
-```ruby
-  me = client.broadcast('@type' => 'getMe').then { |result| puts result }.rescue { |error| puts error }.value
-```
+Client methods are being executed asynchronously and return Concurrent::Promises::Future (see: https://github.com/ruby-concurrency/concurrent-ruby/blob/master/docs-source/promises.in.md).
 
 ## Configuration
 
@@ -120,6 +120,7 @@ TD.configure do |config|
   config.client.use_test_dc = true # default: false
   config.client.database_directory = 'path/to/db/dir' # default: "#{Dir.home}/.tdlib-ruby/db"
   config.client.files_directory = 'path/to/files/dir' # default: "#{Dir.home}/.tdlib-ruby/files"
+  config.client.use_file_database = true # default: true
   config.client.use_chat_info_database = true # default: true
   config.client.use_secret_chats = true # default: true
   config.client.use_message_database = true # default: true
@@ -160,3 +161,5 @@ TD::Client.new(database_directory: 'will override value from config',
 ## Authors
 
 The gem is designed by [Southbridge](https://southbridge.io)
+
+Typeization made by [Yuri Mikhaylov](https://github.com/yurijmi) 

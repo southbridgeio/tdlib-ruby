@@ -1,3 +1,12 @@
+### 2.0.0 / 2019-02-08
+
+* Generated types and client functions
+* Async handlers
+* Use ffi instead of fiddle
+* Use Concurrent::Promises
+* TD errors handling in promises
+* Add use_file_database setting to config
+
 ### 1.0.0 / 2018-05-27
 
 * Return promises from TD::Client#broadcast

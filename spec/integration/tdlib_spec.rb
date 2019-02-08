@@ -2,8 +2,10 @@ require 'spec_helper'
 require 'tdlib-ruby'
 
 describe TD::Client do
-  let(:client) { TD::Client.new }
-  let(:payload) { { '@type': 'getTextEntities', 'text': '@telegram' } }
+  let(:client) { TD::Client.new(timeout: timeout).tap(&:connect) }
+  let!(:payload) { { '@type' => 'getTextEntities', 'text' => text } }
+  let!(:text) { '@telegram' }
+  let(:timeout) { TD::Client::TIMEOUT }
 
   before do
     TD.configure do |config|
@@ -24,32 +26,35 @@ describe TD::Client do
     it { is_expected.to include('ready') }
 
     context 'when timeout reached' do
-      subject { client.on_ready(timeout: 0.0001) { [client, 'ready'] } }
+      let(:timeout) { 0.0001 }
 
-      it { expect { subject }.to raise_error(TD::TimeoutError) }
+      subject { client.on_ready { [client, 'ready'] } }
+
+      it { expect { subject }.to raise_error(TD::Error) }
     end
   end
 
   describe '#broadcast' do
     context 'when no block given' do
-      subject { client.on_ready { client.broadcast(payload) } }
+      subject { client.ready.then { client.get_text_entities(text) }.flat.wait }
 
       it { expect { subject }.not_to raise_error(Exception) }
-      it { is_expected.to satisfy { |result| result.state == :pending } }
-      it { is_expected.to satisfy { |result| sleep 1; result.state == :fulfilled } }
-      it { is_expected.to satisfy { |result| sleep 1; result.value['@type'] == 'textEntities' } }
+      it { is_expected.to satisfy(&:fulfilled?) }
+      it { is_expected.to satisfy { |result| result.value.is_a?(TD::Types::TextEntities) } }
     end
   end
 
-  describe '#broadcast_and_receive' do
-    subject { client.on_ready { client.broadcast_and_receive(payload) } }
+  describe '#fetch' do
+    subject { client.on_ready { client.fetch(payload) } }
 
-    it { is_expected.to include('@type', 'entities') }
+    it { is_expected.to respond_to(:entities) }
 
     context 'when timeout reached' do
-      subject { client.on_ready(timeout: 0.0001) { client.broadcast_and_receive(payload) } }
+      let(:timeout) { 0.0001 }
 
-      it { expect { subject }.to raise_error(TD::TimeoutError) }
+      subject { client.on_ready { client.fetch(payload) } }
+
+      it { expect { subject }.to raise_error(TD::Error) }
     end
   end
 
@@ -64,7 +69,7 @@ describe TD::Client do
     it 'runs block on update' do
       subject
       sleep 1
-      expect(@result).to include('@type', 'entities')
+      expect(@result).to respond_to(:entities)
     end
   end
 
@@ -74,7 +79,7 @@ describe TD::Client do
     subject do
       client.on_ready do
         client.broadcast(payload) do
-          client.broadcast_and_receive(payload)
+          client.fetch(payload)
         end
         sleep 1
       end

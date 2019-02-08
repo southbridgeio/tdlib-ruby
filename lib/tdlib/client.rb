@@ -1,108 +1,91 @@
+require 'securerandom'
+
 # Simple client for TDLib.
-# @example
-#   TD.configure do |config|
-#     config.lib_path = 'path_to_tdlibjson'
-#     config.encryption_key = 'your_encryption_key'
-#
-#     config.client.api_id = your_api_id
-#     config.client.api_hash = 'your_api_hash'
-#   end
-#
-#   client = TD::Client.new
-#
-#   begin
-#     state = nil
-#
-#     client.on('updateAuthorizationState') do |update|
-#       next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitPhoneNumber'
-#       state = :wait_phone
-#     end
-#
-#     client.on('updateAuthorizationState') do |update|
-#       next unless update.dig('authorization_state', '@type') == 'authorizationStateWaitCode'
-#       state = :wait_code
-#     end
-#
-#     client.on('updateAuthorizationState') do |update|
-#       next unless update.dig('authorization_state', '@type') == 'authorizationStateReady'
-#       state = :ready
-#     end
-#
-#     loop do
-#       case state
-#       when :wait_phone
-#         p 'Please, enter your phone number:'
-#         phone = STDIN.gets.strip
-#         params = {
-#           '@type' => 'setAuthenticationPhoneNumber',
-#           'phone_number' => phone
-#         }
-#         client.broadcast_and_receive(params)
-#       when :wait_code
-#         p 'Please, enter code from SMS:'
-#         code = STDIN.gets.strip
-#         params = {
-#           '@type' => 'checkAuthenticationCode',
-#           'code' => code
-#         }
-#         client.broadcast_and_receive(params)
-#       when :ready
-#         @me = client.broadcast_and_receive('@type' => 'getMe')
-#         break
-#       end
-#     end
-#
-#   ensure
-#     client.close
-#   end
-#
-#   p @me
 class TD::Client
   include Concurrent
+  include TD::ClientMethods
 
   TIMEOUT = 20
 
+  def self.ready(*args)
+    new(*args).connect
+  end
+
+  # @param [FFI::Pointer] td_client
+  # @param [TD::UpdateManager] update_manager
+  # @param [Numeric] timeout
+  # @param [Hash] extra_config optional configuration hash that will be merged into tdlib client configuration
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
-                 proxy: { '@type' => 'proxyEmpty' },
+                 timeout: TIMEOUT,
                  **extra_config)
     @td_client = td_client
+    @ready = false
+    @alive = true
     @update_manager = update_manager
+    @timeout = timeout
     @config = TD.config.client.to_h.merge(extra_config)
-    @proxy = proxy
     @ready_condition_mutex = Mutex.new
     @ready_condition = ConditionVariable.new
-    authorize
+  end
+
+  # Adds initial authorization state handler and runs update manager
+  # Returns future that will be fulfilled when client is ready
+  # @return [Concurrent::Promises::Future]
+  def connect
+    on TD::Types::Update::AuthorizationState do |update|
+      case update.authorization_state
+      when TD::Types::AuthorizationState::WaitTdlibParameters
+        set_tdlib_parameters(TD::Types::TdlibParameters.new(**@config))
+      when TD::Types::AuthorizationState::WaitEncryptionKey
+        check_database_encryption_key(TD.config.encryption_key).then do
+          @ready_condition_mutex.synchronize do
+            @ready = true
+            @ready_condition.broadcast
+          end
+        end
+      else
+        # do nothing
+      end
+    end
+
     @update_manager.run
+    ready
   end
 
   # Sends asynchronous request to the TDLib client and returns Promise object
-  # @see https://www.rubydoc.info/github/ruby-concurrency/concurrent-ruby/Concurrent/Promise)
+  # @see TD::ClientMethods List of available queries as methods
+  # @see https://github.com/ruby-concurrency/concurrent-ruby/blob/master/docs-source/promises.in.md
+  #   Concurrent::Promise documentation
   # @example
-  #   client.broadcast(some_query).then { |result| puts result }.rescue
+  #   client.broadcast(some_query).then { |result| puts result }.rescue { |error| puts [error.code, error.message] }
   # @param [Hash] query
-  # @param [Numeric] timeout
-  # @return [Concurrent::Promise]
-  def broadcast(query, timeout: TIMEOUT)
-    Promise.execute do
+  # @return [Concurrent::Promises::Future]
+  def broadcast(query)
+    return dead_client_promise if dead?
+
+    Promises.future do
       condition = ConditionVariable.new
-      extra = TD::Utils.generate_extra(query)
+      extra = SecureRandom.uuid
       result = nil
       mutex = Mutex.new
-      handler = ->(update) do
-        return unless update['@extra'] == extra
+
+      @update_manager << TD::UpdateHandler.new(TD::Types::Base, extra, disposable: true) do |update|
         mutex.synchronize do
           result = update
-          @update_manager.remove_handler(handler)
           condition.signal
         end
       end
-      @update_manager.add_handler(handler)
+
       query['@extra'] = extra
+
       mutex.synchronize do
-        TD::Api.client_send(@td_client, query)
-        condition.wait(mutex, timeout)
-        raise TD::TimeoutError if result.nil?
+        send_to_td_client(query)
+        condition.wait(mutex, @timeout)
+        error = nil
+        error = result if result.is_a?(TD::Types::Error)
+        error = timeout_error if result.nil?
+        raise TD::Error.new(error) if error
         result
       end
     end
@@ -111,8 +94,8 @@ class TD::Client
   # Sends asynchronous request to the TDLib client and returns received update synchronously
   # @param [Hash] query
   # @return [Hash]
-  def fetch(query, timeout: TIMEOUT)
-    broadcast(query, timeout: timeout).value
+  def fetch(query)
+    broadcast(query).value!
   end
 
   alias broadcast_and_receive fetch
@@ -121,70 +104,85 @@ class TD::Client
   # Only a few requests can be executed synchronously
   # @param [Hash] query
   def execute(query)
+    return dead_client_error if dead?
     TD::Api.client_execute(@td_client, query)
   end
 
-  # Returns current authorization state (it's offline request)
-  # @return [Hash]
-  def authorization_state
-    broadcast_and_receive('@type' => 'getAuthorizationState')
-  end
-
   # Binds passed block as a handler for updates with type of *update_type*
-  # @param [String] update_type
+  # @param [String, Class] update_type
   # @yield [update] yields update to the block as soon as it's received
-  def on(update_type, &_)
-    handler = ->(update) do
-      return unless update['@type'] == update_type
-      yield update
+  def on(update_type, &action)
+    if update_type.is_a?(String)
+      if (type_const = TD::Types::LOOKUP_TABLE[update_type])
+        update_type = TD::Types.const_get("TD::Types::#{type_const}")
+      else
+        raise ArgumentError.new("Can't find class for #{update_type}")
+      end
     end
-    @update_manager.add_handler(handler)
+
+    unless update_type < TD::Types::Base
+      raise ArgumentError.new("Wrong type specified (#{update_type}). Should be of kind TD::Types::Base")
+    end
+
+    @update_manager << TD::UpdateHandler.new(update_type, &action)
   end
 
-  def on_ready(timeout: TIMEOUT, &_)
-    @ready_condition_mutex.synchronize do
-      return(yield self) if @ready || (@ready_condition.wait(@ready_condition_mutex, timeout) && @ready)
-      raise TD::TimeoutError
+  # returns future that will be fulfilled when client is ready
+  # @return [Concurrent::Promises::Future]
+  def ready
+    return dead_client_promise if dead?
+    return Promises.fulfilled_future(self) if ready?
+
+    Promises.future do
+      @ready_condition_mutex.synchronize do
+        next self if @ready || (@ready_condition.wait(@ready_condition_mutex, @timeout) && @ready)
+        raise TD::Error.new(timeout_error)
+      end
     end
+  end
+
+  # @deprecated
+  def on_ready(&action)
+    ready.then(&action).value!
   end
 
   # Stops update manager and destroys TDLib client
-  def close
+  def dispose
+    return if dead?
     @update_manager.stop
+    @alive = false
+    @ready = false
     TD::Api.client_destroy(@td_client)
+  end
+
+  def alive?
+    @alive
+  end
+
+  def dead?
+    !alive?
+  end
+
+  def ready?
+    @ready
   end
 
   private
 
-  def authorize
-    tdlib_params_query = {
-      '@type' => 'setTdlibParameters',
-      parameters: { '@type' => 'tdlibParameters', **@config }
-    }
-    encryption_key_query = {
-      '@type' => 'checkDatabaseEncryptionKey',
-    }
+  def send_to_td_client(query)
+    return unless alive?
+    TD::Api.client_send(@td_client, query)
+  end
 
-    if TD.config.encryption_key
-      encryption_key_query['encryption_key'] = TD.config.encryption_key
-    end
+  def timeout_error
+    TD::Types::Error.new(code: 0, message: 'Timeout error')
+  end
 
-    handler = ->(update) do
-      return unless update['@type'] == 'updateAuthorizationState'
-      case update.dig('authorization_state', '@type')
-      when 'authorizationStateWaitTdlibParameters'
-        broadcast(tdlib_params_query)
-      when 'authorizationStateWaitEncryptionKey'
-        broadcast(encryption_key_query)
-      else
-        broadcast('@type' => 'setProxy', 'proxy' => @proxy)
-        @update_manager.remove_handler(handler)
-        @ready_condition_mutex.synchronize do
-          @ready = true
-          @ready_condition.broadcast
-        end
-      end
-    end
-    @update_manager.add_handler(handler)
+  def dead_client_promise
+    Promises.rejected_future(dead_client_error)
+  end
+
+  def dead_client_error
+    TD::Error.new(TD::Types::Error.new(code: 0, message: 'TD client is dead'))
   end
 end

@@ -14,28 +14,23 @@ Gem::Specification.new do |gem|
   gem.email         = "ask@southbridge.io"
   gem.homepage      = "https://github.com/centosadmin/tdlib-ruby"
 
-  gem.files         = `git ls-files`.split($/)
+  gem.files         = `git ls-files`.split($/) - ['lib/tdlib/td_api_tl_parser.rb']
 
-  `git submodule --quiet foreach --recursive pwd`.split($/).each do |submodule|
-    submodule.sub!("#{Dir.pwd}/",'')
-
-    Dir.chdir(submodule) do
-      `git ls-files`.split($/).map do |subpath|
-        gem.files << File.join(submodule,subpath)
-      end
-    end
-  end
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ['lib']
 
   gem.add_runtime_dependency 'dry-configurable', '~> 0.7'
-  gem.add_runtime_dependency 'concurrent-ruby', '~> 1.0'
+  gem.add_runtime_dependency 'dry-struct',       '~> 0.5.1'
+  gem.add_runtime_dependency 'dry-types',        '~> 0.13.2'
+  gem.add_runtime_dependency 'concurrent-ruby',  '~> 1.0'
+  gem.add_runtime_dependency 'ffi',              '~> 1.0'
 
   gem.add_development_dependency 'bundler', '~> 1.10'
-  gem.add_development_dependency 'rake', '12.3.1'
+  gem.add_development_dependency 'rake', '~> 12.3'
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'rubygems-tasks', '~> 0.2'
   gem.add_development_dependency 'yard', '~> 0.9'
   gem.add_development_dependency 'pry', '~> 0.11'
+  gem.add_development_dependency 'activesupport', '~> 5.2'
 end

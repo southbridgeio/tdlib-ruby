@@ -6,3 +6,4 @@
 /vendor/cache/*.gem
 /.vscode/
 /.yardoc/
+/.idea/
