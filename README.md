@@ -23,6 +23,13 @@ http://rpms.southbridge.ru/rhel7/stable/SRPMS/
 
 http://rpms.southbridge.ru/rhel6/stable/SRPMS/
 
+## Compatibility table
+
+| Gem Version   |   | tdlib version |
+|:-------------:|:-:| :-----------: |
+| 1.x           | → | 1.0 - 1.2     |
+| 2.0           | → | 1.3           |
+
 ## Install
 
 Add to your gemfile:
@@ -35,7 +42,7 @@ and run *bundle install*.
 
 Or just run *gem install tdlib-ruby*
 
-## Basic example
+## Basic authentication example
 
 ```ruby
 require 'tdlib-ruby'
@@ -68,25 +75,28 @@ begin
               nil
             end
   end
+  
+  client.connect
 
   loop do
     case state
     when :wait_phone_number
       puts 'Please, enter your phone number:'
       phone = STDIN.gets.strip
-      client.set_authentication_phone_number(phone).value
+      client.set_authentication_phone_number(phone).wait
     when :wait_code
       puts 'Please, enter code from SMS:'
       code = STDIN.gets.strip
-      client.check_authentication_code(code).value
+      client.check_authentication_code(code).wait
     when :wait_password
       puts 'Please, enter 2FA password:'
       password = STDIN.gets.strip
-      client.check_authentication_password(password).value
+      client.check_authentication_password(password).wait
     when :ready
-      @me = client.get_me.value
+      client.get_me.then { |user| @me = user }.rescue { |err| puts "error: #{err}" }.wait
       break
     end
+    sleep 0.1
   end
 
 ensure
@@ -96,13 +106,7 @@ end
 p @me
 ```
 
-## TD::Client#broadcast
-
-From version 1.0 TD::Client#broadcast returns [Concurrent::Promise](http://ruby-concurrency.github.io/concurrent-ruby/Concurrent/Promise.html) object.
-
-```ruby
-  me = client.broadcast('@type' => 'getMe').then { |result| puts result }.rescue { |error| puts error }.value
-```
+Client methods are being executed asynchronously and return Concurrent::Promises::Future (see: https://github.com/ruby-concurrency/concurrent-ruby/blob/master/docs-source/promises.in.md).
 
 ## Configuration
 

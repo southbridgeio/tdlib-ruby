@@ -1,60 +1,6 @@
 require 'securerandom'
 
 # Simple client for TDLib.
-# @example
-#   TD.configure do |config|
-#     config.lib_path = 'path_to_tdlibjson'
-#     config.encryption_key = 'your_encryption_key'
-#
-#     config.client.api_id = your_api_id
-#     config.client.api_hash = 'your_api_hash'
-#   end
-#
-#   client = TD::Client.new
-#
-#   begin
-#     state = nil
-#
-#     client.on(TD::Types::Update::AuthorizationState) do |update|
-#       state = case update.authorization_state
-#               when TD::Types::AuthorizationState::WaitPhoneNumber
-#                 :wait_phone_number
-#               when TD::Types::AuthorizationState::WaitCode
-#                 :wait_code
-#               when TD::Types::AuthorizationState::WaitPassword
-#                 :wait_password
-#               when TD::Types::AuthorizationState::Ready
-#                 :ready
-#               else
-#                 nil
-#               end
-#     end
-#
-#     loop do
-#       case state
-#       when :wait_phone_number
-#         puts 'Please, enter your phone number:'
-#         phone = STDIN.gets.strip
-#         client.set_authentication_phone_number(phone).value
-#       when :wait_code
-#         puts 'Please, enter code from SMS:'
-#         code = STDIN.gets.strip
-#         client.check_authentication_code(code).value
-#       when :wait_password
-#         puts 'Please, enter 2FA password:'
-#         password = STDIN.gets.strip
-#         client.check_authentication_password(password).value
-#       when :ready
-#         @me = client.get_me.value
-#         break
-#       end
-#     end
-#
-#   ensure
-#     client.close
-#   end
-#
-#   p @me
 class TD::Client
   include Concurrent
   include TD::ClientMethods
@@ -65,6 +11,10 @@ class TD::Client
     new(*args).connect
   end
 
+  # @param [FFI::Pointer] td_client
+  # @param [TD::UpdateManager] update_manager
+  # @param [Numeric] timeout
+  # @param [Hash] extra_config optional configuration hash that will be merged into tdlib client configuration
   def initialize(td_client = TD::Api.client_create,
                  update_manager = TD::UpdateManager.new(td_client),
                  timeout: TIMEOUT,
@@ -79,6 +29,9 @@ class TD::Client
     @ready_condition = ConditionVariable.new
   end
 
+  # Adds initial authorization state handler and runs update manager
+  # Returns future that will be fulfilled when client is ready
+  # @return [Concurrent::Promises::Future]
   def connect
     on TD::Types::Update::AuthorizationState do |update|
       case update.authorization_state
@@ -97,16 +50,17 @@ class TD::Client
     end
 
     @update_manager.run
+    ready
   end
 
   # Sends asynchronous request to the TDLib client and returns Promise object
   # @see TD::ClientMethods List of available queries as methods
-  # @see https://www.rubydoc.info/github/ruby-concurrency/concurrent-ruby/Concurrent/Promise
+  # @see https://github.com/ruby-concurrency/concurrent-ruby/blob/master/docs-source/promises.in.md
   #   Concurrent::Promise documentation
   # @example
   #   client.broadcast(some_query).then { |result| puts result }.rescue { |error| puts [error.code, error.message] }
   # @param [Hash] query
-  # @return [Concurrent::Promise]
+  # @return [Concurrent::Promises::Future]
   def broadcast(query)
     return dead_client_promise if dead?
 
@@ -130,7 +84,7 @@ class TD::Client
         condition.wait(mutex, @timeout)
         error = nil
         error = result if result.is_a?(TD::Types::Error)
-        error = TD::Types::Error.new(code: 0, message: 'Unknown error. Please, see TDlib logs.') if result.nil?
+        error = timeout_error if result.nil?
         raise TD::Error.new(error) if error
         result
       end
@@ -173,6 +127,8 @@ class TD::Client
     @update_manager << TD::UpdateHandler.new(update_type, &action)
   end
 
+  # returns future that will be fulfilled when client is ready
+  # @return [Concurrent::Promises::Future]
   def ready
     return dead_client_promise if dead?
     return Promises.fulfilled_future(self) if ready?
