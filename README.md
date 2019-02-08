@@ -100,7 +100,7 @@ begin
   end
 
 ensure
-  client.close
+  client.dispose
 end
 
 p @me
