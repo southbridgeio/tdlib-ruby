@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
-
+require 'open-uri'
 require 'active_support/all'
 
 AUTOLOAD_BASE_DIR  = 'tdlib/types'
-TD_API_TL_LOCATION = File.join(File.expand_path("../../", __FILE__), %w(td td generate scheme td_api.tl))
+TD_API_TL_LOCATION = "https://raw.githubusercontent.com/tdlib/td/v1.5.0/td/generate/scheme/td_api.tl"
+
 
 def parse_tl_type(type)
   if (vector = type.scan(/[vV]ector<(.*)>/)).length > 0
@@ -207,9 +208,12 @@ def attrs_to_yard_comment(attrs, key = 'attr')
   end.join("\n")
 end
 
-puts "Creating types directory"
+puts "Removing lib/tdlib/types"
+# `find lib/tdlib/types | grep -v base.rb | xargs rm -rf`
+`rm -rf lib/tdlib/types`
 
-FileUtils.mkdir_p "types"
+puts "MKDIR 'lib/tdlib/types'"
+FileUtils.mkdir_p "lib/tdlib/types"
 
 puts "Writing Base class"
 
@@ -245,12 +249,13 @@ module TD::Types
 end
 RUBY
 
+puts "Writing 'lib/tdlib/types/base.rb'"
 File.write 'lib/tdlib/types/base.rb', klass
 
-puts "Parsing td_api.tl"
+puts "Parsing #{TD_API_TL_LOCATION}"
 
 # Reading the TL file and splitting it into classes and functions
-@classes, @functions = File.read(TD_API_TL_LOCATION).split("\n\n---functions---\n\n")
+@classes, @functions = open(TD_API_TL_LOCATION).read.split("\n\n---functions---\n\n")
 
 # First entry in td_api.tl is typecasting, it's worthless for us.
 # Last entry before functions is a testing class, once again worthless
@@ -266,6 +271,7 @@ puts "Converting classes into Ruby types"
 @class_hierarchy = build_hierarchy(@classes)
 @lookup_table = build_lookup_table(@classes)
 @lookup_regex = Regexp.union(@lookup_table.keys.select { |k| k.match?(/[a-z]+[A-Z][a-z]+/) }.map { |k| /\W#{k}\W/ })
+
 
 @classes.each do |class_info|
   class_name       = normalize_class_name(class_info[:class], class_info[:super_class])
@@ -292,7 +298,8 @@ puts "Converting classes into Ruby types"
     file_name  = "#{super_class_name.underscore}/#{class_name.sub(super_class_name, '').underscore}"
     class_name = "#{super_class_name}::#{class_name.sub(super_class_name, '')} < #{super_class_name}"
 
-    FileUtils.mkdir_p "types/#{super_class_name.underscore}"
+    puts "MKDIR 'lib/tdlib/types/#{super_class_name.underscore}'"
+     FileUtils.mkdir_p "lib/tdlib/types/#{super_class_name.underscore}"
   end
 
   if attributes.blank?
@@ -317,6 +324,7 @@ module TD::Types#{description}#{attributes_doc}
 end
   RUBY
 
+  puts  "Writing 'lib/tdlib/types/#{file_name}.rb'"
   File.write "lib/tdlib/types/#{file_name}.rb", klass
 end
 
@@ -384,6 +392,7 @@ module TD::Types
 end
 RUBY
 
+puts "Writing 'lib/tdlib/types.rb'"
 File.write 'lib/tdlib/types.rb', klass
 
 puts "Converting functions"
@@ -407,10 +416,21 @@ puts "Converting functions"
   else
     params_doc = "\n" + attrs_to_yard_comment(params, 'param')
 
-    # TODO: Fix mixup of =nil params (only in set_password)
-    method_params = params.map do |attr, info|
-      "#{attr}#{ " = nil" if info[:optional] }"
-    end.join(", ")
+    if method_name == 'set_password'
+      method_params = params.map do |attr, info|
+        #set default value to false
+        if attr == 'set_recovery_email_address'
+          "#{attr}: false"
+        else
+          # use named arguments
+          "#{attr}#{ ": nil" if info[:optional] }"
+        end
+      end.join(", ")
+    else
+      method_params = params.map do |attr, info|
+        "#{attr}#{ " = nil" if info[:optional] }"
+      end.join(", ")
+    end
 
     method_params = "(#{wrap_params(method_params, 118 - (method_name.length + 5), method_name.length + 7)})"
 
@@ -442,6 +462,7 @@ module TD::ClientMethods
 #{@functions.join("  \n")}end
 RUBY
 
+puts "Writing 'lib/tdlib/client_methods.rb'"
 File.write 'lib/tdlib/client_methods.rb', klass
 
 puts "Done. Please look through client_methods.rb carefully, especially the set_password method!"

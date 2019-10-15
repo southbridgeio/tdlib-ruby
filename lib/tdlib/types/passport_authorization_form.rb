@@ -4,14 +4,10 @@ module TD::Types
   # @attr id [Integer] Unique identifier of the authorization form.
   # @attr required_elements [Array<TD::Types::PassportRequiredElement>] Information about the Telegram Passport
   #   elements that need to be provided to complete the form.
-  # @attr elements [Array<TD::Types::PassportElement>] Already available Telegram Passport elements.
-  # @attr errors [Array<TD::Types::PassportElementError>] Errors in the elements that are already available.
-  # @attr privacy_policy_url [String, nil] URL for the privacy policy of the service; can be empty.
+  # @attr privacy_policy_url [String, nil] URL for the privacy policy of the service; may be empty.
   class PassportAuthorizationForm < Base
     attribute :id, TD::Types::Integer
     attribute :required_elements, TD::Types::Array.of(TD::Types::PassportRequiredElement)
-    attribute :elements, TD::Types::Array.of(TD::Types::PassportElement)
-    attribute :errors, TD::Types::Array.of(TD::Types::PassportElementError)
     attribute :privacy_policy_url, TD::Types::String.optional.default(nil)
   end
 end

@@ -1,8 +1,10 @@
 module TD::Types
   # Contains information about one session in a Telegram application used by the current user.
+  # Sessions should be shown to the user in the returned order.
   #
   # @attr id [Integer] Session identifier.
   # @attr is_current [Boolean] True, if this session is the current session.
+  # @attr is_password_pending [Boolean] True, if a password is needed to complete authorization of the session.
   # @attr api_id [Integer] Telegram API identifier, as provided by the application.
   # @attr application_name [String] Name of the application, as provided by the application.
   # @attr application_version [String] The version of the application, as provided by the application.
@@ -23,6 +25,7 @@ module TD::Types
   class Session < Base
     attribute :id, TD::Types::Integer
     attribute :is_current, TD::Types::Bool
+    attribute :is_password_pending, TD::Types::Bool
     attribute :api_id, TD::Types::Integer
     attribute :application_name, TD::Types::String
     attribute :application_version, TD::Types::String

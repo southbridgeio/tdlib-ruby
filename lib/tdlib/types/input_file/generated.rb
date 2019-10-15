@@ -5,6 +5,7 @@ module TD::Types
   #   no such file.
   # @attr conversion [String] String specifying the conversion applied to the original file; should be persistent
   #   across application restarts.
+  #   Conversions beginning with '#' are reserved for internal TDLib usage.
   # @attr expected_size [Integer] Expected size of the generated file; 0 if unknown.
   class InputFile::Generated < InputFile
     attribute :original_path, TD::Types::String.optional.default(nil)

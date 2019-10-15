@@ -1,5 +1,5 @@
 module TD::Types
-  # An integer option.
+  # Represents an integer option.
   #
   # @attr value [Integer] The value of the option.
   class OptionValue::Integer < OptionValue

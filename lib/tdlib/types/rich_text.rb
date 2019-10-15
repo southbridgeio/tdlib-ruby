@@ -10,6 +10,12 @@ module TD::Types
       fixed
       url
       email_address
+      subscript
+      superscript
+      marked
+      phone_number
+      icon
+      anchor
       s
     ].each do |type|
       autoload TD::Types.camelize(type), "tdlib/types/rich_text/#{type}"

@@ -16,6 +16,7 @@ module TD::Types
       contact
       game
       invoice
+      poll
       forwarded
     ].each do |type|
       autoload TD::Types.camelize(type), "tdlib/types/input_message_content/#{type}"

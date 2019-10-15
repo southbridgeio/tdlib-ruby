@@ -3,6 +3,7 @@ module TD::Types
   class SupergroupMembersFilter < Base
     %w[
       recent
+      contacts
       administrators
       search
       restricted

@@ -15,6 +15,7 @@ module TD::Types
       new_chat
       chat_title
       chat_photo
+      chat_permissions
       chat_last_message
       chat_order
       chat_is_pinned
@@ -26,8 +27,14 @@ module TD::Types
       chat_unread_mention_count
       chat_notification_settings
       scope_notification_settings
+      chat_pinned_message
       chat_reply_markup
       chat_draft_message
+      chat_online_member_count
+      notification
+      notification_group
+      active_notifications
+      have_pending_notifications
       delete_messages
       user_chat_action
       user_status
@@ -52,6 +59,7 @@ module TD::Types
       recent_stickers
       favorite_stickers
       saved_animations
+      selected_background
       language_pack_strings
       connection_state
       terms_of_service
@@ -63,6 +71,7 @@ module TD::Types
       new_pre_checkout_query
       new_custom_event
       new_custom_query
+      poll
     ].each do |type|
       autoload TD::Types.camelize(type), "tdlib/types/update/#{type}"
     end

@@ -2,6 +2,7 @@ module TD::Types
   # Specifies the kind of chat members to return in searchChatMembers.
   class ChatMembersFilter < Base
     %w[
+      contacts
       administrators
       members
       restricted

@@ -7,7 +7,7 @@ module TD::Types
   # @attr photo [TD::Types::ChatPhoto, nil] Chat photo; may be null.
   # @attr member_count [Integer] Number of members.
   # @attr member_user_ids [Array<Integer>] User identifiers of some chat members that may be known to the current user.
-  # @attr is_public [Boolean] True, if the chat is a public supergroup or channel with a username.
+  # @attr is_public [Boolean] True, if the chat is a public supergroup or a channel with a username.
   class ChatInviteLinkInfo < Base
     attribute :chat_id, TD::Types::Integer
     attribute :type, TD::Types::ChatType

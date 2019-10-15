@@ -8,6 +8,7 @@ module TD::Types
   # @attr mime_type [String] MIME type of the file; as defined by the sender.
   # @attr has_stickers [Boolean] True, if stickers were added to the photo.
   # @attr supports_streaming [Boolean] True, if the video should be tried to be streamed.
+  # @attr minithumbnail [TD::Types::Minithumbnail, nil] Video minithumbnail; may be null.
   # @attr thumbnail [TD::Types::PhotoSize, nil] Video thumbnail; as defined by the sender; may be null.
   # @attr video [TD::Types::File] File containing the video.
   class Video < Base
@@ -18,6 +19,7 @@ module TD::Types
     attribute :mime_type, TD::Types::String
     attribute :has_stickers, TD::Types::Bool
     attribute :supports_streaming, TD::Types::Bool
+    attribute :minithumbnail, TD::Types::Minithumbnail.optional.default(nil)
     attribute :thumbnail, TD::Types::PhotoSize.optional.default(nil)
     attribute :video, TD::Types::File
   end

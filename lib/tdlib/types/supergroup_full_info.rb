@@ -9,13 +9,13 @@ module TD::Types
   # @attr can_get_members [Boolean] True, if members of the chat can be retrieved.
   # @attr can_set_username [Boolean] True, if the chat can be made public.
   # @attr can_set_sticker_set [Boolean] True, if the supergroup sticker set can be changed.
+  # @attr can_view_statistics [Boolean] True, if the channel statistics is available through getChatStatisticsUrl.
   # @attr is_all_history_available [Boolean] True, if new chat members will have access to old messages.
   #   In public supergroups and both public and private channels, old messages are always available, so this option
   #   affects only private supergroups.
   #   The value of this field is only available for chat administrators.
   # @attr sticker_set_id [Integer] Identifier of the supergroup sticker set; 0 if none.
   # @attr invite_link [String] Invite link for this chat.
-  # @attr pinned_message_id [Integer] Identifier of the pinned message in the chat; 0 if none.
   # @attr upgraded_from_basic_group_id [Integer] Identifier of the basic group from which supergroup was upgraded; 0 if
   #   none.
   # @attr upgraded_from_max_message_id [Integer] Identifier of the last message in the basic group from which
@@ -29,10 +29,10 @@ module TD::Types
     attribute :can_get_members, TD::Types::Bool
     attribute :can_set_username, TD::Types::Bool
     attribute :can_set_sticker_set, TD::Types::Bool
+    attribute :can_view_statistics, TD::Types::Bool
     attribute :is_all_history_available, TD::Types::Bool
     attribute :sticker_set_id, TD::Types::Integer
     attribute :invite_link, TD::Types::String
-    attribute :pinned_message_id, TD::Types::Integer
     attribute :upgraded_from_basic_group_id, TD::Types::Integer
     attribute :upgraded_from_max_message_id, TD::Types::Integer
   end

@@ -7,6 +7,7 @@ module TD::Types
       author_date
       header
       subheader
+      kicker
       paragraph
       preformatted
       footer
@@ -25,6 +26,10 @@ module TD::Types
       collage
       slideshow
       chat_link
+      table
+      details
+      related_articles
+      map
     ].each do |type|
       autoload TD::Types.camelize(type), "tdlib/types/page_block/#{type}"
     end

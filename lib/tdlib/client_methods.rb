@@ -28,10 +28,10 @@ module TD::ClientMethods
   # @param chat_id [Integer] Chat identifier.
   # @param user_id [Integer] Identifier of the user.
   # @param forward_limit [Integer] The number of earlier messages from the chat to be forwarded to the new member; up
-  #   to 300.
+  #   to 100.
   #   Ignored for supergroups and channels.
   # @return [TD::Types::Ok]
-  def add_chat_member(chat_id, user_id, forward_limit: 300)
+  def add_chat_member(chat_id, user_id, forward_limit)
     broadcast('@type'         => 'addChatMember',
               'chat_id'       => chat_id,
               'user_id'       => user_id,
@@ -53,6 +53,17 @@ module TD::ClientMethods
               'user_ids' => user_ids)
   end
   
+  # Adds a custom server language pack to the list of installed language packs in current localization target.
+  # Can be called before authorization.
+  #
+  # @param language_pack_id [String] Identifier of a language pack to be added; may be different from a name that is
+  #   used in an "https://t.me/setlanguage/" link.
+  # @return [TD::Types::Ok]
+  def add_custom_server_language_pack(language_pack_id)
+    broadcast('@type'            => 'addCustomServerLanguagePack',
+              'language_pack_id' => language_pack_id)
+  end
+  
   # Adds a new sticker to the list of favorite stickers.
   # The new sticker is added to the top of the list.
   # If the sticker was already in the list, it is removed from the list first.
@@ -67,6 +78,7 @@ module TD::ClientMethods
   
   # Adds a local message to a chat.
   # The message is persistent across application restarts only if the message database is used.
+  # Returns the added message.
   #
   # @param chat_id [Integer] Target chat.
   # @param sender_user_id [Integer] Identifier of the user who will be shown as the sender of the message; may be 0 for
@@ -74,15 +86,28 @@ module TD::ClientMethods
   # @param reply_to_message_id [Integer] Identifier of the message to reply to or 0.
   # @param disable_notification [Boolean] Pass true to disable notification for the message.
   # @param input_message_content [TD::Types::InputMessageContent] The content of the message to be added.
-  # @return [TD::Types::Message] the added message.
-  def add_local_message(chat_id, input_message_content,
-                        sender_user_id: 0, reply_to_message_id: 0, disable_notification: false)
+  # @return [TD::Types::Message]
+  def add_local_message(chat_id, sender_user_id, reply_to_message_id, disable_notification, input_message_content)
     broadcast('@type'                 => 'addLocalMessage',
               'chat_id'               => chat_id,
               'sender_user_id'        => sender_user_id,
               'reply_to_message_id'   => reply_to_message_id,
               'disable_notification'  => disable_notification,
               'input_message_content' => input_message_content)
+  end
+  
+  # Adds a message to TDLib internal log.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @param verbosity_level [Integer] Minimum verbosity level needed for the message to be logged, 0-1023.
+  # @param text [String] Text of a message to log.
+  # @return [TD::Types::Ok]
+  def add_log_message(verbosity_level, text)
+    broadcast('@type'           => 'addLogMessage',
+              'verbosity_level' => verbosity_level,
+              'text'            => text)
   end
   
   # Adds the specified data to data usage statistics.
@@ -104,7 +129,7 @@ module TD::ClientMethods
   # @param enable [Boolean] True, if the proxy should be enabled.
   # @param type [TD::Types::ProxyType] Proxy type.
   # @return [TD::Types::Proxy]
-  def add_proxy(server, port, type, enable = false)
+  def add_proxy(server, port, enable, type)
     broadcast('@type'  => 'addProxy',
               'server' => server,
               'port'   => port,
@@ -121,7 +146,7 @@ module TD::ClientMethods
   #   video files; pass false to add the sticker to the list of recently sent stickers.
   # @param sticker [TD::Types::InputFile] Sticker file to add.
   # @return [TD::Types::Stickers]
-  def add_recent_sticker(sticker, is_attached: false)
+  def add_recent_sticker(is_attached, sticker)
     broadcast('@type'       => 'addRecentSticker',
               'is_attached' => is_attached,
               'sticker'     => sticker)
@@ -144,7 +169,8 @@ module TD::ClientMethods
   # Only non-secret video animations with MIME type "video/mp4" can be added to the list.
   #
   # @param animation [TD::Types::InputFile] The animation file to be added.
-  #   Only animations known to the server (i.e. successfully sent via a message) can be added to the list.
+  #   Only animations known to the server (i.e.
+  #   successfully sent via a message) can be added to the list.
   # @return [TD::Types::Ok]
   def add_saved_animation(animation)
     broadcast('@type'     => 'addSavedAnimation',
@@ -152,11 +178,12 @@ module TD::ClientMethods
   end
   
   # Adds a new sticker to a set; for bots only.
+  # Returns the sticker set.
   #
   # @param user_id [Integer] Sticker set owner.
   # @param name [String] Sticker set name.
   # @param sticker [TD::Types::InputSticker] Sticker to add to the set.
-  # @return [TD::Types::StickerSet] the sticker set.
+  # @return [TD::Types::StickerSet]
   def add_sticker_to_set(user_id, name, sticker)
     broadcast('@type'   => 'addStickerToSet',
               'user_id' => user_id,
@@ -218,9 +245,9 @@ module TD::ClientMethods
   # Sets the result of a pre-checkout query; for bots only.
   #
   # @param pre_checkout_query_id [Integer] Identifier of the pre-checkout query.
-  # @param error_message [String, nil] An error message, empty on success.
+  # @param error_message [String] An error message, empty on success.
   # @return [TD::Types::Ok]
-  def answer_pre_checkout_query(pre_checkout_query_id, error_message: nil)
+  def answer_pre_checkout_query(pre_checkout_query_id, error_message)
     broadcast('@type'                 => 'answerPreCheckoutQuery',
               'pre_checkout_query_id' => pre_checkout_query_id,
               'error_message'         => error_message)
@@ -230,9 +257,9 @@ module TD::ClientMethods
   #
   # @param shipping_query_id [Integer] Identifier of the shipping query.
   # @param shipping_options [Array<TD::Types::ShippingOption>] Available shipping options.
-  # @param error_message [String, nil] An error message, empty on success.
+  # @param error_message [String] An error message, empty on success.
   # @return [TD::Types::Ok]
-  def answer_shipping_query(shipping_query_id, shipping_options, error_message: nil)
+  def answer_shipping_query(shipping_query_id, shipping_options, error_message)
     broadcast('@type'             => 'answerShippingQuery',
               'shipping_query_id' => shipping_query_id,
               'shipping_options'  => shipping_options,
@@ -255,14 +282,14 @@ module TD::ClientMethods
   # @param only_if_pending [Boolean] Pass true to stop downloading only if it hasn't been started, i.e.
   #   request hasn't been sent to server.
   # @return [TD::Types::Ok]
-  def cancel_download_file(file_id, only_if_pending: false)
+  def cancel_download_file(file_id, only_if_pending)
     broadcast('@type'           => 'cancelDownloadFile',
               'file_id'         => file_id,
               'only_if_pending' => only_if_pending)
   end
   
   # Stops the uploading of a file.
-  # Supported only for files uploaded by using {#upload_file}.
+  # Supported only for files uploaded by using uploadFile.
   # For other files the behavior is undefined.
   #
   # @param file_id [Integer] Identifier of the file to stop uploading.
@@ -272,9 +299,9 @@ module TD::ClientMethods
               'file_id' => file_id)
   end
   
-  # Used to let the server know whether a chat is spam or not.
-  # Can be used only if {TD::Types::ChatReportSpamState#can_report_spam} is true.
-  # After this request, {TD::Types::ChatReportSpamState#can_report_spam} becomes false forever.
+  # Reports to the server whether a chat is a spam chat or not.
+  # Can be used only if ChatReportSpamState.can_report_spam is true.
+  # After this request, ChatReportSpamState.can_report_spam becomes false forever.
   #
   # @param chat_id [Integer] Chat identifier.
   # @param is_spam_chat [Boolean] If true, the chat will be reported as spam; otherwise it will be marked as not spam.
@@ -298,17 +325,16 @@ module TD::ClientMethods
   end
   
   # Changes the phone number of the user and sends an authentication code to the user's new phone number.
+  # On success, returns information about the sent code.
   #
   # @param phone_number [String] The new phone number of the user in international format.
-  # @param allow_flash_call [Boolean] Pass true if the code can be sent via flash call to the specified phone number.
-  # @param is_current_phone_number [Boolean] Pass true if the phone number is used on the current device.
-  #   Ignored if allow_flash_call is false.
-  # @return [TD::Types::AuthenticationCodeInfo] On success, returns information about the sent code.
-  def change_phone_number(phone_number, allow_flash_call: false, is_current_phone_number: false)
-    broadcast('@type'                   => 'changePhoneNumber',
-              'phone_number'            => phone_number,
-              'allow_flash_call'        => allow_flash_call,
-              'is_current_phone_number' => is_current_phone_number)
+  # @param settings [TD::Types::PhoneNumberAuthenticationSettings] Settings for the authentication of the user's phone
+  #   number.
+  # @return [TD::Types::AuthenticationCodeInfo]
+  def change_phone_number(phone_number, settings)
+    broadcast('@type'        => 'changePhoneNumber',
+              'phone_number' => phone_number,
+              'settings'     => settings)
   end
   
   # Installs/uninstalls or activates/archives a sticker set.
@@ -326,8 +352,8 @@ module TD::ClientMethods
   end
   
   # Checks the authentication token of a bot; to log in as a bot.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitPhoneNumber}.
-  # Can be used instead of {#set_authentication_phone_number} and {#check_authentication_code} to log in.
+  # Works only when the current authorization state is authorizationStateWaitPhoneNumber.
+  # Can be used instead of setAuthenticationPhoneNumber and checkAuthenticationCode to log in.
   #
   # @param token [String] The bot token.
   # @return [TD::Types::Ok]
@@ -337,22 +363,17 @@ module TD::ClientMethods
   end
   
   # Checks the authentication code.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitCode}.
+  # Works only when the current authorization state is authorizationStateWaitCode.
   #
   # @param code [String] The verification code received via SMS, Telegram message, phone call, or flash call.
-  # @param first_name [String, nil] If the user is not yet registered, the first name of the user; 1-255 characters.
-  # @param last_name [String, nil] If the user is not yet registered; the last name of the user; optional; 0-255
-  #   characters.
   # @return [TD::Types::Ok]
-  def check_authentication_code(code, first_name = nil, last_name = nil)
-    broadcast('@type'      => 'checkAuthenticationCode',
-              'code'       => code,
-              'first_name' => first_name,
-              'last_name'  => last_name)
+  def check_authentication_code(code)
+    broadcast('@type' => 'checkAuthenticationCode',
+              'code'  => code)
   end
   
   # Checks the authentication password for correctness.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitPassword}.
+  # Works only when the current authorization state is authorizationStateWaitPassword.
   #
   # @param password [String] The password to check.
   # @return [TD::Types::Ok]
@@ -393,7 +414,7 @@ module TD::ClientMethods
   end
   
   # Checks the database encryption key for correctness.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitEncryptionKey}.
+  # Works only when the current authorization state is authorizationStateWaitEncryptionKey.
   #
   # @param encryption_key [String] Encryption key to check or set up.
   # @return [TD::Types::Ok]
@@ -429,6 +450,15 @@ module TD::ClientMethods
               'code'  => code)
   end
   
+  # Checks the 2-step verification recovery email address verification code.
+  #
+  # @param code [String] Verification code.
+  # @return [TD::Types::PasswordState]
+  def check_recovery_email_address_code(code)
+    broadcast('@type' => 'checkRecoveryEmailAddressCode',
+              'code'  => code)
+  end
+  
   # Removes potentially dangerous characters from the name of a file.
   # The encoding of the file name is supposed to be UTF-8.
   # Returns an empty string on failure.
@@ -452,7 +482,7 @@ module TD::ClientMethods
               'exclude_secret_chats' => exclude_secret_chats)
   end
   
-  # Clears all imported contacts, contacts list remains unchanged.
+  # Clears all imported contacts, contact list remains unchanged.
   #
   # @return [TD::Types::Ok]
   def clear_imported_contacts
@@ -464,7 +494,7 @@ module TD::ClientMethods
   # @param is_attached [Boolean] Pass true to clear the list of stickers recently attached to photo or video files;
   #   pass false to clear the list of recently sent stickers.
   # @return [TD::Types::Ok]
-  def clear_recent_stickers(is_attached = false)
+  def clear_recent_stickers(is_attached)
     broadcast('@type'       => 'clearRecentStickers',
               'is_attached' => is_attached)
   end
@@ -478,15 +508,14 @@ module TD::ClientMethods
   
   # Closes the TDLib instance.
   # All databases will be flushed to disk and properly closed.
-  # After the close completes, {TD::Types::Update::AuthorizationState} with {TD::Types::AuthorizationState::Closed}
-  #   will be sent.
+  # After the close completes, updateAuthorizationState with authorizationStateClosed will be sent.
   #
   # @return [TD::Types::Ok]
   def close
     broadcast('@type' => 'close')
   end
   
-  # This method should be called if the chat is closed by the user.
+  # Informs TDLib that the chat is closed by the user.
   # Many useful activities depend on the chat being opened or closed.
   #
   # @param chat_id [Integer] Chat identifier.
@@ -496,7 +525,7 @@ module TD::ClientMethods
               'chat_id' => chat_id)
   end
   
-  # Closes a secret chat, effectively transfering its state to {TD::Types::SecretChatState::Closed}.
+  # Closes a secret chat, effectively transfering its state to secretChatStateClosed.
   #
   # @param secret_chat_id [Integer] Secret chat identifier.
   # @return [TD::Types::Ok]
@@ -511,7 +540,7 @@ module TD::ClientMethods
   # @param force [Boolean] If true, the chat will be created without network request.
   #   In this case all information about the chat except its type, title and photo can be incorrect.
   # @return [TD::Types::Chat]
-  def create_basic_group_chat(basic_group_id, force = false)
+  def create_basic_group_chat(basic_group_id, force)
     broadcast('@type'          => 'createBasicGroupChat',
               'basic_group_id' => basic_group_id,
               'force'          => force)
@@ -528,11 +557,12 @@ module TD::ClientMethods
               'protocol' => protocol)
   end
   
-  # Creates a new basic group and sends a corresponding {TD::Types::MessageContent::BasicGroupChatCreate}.
+  # Creates a new basic group and sends a corresponding messageBasicGroupChatCreate.
+  # Returns the newly created chat.
   #
   # @param user_ids [Array<Integer>] Identifiers of users to be added to the basic group.
-  # @param title [String] Title of the new basic group; 1-255 characters.
-  # @return [TD::Types::Chat] the newly created chat.
+  # @param title [String] Title of the new basic group; 1-128 characters.
+  # @return [TD::Types::Chat]
   def create_new_basic_group_chat(user_ids, title)
     broadcast('@type'    => 'createNewBasicGroupChat',
               'user_ids' => user_ids,
@@ -540,15 +570,17 @@ module TD::ClientMethods
   end
   
   # Creates a new secret chat.
+  # Returns the newly created chat.
   #
   # @param user_id [Integer] Identifier of the target user.
-  # @return [TD::Types::Chat] the newly created chat.
+  # @return [TD::Types::Chat]
   def create_new_secret_chat(user_id)
     broadcast('@type'   => 'createNewSecretChat',
               'user_id' => user_id)
   end
   
   # Creates a new sticker set; for bots only.
+  # Returns the newly created sticker set.
   #
   # @param user_id [Integer] Sticker set owner.
   # @param title [String] Sticker set title; 1-64 characters.
@@ -557,8 +589,8 @@ module TD::ClientMethods
   #   Must end with *"_by_<bot username>"* (*<bot_username>* is case insensitive); 1-64 characters.
   # @param is_masks [Boolean] True, if stickers are masks.
   # @param stickers [Array<TD::Types::InputSticker>] List of stickers to be added to the set.
-  # @return [TD::Types::StickerSet] the newly created sticker set.
-  def create_new_sticker_set(user_id, title, name, stickers, is_masks: false)
+  # @return [TD::Types::StickerSet]
+  def create_new_sticker_set(user_id, title, name, is_masks, stickers)
     broadcast('@type'    => 'createNewStickerSet',
               'user_id'  => user_id,
               'title'    => title,
@@ -567,13 +599,14 @@ module TD::ClientMethods
               'stickers' => stickers)
   end
   
-  # Creates a new supergroup or channel and sends a corresponding {TD::Types::MessageContent::SupergroupChatCreate}.
+  # Creates a new supergroup or channel and sends a corresponding messageSupergroupChatCreate.
+  # Returns the newly created chat.
   #
-  # @param title [String] Title of the new chat; 1-255 characters.
+  # @param title [String] Title of the new chat; 1-128 characters.
   # @param is_channel [Boolean] True, if a channel chat should be created.
   # @param description [String] Chat description; 0-255 characters.
-  # @return [TD::Types::Chat] the newly created chat.
-  def create_new_supergroup_chat(title, description, is_channel: false)
+  # @return [TD::Types::Chat]
+  def create_new_supergroup_chat(title, is_channel, description)
     broadcast('@type'       => 'createNewSupergroupChat',
               'title'       => title,
               'is_channel'  => is_channel,
@@ -586,7 +619,7 @@ module TD::ClientMethods
   # @param force [Boolean] If true, the chat will be created without network request.
   #   In this case all information about the chat except its type, title and photo can be incorrect.
   # @return [TD::Types::Chat]
-  def create_private_chat(user_id, force = false)
+  def create_private_chat(user_id, force)
     broadcast('@type'   => 'createPrivateChat',
               'user_id' => user_id,
               'force'   => force)
@@ -607,7 +640,7 @@ module TD::ClientMethods
   # @param force [Boolean] If true, the chat will be created without network request.
   #   In this case all information about the chat except its type, title and photo can be incorrect.
   # @return [TD::Types::Chat]
-  def create_supergroup_chat(supergroup_id, force = false)
+  def create_supergroup_chat(supergroup_id, force)
     broadcast('@type'         => 'createSupergroupChat',
               'supergroup_id' => supergroup_id,
               'force'         => force)
@@ -627,8 +660,7 @@ module TD::ClientMethods
   
   # Deletes the account of the current user, deleting all information associated with the user from the server.
   # The phone number of the account can be used to create a new account.
-  # Can be called before authorization when the current authorization state is
-  #   {TD::Types::AuthorizationState::WaitPassword}.
+  # Can be called before authorization when the current authorization state is authorizationStateWaitPassword.
   #
   # @param reason [String, nil] The reason why the account was deleted; optional.
   # @return [TD::Types::Ok]
@@ -637,16 +669,19 @@ module TD::ClientMethods
               'reason' => reason)
   end
   
-  # Deletes all messages in the chat only for the user.
-  # Cannot be used in channels and public supergroups.
+  # Deletes all messages in the chat.
+  # Use Chat.can_be_deleted_only_for_self and Chat.can_be_deleted_for_all_users fields to find whether and how the
+  #   method can be applied to the chat.
   #
   # @param chat_id [Integer] Chat identifier.
-  # @param remove_from_chat_list [Boolean] Pass true if the chat should be removed from the chats list.
+  # @param remove_from_chat_list [Boolean] Pass true if the chat should be removed from the chat list.
+  # @param revoke [Boolean] Pass true to try to delete chat history for all users.
   # @return [TD::Types::Ok]
-  def delete_chat_history(chat_id, remove_from_chat_list = false)
+  def delete_chat_history(chat_id, remove_from_chat_list, revoke)
     broadcast('@type'                 => 'deleteChatHistory',
               'chat_id'               => chat_id,
-              'remove_from_chat_list' => remove_from_chat_list)
+              'remove_from_chat_list' => remove_from_chat_list,
+              'revoke'                => revoke)
   end
   
   # Deletes all messages sent by the specified user to a chat.
@@ -684,7 +719,9 @@ module TD::ClientMethods
   end
   
   # Deletes all information about a language pack in the current localization target.
-  # The language pack that is currently in use can't be deleted.
+  # The language pack which is currently in use (including base language pack) or is being synchronized can't be
+  #   deleted.
+  # Can be called before authorization.
   #
   # @param language_pack_id [String] Identifier of the language pack to delete.
   # @return [TD::Types::Ok]
@@ -697,11 +734,10 @@ module TD::ClientMethods
   #
   # @param chat_id [Integer] Chat identifier.
   # @param message_ids [Array<Integer>] Identifiers of the messages to be deleted.
-  # @param revoke [Boolean] Pass true to try to delete outgoing messages for all chat members (may fail if messages are
-  #   too old).
+  # @param revoke [Boolean] Pass true to try to delete messages for all chat members.
   #   Always true for supergroups, channels and secret chats.
   # @return [TD::Types::Ok]
-  def delete_messages(chat_id, message_ids, revoke = false)
+  def delete_messages(chat_id, message_ids, revoke)
     broadcast('@type'       => 'deleteMessages',
               'chat_id'     => chat_id,
               'message_ids' => message_ids,
@@ -718,7 +754,7 @@ module TD::ClientMethods
   end
   
   # Deletes a profile photo.
-  # If something changes, {TD::Types::Update::User} will be sent.
+  # If something changes, updateUser will be sent.
   #
   # @param profile_photo_id [Integer] Identifier of the profile photo to delete.
   # @return [TD::Types::Ok]
@@ -756,8 +792,7 @@ module TD::ClientMethods
   # Closes the TDLib instance, destroying all local data without a proper logout.
   # The current user session will remain in the list of all active sessions.
   # All local data will be destroyed.
-  # After the destruction completes {TD::Types::Update::AuthorizationState} with {TD::Types::AuthorizationState::Closed}
-  #   will be sent.
+  # After the destruction completes updateAuthorizationState with authorizationStateClosed will be sent.
   #
   # @return [TD::Types::Ok]
   def destroy
@@ -779,7 +814,7 @@ module TD::ClientMethods
   # @param duration [Integer] The call duration, in seconds.
   # @param connection_id [Integer] Identifier of the connection used during the call.
   # @return [TD::Types::Ok]
-  def discard_call(call_id, duration, connection_id, is_disconnected: false)
+  def discard_call(call_id, is_disconnected, duration, connection_id)
     broadcast('@type'           => 'discardCall',
               'call_id'         => call_id,
               'is_disconnected' => is_disconnected,
@@ -803,26 +838,34 @@ module TD::ClientMethods
               'website_id' => website_id)
   end
   
-  # Asynchronously downloads a file from the cloud.
-  # {TD::Types::Update::File} will be used to notify about the download progress and successful completion of the
-  #   download.
-  # Returns file state just after the download has been started.
+  # Downloads a file from the cloud.
+  # Download progress and completion of the download will be notified through updateFile updates.
   #
   # @param file_id [Integer] Identifier of the file to download.
   # @param priority [Integer] Priority of the download (1-32).
   #   The higher the priority, the earlier the file will be downloaded.
-  #   If the priorities of two files are equal, then the last one for which {#download_file} was called will be
-  #     downloaded first.
+  #   If the priorities of two files are equal, then the last one for which downloadFile was called will be downloaded
+  #   first.
+  # @param offset [Integer] The starting position from which the file should be downloaded.
+  # @param limit [Integer] Number of bytes which should be downloaded starting from the "offset" position before the
+  #   download will be automatically cancelled; use 0 to download without a limit.
+  # @param synchronous [Boolean] If false, this request returns file state just after the download has been started.
+  #   If true, this request returns file state only after the download has succeeded, has failed, has been cancelled or
+  #   a new downloadFile request with different offset/limit parameters was sent.
   # @return [TD::Types::File]
-  def download_file(file_id, priority = 1)
-    broadcast('@type'    => 'downloadFile',
-              'file_id'  => file_id,
-              'priority' => priority)
+  def download_file(file_id, priority, offset, limit, synchronous)
+    broadcast('@type'       => 'downloadFile',
+              'file_id'     => file_id,
+              'priority'    => priority,
+              'offset'      => offset,
+              'limit'       => limit,
+              'synchronous' => synchronous)
   end
   
-  # Edits information about a custom language pack in the current localization target.
+  # Edits information about a custom local language pack in the current localization target.
+  # Can be called before authorization.
   #
-  # @param info [TD::Types::LanguagePackInfo] New information about the custom language pack.
+  # @param info [TD::Types::LanguagePackInfo] New information about the custom local language pack.
   # @return [TD::Types::Ok]
   def edit_custom_language_pack_info(info)
     broadcast('@type' => 'editCustomLanguagePackInfo',
@@ -847,8 +890,8 @@ module TD::ClientMethods
   #
   # @param inline_message_id [String] Inline message identifier.
   # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup.
-  # @param location [TD::Types::Location, nil] New location content of the message.
-  #   Pass nil to stop sharing the live location.
+  # @param location [TD::Types::Location, nil] New location content of the message; may be null.
+  #   Pass null to stop sharing the live location.
   # @return [TD::Types::Ok]
   def edit_inline_message_live_location(inline_message_id, reply_markup, location = nil)
     broadcast('@type'             => 'editInlineMessageLiveLocation',
@@ -861,12 +904,12 @@ module TD::ClientMethods
   #   sent via a bot; for bots only.
   #
   # @param inline_message_id [String] Inline message identifier.
-  # @param reply_markup [TD::Types::ReplyMarkup, nil] The new message reply markup; for bots only.
-  # @param input_message_content [TD::Types::InputMessageContent::Animation, TD::Types::InputMessageContent::Audio,
-  #   TD::Types::InputMessageContent::Document, TD::Types::InputMessageContent::Photo,
-  #   TD::Types::InputMessageContent::Video] New content of the message.
+  # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup; for bots only.
+  # @param input_message_content [TD::Types::InputMessageContent] New content of the message.
+  #   Must be one of the following types: InputMessageAnimation, InputMessageAudio, InputMessageDocument,
+  #   InputMessagePhoto or InputMessageVideo.
   # @return [TD::Types::Ok]
-  def edit_inline_message_media(inline_message_id, input_message_content, reply_markup: nil)
+  def edit_inline_message_media(inline_message_id, reply_markup, input_message_content)
     broadcast('@type'                 => 'editInlineMessageMedia',
               'inline_message_id'     => inline_message_id,
               'reply_markup'          => reply_markup,
@@ -888,9 +931,10 @@ module TD::ClientMethods
   #
   # @param inline_message_id [String] Inline message identifier.
   # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup.
-  # @param input_message_content [TD::Types::InputMessageContent::Text] New text content of the message.
+  # @param input_message_content [TD::Types::InputMessageContent] New text content of the message.
+  #   Should be of type InputMessageText.
   # @return [TD::Types::Ok]
-  def edit_inline_message_text(inline_message_id, input_message_content, reply_markup)
+  def edit_inline_message_text(inline_message_id, reply_markup, input_message_content)
     broadcast('@type'                 => 'editInlineMessageText',
               'inline_message_id'     => inline_message_id,
               'reply_markup'          => reply_markup,
@@ -898,14 +942,15 @@ module TD::ClientMethods
   end
   
   # Edits the message content caption.
+  # Returns the edited message after the edit is completed on the server side.
   #
   # @param chat_id [Integer] The chat the message belongs to.
   # @param message_id [Integer] Identifier of the message.
-  # @param reply_markup [TD::Types::ReplyMarkup, nil] The new message reply markup; for bots only.
+  # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup; for bots only.
   # @param caption [TD::Types::FormattedText] New message content caption; 0-GetOption("message_caption_length_max")
   #   characters.
-  # @return [TD::Types::Message] the edited message after the edit is completed on the server side.
-  def edit_message_caption(chat_id, message_id, caption, reply_markup: nil)
+  # @return [TD::Types::Message]
+  def edit_message_caption(chat_id, message_id, reply_markup, caption)
     broadcast('@type'        => 'editMessageCaption',
               'chat_id'      => chat_id,
               'message_id'   => message_id,
@@ -915,14 +960,15 @@ module TD::ClientMethods
   
   # Edits the message content of a live location.
   # Messages can be edited for a limited period of time specified in the live location.
+  # Returns the edited message after the edit is completed on the server side.
   #
   # @param chat_id [Integer] The chat the message belongs to.
   # @param message_id [Integer] Identifier of the message.
-  # @param reply_markup [TD::Types::ReplyMarkup, nil] The new message reply markup; for bots only.
-  # @param location [TD::Types::Location, nil] New location content of the message.
-  #   Pass nil to stop sharing the live location.
-  # @return [TD::Types::Message] the edited message after the edit is completed on the server side.
-  def edit_message_live_location(chat_id, message_id, location = nil, reply_markup: nil)
+  # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup; for bots only.
+  # @param location [TD::Types::Location, nil] New location content of the message; may be null.
+  #   Pass null to stop sharing the live location.
+  # @return [TD::Types::Message]
+  def edit_message_live_location(chat_id, message_id, reply_markup, location = nil)
     broadcast('@type'        => 'editMessageLiveLocation',
               'chat_id'      => chat_id,
               'message_id'   => message_id,
@@ -934,15 +980,16 @@ module TD::ClientMethods
   # The media in the message can't be replaced if the message was set to self-destruct.
   # Media can't be replaced by self-destructing media.
   # Media in an album can be edited only to contain a photo or a video.
+  # Returns the edited message after the edit is completed on the server side.
   #
   # @param chat_id [Integer] The chat the message belongs to.
   # @param message_id [Integer] Identifier of the message.
-  # @param reply_markup [TD::Types::ReplyMarkup, nil] The new message reply markup; for bots only.
-  # @param input_message_content [TD::Types::InputMessageContent::Animation, TD::Types::InputMessageContent::Audio,
-  #   TD::Types::InputMessageContent::Document, TD::Types::InputMessageContent::Photo,
-  #   TD::Types::InputMessageContent::Video] New content of the message.
-  # @return [TD::Types::Message] the edited message after the edit is completed on the server side.
-  def edit_message_media(chat_id, message_id, input_message_content, reply_markup: nil)
+  # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup; for bots only.
+  # @param input_message_content [TD::Types::InputMessageContent] New content of the message.
+  #   Must be one of the following types: InputMessageAnimation, InputMessageAudio, InputMessageDocument,
+  #   InputMessagePhoto or InputMessageVideo.
+  # @return [TD::Types::Message]
+  def edit_message_media(chat_id, message_id, reply_markup, input_message_content)
     broadcast('@type'                 => 'editMessageMedia',
               'chat_id'               => chat_id,
               'message_id'            => message_id,
@@ -951,11 +998,12 @@ module TD::ClientMethods
   end
   
   # Edits the message reply markup; for bots only.
+  # Returns the edited message after the edit is completed on the server side.
   #
   # @param chat_id [Integer] The chat the message belongs to.
   # @param message_id [Integer] Identifier of the message.
   # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup.
-  # @return [TD::Types::Message] the edited message after the edit is completed on the server side.
+  # @return [TD::Types::Message]
   def edit_message_reply_markup(chat_id, message_id, reply_markup)
     broadcast('@type'        => 'editMessageReplyMarkup',
               'chat_id'      => chat_id,
@@ -964,13 +1012,15 @@ module TD::ClientMethods
   end
   
   # Edits the text of a message (or a text of a game message).
+  # Returns the edited message after the edit is completed on the server side.
   #
   # @param chat_id [Integer] The chat the message belongs to.
   # @param message_id [Integer] Identifier of the message.
-  # @param reply_markup [TD::Types::ReplyMarkup, nil] The new message reply markup; for bots only.
-  # @param input_message_content [TD::Types::InputMessageContent::Text] New text content of the message.
-  # @return [TD::Types::Message] the edited message after the edit is completed on the server side.
-  def edit_message_text(chat_id, message_id, input_message_content, reply_markup: nil)
+  # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup; for bots only.
+  # @param input_message_content [TD::Types::InputMessageContent] New text content of the message.
+  #   Should be of type InputMessageText.
+  # @return [TD::Types::Message]
+  def edit_message_text(chat_id, message_id, reply_markup, input_message_content)
     broadcast('@type'                 => 'editMessageText',
               'chat_id'               => chat_id,
               'message_id'            => message_id,
@@ -987,7 +1037,7 @@ module TD::ClientMethods
   # @param enable [Boolean] True, if the proxy should be enabled.
   # @param type [TD::Types::ProxyType] Proxy type.
   # @return [TD::Types::Proxy]
-  def edit_proxy(proxy_id, server, port, type, enable = false)
+  def edit_proxy(proxy_id, server, port, enable, type)
     broadcast('@type'    => 'editProxy',
               'proxy_id' => proxy_id,
               'server'   => server,
@@ -1010,42 +1060,48 @@ module TD::ClientMethods
   # Finishes the file generation.
   #
   # @param generation_id [Integer] The identifier of the generation process.
-  # @param error [TD::Types::Error, nil] If set, means that file generation has failed and should be terminated.
+  # @param error [TD::Types::Error] If set, means that file generation has failed and should be terminated.
   # @return [TD::Types::Ok]
-  def finish_file_generation(generation_id, error: nil)
+  def finish_file_generation(generation_id, error)
     broadcast('@type'         => 'finishFileGeneration',
               'generation_id' => generation_id,
               'error'         => error)
   end
   
   # Forwards previously sent messages.
+  # Returns the forwarded messages in the same order as the message identifiers passed in message_ids.
+  # If a message can't be forwarded, null will be returned instead of the message.
   #
   # @param chat_id [Integer] Identifier of the chat to which to forward messages.
   # @param from_chat_id [Integer] Identifier of the chat from which to forward messages.
   # @param message_ids [Array<Integer>] Identifiers of the messages to forward.
   # @param disable_notification [Boolean] Pass true to disable notification for the message, doesn't work if messages
   #   are forwarded to a secret chat.
-  # @param from_background [Boolean] Pass true if the message is sent from the background.
+  # @param from_background [Boolean] Pass true if the messages are sent from the background.
   # @param as_album [Boolean] True, if the messages should be grouped into an album after forwarding.
   #   For this to work, no more than 10 messages may be forwarded, and all of them must be photo or video messages.
-  # @return [TD::Types::Messages, nil] the forwarded messages in the same order as the message identifiers passed in
-  #   message_ids.
-  #   If a message can't be forwarded, nil will be returned instead of the message.
-  def forward_messages(chat_id, from_chat_id, message_ids,
-                       disable_notification: false, from_background: false, as_album: false)
+  # @param send_copy [Boolean] True, if content of the messages needs to be copied without links to the original
+  #   messages.
+  #   Always true if the messages are forwarded to a secret chat.
+  # @param remove_caption [Boolean] True, if media captions of message copies needs to be removed.
+  #   Ignored if send_copy is false.
+  # @return [TD::Types::Messages]
+  def forward_messages(chat_id, from_chat_id, message_ids, disable_notification, from_background, as_album, send_copy,
+                       remove_caption)
     broadcast('@type'                => 'forwardMessages',
               'chat_id'              => chat_id,
               'from_chat_id'         => from_chat_id,
               'message_ids'          => message_ids,
               'disable_notification' => disable_notification,
               'from_background'      => from_background,
-              'as_album'             => as_album)
+              'as_album'             => as_album,
+              'send_copy'            => send_copy,
+              'remove_caption'       => remove_caption)
   end
   
   # Generates a new invite link for a chat; the previously generated link is revoked.
   # Available for basic groups, supergroups, and channels.
-  # In basic groups this can be called only by the group's creator; in supergroups and channels this requires
-  #   appropriate administrator rights.
+  # Requires administrator privileges and can_invite_users right.
   #
   # @param chat_id [Integer] Chat identifier.
   # @return [TD::Types::ChatInviteLink]
@@ -1085,13 +1141,21 @@ module TD::ClientMethods
               'password' => password)
   end
   
+  # Returns application config, provided by the server.
+  # Can be called before authorization.
+  #
+  # @return [TD::Types::JsonValue]
+  def get_application_config
+    broadcast('@type' => 'getApplicationConfig')
+  end
+  
   # Returns a list of archived sticker sets.
   #
   # @param is_masks [Boolean] Pass true to return mask stickers sets; pass false to return ordinary sticker sets.
   # @param offset_sticker_set_id [Integer] Identifier of the sticker set from which to return the result.
   # @param limit [Integer] Maximum number of sticker sets to return.
   # @return [TD::Types::StickerSets]
-  def get_archived_sticker_sets(offset_sticker_set_id, limit = 100, is_masks: false)
+  def get_archived_sticker_sets(is_masks, offset_sticker_set_id, limit)
     broadcast('@type'                 => 'getArchivedStickerSets',
               'is_masks'              => is_masks,
               'offset_sticker_set_id' => offset_sticker_set_id,
@@ -1110,11 +1174,38 @@ module TD::ClientMethods
   
   # Returns the current authorization state; this is an offline request.
   # For informational purposes only.
-  # Use {TD::Types::Update::AuthorizationState} instead to maintain the current authorization state.
+  # Use updateAuthorizationState instead to maintain the current authorization state.
   #
   # @return [TD::Types::AuthorizationState]
   def get_authorization_state
     broadcast('@type' => 'getAuthorizationState')
+  end
+  
+  # Returns auto-download settings presets for the currently logged in user.
+  #
+  # @return [TD::Types::AutoDownloadSettingsPresets]
+  def get_auto_download_settings_presets
+    broadcast('@type' => 'getAutoDownloadSettingsPresets')
+  end
+  
+  # Constructs a persistent HTTP URL for a background.
+  #
+  # @param name [String] Background name.
+  # @param type [TD::Types::BackgroundType] Background type.
+  # @return [TD::Types::HttpUrl]
+  def get_background_url(name, type)
+    broadcast('@type' => 'getBackgroundUrl',
+              'name'  => name,
+              'type'  => type)
+  end
+  
+  # Returns backgrounds installed by the user.
+  #
+  # @param for_dark_theme [Boolean] True, if the backgrounds needs to be ordered for dark theme.
+  # @return [TD::Types::Backgrounds]
+  def get_backgrounds(for_dark_theme)
+    broadcast('@type'          => 'getBackgrounds',
+              'for_dark_theme' => for_dark_theme)
   end
   
   # Returns information about a basic group by its identifier.
@@ -1141,7 +1232,7 @@ module TD::ClientMethods
   # @param offset [Integer] Number of users to skip in the result; must be non-negative.
   # @param limit [Integer] Maximum number of users to return; up to 100.
   # @return [TD::Types::Users]
-  def get_blocked_users(offset, limit = 100)
+  def get_blocked_users(offset, limit)
     broadcast('@type'  => 'getBlockedUsers',
               'offset' => offset,
               'limit'  => limit)
@@ -1182,7 +1273,8 @@ module TD::ClientMethods
   # Returns a list of service actions taken by chat members and administrators in the last 48 hours.
   # Available only in supergroups and channels.
   # Requires administrator rights.
-  # Returns results in reverse chronological order (i.e., in order of decreasing event_id).
+  # Returns results in reverse chronological order (i.
+  # e., in order of decreasing event_id).
   #
   # @param chat_id [Integer] Chat identifier.
   # @param query [String] Search query by which to filter events.
@@ -1212,17 +1304,17 @@ module TD::ClientMethods
   # @param chat_id [Integer] Chat identifier.
   # @param from_message_id [Integer] Identifier of the message starting from which history must be fetched; use 0 to
   #   get results from the last message.
-  # @param offset [Integer] Specify 0 to get results from exactly the from_message_id or a negative offset to get the
-  #   specified message and some newer messages.
+  # @param offset [Integer] Specify 0 to get results from exactly the from_message_id or a negative offset up to 99 to
+  #   get additionally some newer messages.
   # @param limit [Integer] The maximum number of messages to be returned; must be positive and can't be greater than
   #   100.
-  #   If the offset is negative, the limit must be greater than -offset.
+  #   If the offset is negative, the limit must be greater or equal to -offset.
   #   Fewer messages may be returned than specified by the limit, even if the end of the message history has not been
   #   reached.
   # @param only_local [Boolean] If true, returns only messages that are available locally without sending network
   #   requests.
   # @return [TD::Types::Messages]
-  def get_chat_history(chat_id, from_message_id, offset = 0, limit = 100, only_local: false)
+  def get_chat_history(chat_id, from_message_id, offset, limit, only_local)
     broadcast('@type'           => 'getChatHistory',
               'chat_id'         => chat_id,
               'from_message_id' => from_message_id,
@@ -1256,16 +1348,28 @@ module TD::ClientMethods
   # Returns approximate number of messages of the specified type in the chat.
   #
   # @param chat_id [Integer] Identifier of the chat in which to count messages.
-  # @param filter [TD::Types::SearchMessagesFilter, nil] Filter for message content;
+  # @param filter [TD::Types::SearchMessagesFilter] Filter for message content;
   #   {TD::Types::SearchMessagesFilter::Empty} is unsupported in this function.
   # @param return_local [Boolean] If true, returns count that is available locally without sending network requests,
   #   returning -1 if the number of messages is unknown.
   # @return [TD::Types::Count]
-  def get_chat_message_count(chat_id, filter = nil, return_local: false)
+  def get_chat_message_count(chat_id, filter, return_local)
     broadcast('@type'        => 'getChatMessageCount',
               'chat_id'      => chat_id,
               'filter'       => filter,
               'return_local' => return_local)
+  end
+  
+  # Returns list of chats with non-default notification settings.
+  #
+  # @param scope [TD::Types::NotificationSettingsScope] If specified, only chats from the specified scope will be
+  #   returned.
+  # @param compare_sound [Boolean] If true, also chats with non-default sound will be returned.
+  # @return [TD::Types::Chats]
+  def get_chat_notification_settings_exceptions(scope, compare_sound)
+    broadcast('@type'         => 'getChatNotificationSettingsExceptions',
+              'scope'         => scope,
+              'compare_sound' => compare_sound)
   end
   
   # Returns information about a pinned chat message.
@@ -1286,9 +1390,24 @@ module TD::ClientMethods
               'chat_id' => chat_id)
   end
   
+  # Returns an HTTP URL with the chat statistics.
+  # Currently this method can be used only for channels.
+  #
+  # @param chat_id [Integer] Chat identifier.
+  # @param parameters [String] Parameters from "tg://statsrefresh?params=******" link.
+  # @param is_dark [Boolean] Pass true if a URL with the dark theme must be returned.
+  # @return [TD::Types::HttpUrl]
+  def get_chat_statistics_url(chat_id, parameters, is_dark)
+    broadcast('@type'      => 'getChatStatisticsUrl',
+              'chat_id'    => chat_id,
+              'parameters' => parameters,
+              'is_dark'    => is_dark)
+  end
+  
   # Returns an ordered list of chats.
   # Chats are sorted by the pair (order, chat_id) in decreasing order.
-  # (For example, to get a list of chats from the beginning, the offset_order should be equal to 2^63 - 1).
+  # (For example, to get a list of chats from the beginning, the offset_order should be equal to a biggest signed
+  #   64-bit number 9223372036854775807 == 2^63 - 1).
   # For optimal performance the number of returned chats is chosen by the library.
   #
   # @param offset_order [Integer] Chat order to return chats from.
@@ -1296,7 +1415,7 @@ module TD::ClientMethods
   # @param limit [Integer] The maximum number of chats to be returned.
   #   It is possible that fewer chats than the limit are returned even if the end of the list is not reached.
   # @return [TD::Types::Chats]
-  def get_chats(offset_chat_id = 0, limit = 100, offset_order: 9223372036854775807)
+  def get_chats(offset_order, offset_chat_id, limit)
     broadcast('@type'          => 'getChats',
               'offset_order'   => offset_order,
               'offset_chat_id' => offset_chat_id,
@@ -1317,19 +1436,38 @@ module TD::ClientMethods
     broadcast('@type' => 'getContacts')
   end
   
-  # Uses current user IP to found his country.
+  # Uses current user IP to found their country.
+  # Returns two-letter ISO 3166-1 alpha-2 country code.
   # Can be called before authorization.
   #
-  # @return [TD::Types::Text] two-letter ISO 3166-1 alpha-2 country code.
+  # @return [TD::Types::Text]
   def get_country_code
     broadcast('@type' => 'getCountryCode')
   end
   
-  # Returns a list of public chats created by the user.
+  # Returns a list of public chats with username created by the user.
   #
   # @return [TD::Types::Chats]
   def get_created_public_chats
     broadcast('@type' => 'getCreatedPublicChats')
+  end
+  
+  # Returns all updates needed to restore current TDLib state, i.e.
+  # all actual UpdateAuthorizationState/UpdateUser/UpdateNewChat and others.
+  # This is especially usefull if TDLib is run in a separate process.
+  # This is an offline method.
+  # Can be called before authorization.
+  #
+  # @return [TD::Types::Updates]
+  def get_current_state
+    broadcast('@type' => 'getCurrentState')
+  end
+  
+  # Returns database statistics.
+  #
+  # @return [TD::Types::DatabaseStatistics]
+  def get_database_statistics
+    broadcast('@type' => 'getDatabaseStatistics')
   end
   
   # Returns information about a tg:// deep link.
@@ -1342,6 +1480,17 @@ module TD::ClientMethods
   def get_deep_link_info(link)
     broadcast('@type' => 'getDeepLinkInfo',
               'link'  => link)
+  end
+  
+  # Returns an HTTP URL which can be used to automatically log in to the translation platform and suggest new emoji
+  #   replacements.
+  # The URL will be valid for 30 seconds after generation.
+  #
+  # @param language_code [String] Language code for which the emoji replacements will be suggested.
+  # @return [TD::Types::HttpUrl]
+  def get_emoji_suggestions_url(language_code)
+    broadcast('@type'         => 'getEmojiSuggestionsUrl',
+              'language_code' => language_code)
   end
   
   # Returns favorite stickers.
@@ -1358,6 +1507,17 @@ module TD::ClientMethods
   def get_file(file_id)
     broadcast('@type'   => 'getFile',
               'file_id' => file_id)
+  end
+  
+  # Returns file downloaded prefix size from a given offset.
+  #
+  # @param file_id [Integer] Identifier of the file.
+  # @param offset [Integer] Offset from which downloaded prefix size should be calculated.
+  # @return [TD::Types::Count]
+  def get_file_downloaded_prefix_size(file_id, offset)
+    broadcast('@type'   => 'getFileDownloadedPrefixSize',
+              'file_id' => file_id,
+              'offset'  => offset)
   end
   
   # Returns the extension of a file, guessed by its MIME type.
@@ -1400,14 +1560,14 @@ module TD::ClientMethods
               'user_id'    => user_id)
   end
   
-  # Returns a list of common chats with a given user.
+  # Returns a list of common group chats with a given user.
   # Chats are sorted by their type and creation date.
   #
   # @param user_id [Integer] User identifier.
   # @param offset_chat_id [Integer] Chat identifier starting from which to return chats; use 0 for the first request.
   # @param limit [Integer] Maximum number of chats to be returned; up to 100.
   # @return [TD::Types::Chats]
-  def get_groups_in_common(user_id, offset_chat_id = 0, limit = 100)
+  def get_groups_in_common(user_id, offset_chat_id, limit)
     broadcast('@type'          => 'getGroupsInCommon',
               'user_id'        => user_id,
               'offset_chat_id' => offset_chat_id,
@@ -1437,11 +1597,11 @@ module TD::ClientMethods
   #
   # @param bot_user_id [Integer] The identifier of the target bot.
   # @param chat_id [Integer] Identifier of the chat, where the query was sent.
-  # @param user_location [TD::Types::Location, nil] Location of the user, only if needed.
+  # @param user_location [TD::Types::Location] Location of the user, only if needed.
   # @param query [String] Text of the query.
   # @param offset [String] Offset of the first entry to return.
   # @return [TD::Types::InlineQueryResults]
-  def get_inline_query_results(bot_user_id, chat_id, query, offset = '0', user_location: nil)
+  def get_inline_query_results(bot_user_id, chat_id, user_location, query, offset)
     broadcast('@type'         => 'getInlineQueryResults',
               'bot_user_id'   => bot_user_id,
               'chat_id'       => chat_id,
@@ -1454,7 +1614,7 @@ module TD::ClientMethods
   #
   # @param is_masks [Boolean] Pass true to return mask sticker sets; pass false to return ordinary sticker sets.
   # @return [TD::Types::StickerSets]
-  def get_installed_sticker_sets(is_masks = false)
+  def get_installed_sticker_sets(is_masks)
     broadcast('@type'    => 'getInstalledStickerSets',
               'is_masks' => is_masks)
   end
@@ -1465,6 +1625,41 @@ module TD::ClientMethods
   # @return [TD::Types::Text]
   def get_invite_text
     broadcast('@type' => 'getInviteText')
+  end
+  
+  # Converts a JsonValue object to corresponding JSON-serialized string.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @param json_value [TD::Types::JsonValue] The {TD::Types::JsonValue} object.
+  # @return [TD::Types::Text]
+  def get_json_string(json_value)
+    broadcast('@type'      => 'getJsonString',
+              'json_value' => json_value)
+  end
+  
+  # Converts a JSON-serialized string to corresponding JsonValue object.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @param json [String] The JSON-serialized string.
+  # @return [TD::Types::JsonValue]
+  def get_json_value(json)
+    broadcast('@type' => 'getJsonValue',
+              'json'  => json)
+  end
+  
+  # Returns information about a language pack.
+  # Returned language pack identifier may be different from a provided one.
+  # Can be called before authorization.
+  #
+  # @param language_pack_id [String] Language pack identifier.
+  # @return [TD::Types::LanguagePackInfo]
+  def get_language_pack_info(language_pack_id)
+    broadcast('@type'            => 'getLanguagePackInfo',
+              'language_pack_id' => language_pack_id)
   end
   
   # Returns a string stored in the local database from the specified localization target and language pack by its key.
@@ -1487,6 +1682,7 @@ module TD::ClientMethods
   end
   
   # Returns strings from a language pack in the current localization target by their keys.
+  # Can be called before authorization.
   #
   # @param language_pack_id [String] Language pack identifier of the strings to be returned.
   # @param keys [Array<String>] Language pack keys of the strings to be returned; leave empty to request all available
@@ -1500,12 +1696,56 @@ module TD::ClientMethods
   
   # Returns information about the current localization target.
   # This is an offline request if only_local is true.
+  # Can be called before authorization.
   #
   # @param only_local [Boolean] If true, returns only locally available information without sending network requests.
   # @return [TD::Types::LocalizationTargetInfo]
-  def get_localization_target_info(only_local = false)
+  def get_localization_target_info(only_local)
     broadcast('@type'      => 'getLocalizationTargetInfo',
               'only_local' => only_local)
+  end
+  
+  # Returns information about currently used log stream for internal logging of TDLib.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @return [TD::Types::LogStream]
+  def get_log_stream
+    broadcast('@type' => 'getLogStream')
+  end
+  
+  # Returns current verbosity level for a specified TDLib internal log tag.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @param tag [String] Logging tag to change verbosity level.
+  # @return [TD::Types::LogVerbosityLevel]
+  def get_log_tag_verbosity_level(tag)
+    broadcast('@type' => 'getLogTagVerbosityLevel',
+              'tag'   => tag)
+  end
+  
+  # Returns list of available TDLib internal log tags, for example, ["actor", "binlog", "connections", "notifications",
+  #   "proxy"].
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @return [TD::Types::LogTags]
+  def get_log_tags
+    broadcast('@type' => 'getLogTags')
+  end
+  
+  # Returns current verbosity level of the internal logging of TDLib.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @return [TD::Types::LogVerbosityLevel]
+  def get_log_verbosity_level
+    broadcast('@type' => 'getLogVerbosityLevel')
   end
   
   # Returns information about a file with a map thumbnail in PNG format.
@@ -1519,7 +1759,7 @@ module TD::ClientMethods
   # @param chat_id [Integer] Identifier of a chat, in which the thumbnail will be shown.
   #   Use 0 if unknown.
   # @return [TD::Types::File]
-  def get_map_thumbnail_file(location, zoom = 13, width = 1024, height = 1024, scale = 1, chat_id: 0)
+  def get_map_thumbnail_file(location, zoom, width, height, scale, chat_id)
     broadcast('@type'    => 'getMapThumbnailFile',
               'location' => location,
               'zoom'     => zoom,
@@ -1547,8 +1787,43 @@ module TD::ClientMethods
               'message_id' => message_id)
   end
   
+  # Returns a private HTTPS link to a message in a chat.
+  # Available only for already sent messages in supergroups and channels.
+  # The link will work only for members of the chat.
+  #
+  # @param chat_id [Integer] Identifier of the chat to which the message belongs.
+  # @param message_id [Integer] Identifier of the message.
+  # @return [TD::Types::HttpUrl]
+  def get_message_link(chat_id, message_id)
+    broadcast('@type'      => 'getMessageLink',
+              'chat_id'    => chat_id,
+              'message_id' => message_id)
+  end
+  
+  # Returns information about a public or private message link.
+  #
+  # @param url [String] The message link in the format "https://t.me/c/...", or "tg://privatepost?...", or
+  #   "https://t.me/username/...", or "tg://resolve?...".
+  # @return [TD::Types::MessageLinkInfo]
+  def get_message_link_info(url)
+    broadcast('@type' => 'getMessageLinkInfo',
+              'url'   => url)
+  end
+  
+  # Returns information about a message, if it is available locally without sending network request.
+  # This is an offline request.
+  #
+  # @param chat_id [Integer] Identifier of the chat the message belongs to.
+  # @param message_id [Integer] Identifier of the message to get.
+  # @return [TD::Types::Message]
+  def get_message_locally(chat_id, message_id)
+    broadcast('@type'      => 'getMessageLocally',
+              'chat_id'    => chat_id,
+              'message_id' => message_id)
+  end
+  
   # Returns information about messages.
-  # If a message is not found, returns nil on the corresponding position of the result.
+  # If a message is not found, returns null on the corresponding position of the result.
   #
   # @param chat_id [Integer] Identifier of the chat the messages belong to.
   # @param message_ids [Array<Integer>] Identifiers of the messages to get.
@@ -1564,16 +1839,16 @@ module TD::ClientMethods
   #
   # @param only_current [Boolean] If true, returns only data for the current library launch.
   # @return [TD::Types::NetworkStatistics]
-  def get_network_statistics(only_current = false)
+  def get_network_statistics(only_current)
     broadcast('@type'        => 'getNetworkStatistics',
               'only_current' => only_current)
   end
   
   # Returns the value of an option by its name.
-  # Can be called before authorization.
+  # (Check the list of available options on https://core.telegram.org/tdlib/options.) Can be called before
+  #   authorization.
   #
   # @param name [String] The name of the option.
-  # @see https://core.telegram.org/tdlib/options List of available options 
   # @return [TD::Types::OptionValue]
   def get_option(name)
     broadcast('@type' => 'getOption',
@@ -1586,15 +1861,26 @@ module TD::ClientMethods
   # @param scope [String] Telegram Passport element types requested by the service.
   # @param public_key [String] Service's public_key.
   # @param nonce [String] Authorization form nonce provided by the service.
-  # @param password [String] Password of the current user.
   # @return [TD::Types::PassportAuthorizationForm]
-  def get_passport_authorization_form(bot_user_id, scope, public_key, nonce, password)
+  def get_passport_authorization_form(bot_user_id, scope, public_key, nonce)
     broadcast('@type'       => 'getPassportAuthorizationForm',
               'bot_user_id' => bot_user_id,
               'scope'       => scope,
               'public_key'  => public_key,
-              'nonce'       => nonce,
-              'password'    => password)
+              'nonce'       => nonce)
+  end
+  
+  # Returns already available Telegram Passport elements suitable for completing a Telegram Passport authorization
+  #   form.
+  # Result can be received only once for each authorization form.
+  #
+  # @param autorization_form_id [Integer] Authorization form identifier.
+  # @param password [String] Password of the current user.
+  # @return [TD::Types::PassportElementsWithErrors]
+  def get_passport_authorization_form_available_elements(autorization_form_id, password)
+    broadcast('@type'                => 'getPassportAuthorizationFormAvailableElements',
+              'autorization_form_id' => autorization_form_id,
+              'password'             => password)
   end
   
   # Returns one of the available Telegram Passport elements.
@@ -1616,7 +1902,7 @@ module TD::ClientMethods
   end
   
   # Returns an invoice payment form.
-  # This method should be called when the user presses {TD::Types::InlineKeyboardButton::Buy}.
+  # This method should be called when the user presses inlineKeyboardButtonBuy.
   #
   # @param chat_id [Integer] Chat identifier of the Invoice message.
   # @param message_id [Integer] Message identifier.
@@ -1669,17 +1955,30 @@ module TD::ClientMethods
   end
   
   # Returns a public HTTPS link to a message.
-  # Available only for messages in public supergroups and channels.
+  # Available only for messages in supergroups and channels with username.
   #
   # @param chat_id [Integer] Identifier of the chat to which the message belongs.
   # @param message_id [Integer] Identifier of the message.
   # @param for_album [Boolean] Pass true if a link for a whole media album should be returned.
   # @return [TD::Types::PublicMessageLink]
-  def get_public_message_link(chat_id, message_id, for_album: false)
+  def get_public_message_link(chat_id, message_id, for_album)
     broadcast('@type'      => 'getPublicMessageLink',
               'chat_id'    => chat_id,
               'message_id' => message_id,
               'for_album'  => for_album)
+  end
+  
+  # Returns a globally unique push notification subscription identifier for identification of an account, which has
+  #   received a push notification.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @param payload [String] JSON-encoded push notification payload.
+  # @return [TD::Types::PushReceiverId]
+  def get_push_receiver_id(payload)
+    broadcast('@type'   => 'getPushReceiverId',
+              'payload' => payload)
   end
   
   # Returns up to 20 recently used inline bots in the order of their last usage.
@@ -1694,7 +1993,7 @@ module TD::ClientMethods
   # @param is_attached [Boolean] Pass true to return stickers and masks that were recently attached to photos or video
   #   files; pass false to return recently sent stickers.
   # @return [TD::Types::Stickers]
-  def get_recent_stickers(is_attached = false)
+  def get_recent_stickers(is_attached)
     broadcast('@type'       => 'getRecentStickers',
               'is_attached' => is_attached)
   end
@@ -1708,7 +2007,7 @@ module TD::ClientMethods
               'referrer' => referrer)
   end
   
-  # Returns a recovery email address that was previously set up.
+  # Returns a 2-step verification recovery email address that was previously set up.
   # This method can be used to verify a password provided by the user.
   #
   # @param password [String] The password for the current user.
@@ -1722,9 +2021,9 @@ module TD::ClientMethods
   # Can be used to register a URL as a file for further uploading, or sending as a message.
   #
   # @param remote_file_id [String] Remote identifier of the file to get.
-  # @param file_type [TD::Types::FileType, nil] File type, if known.
+  # @param file_type [TD::Types::FileType] File type, if known.
   # @return [TD::Types::File]
-  def get_remote_file(remote_file_id, file_type = nil)
+  def get_remote_file(remote_file_id, file_type)
     broadcast('@type'          => 'getRemoteFile',
               'remote_file_id' => remote_file_id,
               'file_type'      => file_type)
@@ -1776,9 +2075,11 @@ module TD::ClientMethods
   end
   
   # Returns emoji corresponding to a sticker.
+  # The list is only for informational purposes, because a sticker is always sent with a fixed emoji from the
+  #   corresponding Sticker object.
   #
   # @param sticker [TD::Types::InputFile] Sticker file identifier.
-  # @return [TD::Types::StickerEmojis]
+  # @return [TD::Types::Emojis]
   def get_sticker_emojis(sticker)
     broadcast('@type'   => 'getStickerEmojis',
               'sticker' => sticker)
@@ -1800,13 +2101,14 @@ module TD::ClientMethods
   #   If empty, returns all known installed stickers.
   # @param limit [Integer] Maximum number of stickers to be returned.
   # @return [TD::Types::Stickers]
-  def get_stickers(emoji, limit = 100)
+  def get_stickers(emoji, limit)
     broadcast('@type' => 'getStickers',
               'emoji' => emoji,
               'limit' => limit)
   end
   
   # Returns storage usage statistics.
+  # Can be called before authorization.
   #
   # @param chat_limit [Integer] Maximum number of chats with the largest storage usage for which separate statistics
   #   should be returned.
@@ -1819,6 +2121,7 @@ module TD::ClientMethods
   end
   
   # Quickly returns approximate storage usage statistics.
+  # Can be called before authorization.
   #
   # @return [TD::Types::StorageStatisticsFast]
   def get_storage_statistics_fast
@@ -1850,7 +2153,7 @@ module TD::ClientMethods
   #
   # @param supergroup_id [Integer] Identifier of the supergroup or channel.
   # @param filter [TD::Types::SupergroupMembersFilter] The type of users to return.
-  #   By default, {TD::Types::SupergroupMembersFilter::Recent}.
+  #   By default, supergroupMembersRecent.
   # @param offset [Integer] Number of users to skip.
   # @param limit [Integer] The maximum number of users be returned; up to 200.
   # @return [TD::Types::ChatMembers]
@@ -1894,7 +2197,7 @@ module TD::ClientMethods
   # @param category [TD::Types::TopChatCategory] Category of chats to be returned.
   # @param limit [Integer] Maximum number of chats to be returned; up to 30.
   # @return [TD::Types::Chats]
-  def get_top_chats(category, limit = 30)
+  def get_top_chats(category, limit)
     broadcast('@type'    => 'getTopChats',
               'category' => category,
               'limit'    => limit)
@@ -1942,18 +2245,11 @@ module TD::ClientMethods
   # @param offset [Integer] The number of photos to skip; must be non-negative.
   # @param limit [Integer] Maximum number of photos to be returned; up to 100.
   # @return [TD::Types::UserProfilePhotos]
-  def get_user_profile_photos(user_id, offset = 0, limit = 100)
+  def get_user_profile_photos(user_id, offset, limit)
     broadcast('@type'   => 'getUserProfilePhotos',
               'user_id' => user_id,
               'offset'  => offset,
               'limit'   => limit)
-  end
-  
-  # Returns background wallpapers.
-  #
-  # @return [TD::Types::Wallpapers]
-  def get_wallpapers
-    broadcast('@type' => 'getWallpapers')
   end
   
   # Returns an instant view version of a web page if available.
@@ -1962,7 +2258,7 @@ module TD::ClientMethods
   # @param url [String] The web page URL.
   # @param force_full [Boolean] If true, the full instant view for the web page will be returned.
   # @return [TD::Types::WebPageInstantView]
-  def get_web_page_instant_view(url, force_full = false)
+  def get_web_page_instant_view(url, force_full)
     broadcast('@type'      => 'getWebPageInstantView',
               'url'        => url,
               'force_full' => force_full)
@@ -2023,15 +2319,14 @@ module TD::ClientMethods
   # Closes the TDLib instance after a proper logout.
   # Requires an available network connection.
   # All local data will be destroyed.
-  # After the logout completes, {TD::Types::Update::AuthorizationState} with {TD::Types::AuthorizationState::Closed}
-  #   will be sent.
+  # After the logout completes, updateAuthorizationState with authorizationStateClosed will be sent.
   #
   # @return [TD::Types::Ok]
   def log_out
     broadcast('@type' => 'logOut')
   end
   
-  # This method should be called if the chat is opened by the user.
+  # Informs TDLib that the chat is opened by the user.
   # Many useful activities depend on the chat being opened or closed (e.g., in supergroups and channels all updates are
   #   received only for opened chats).
   #
@@ -2042,9 +2337,9 @@ module TD::ClientMethods
               'chat_id' => chat_id)
   end
   
-  # This method should be called if the message content has been opened (e.g., the user has opened a photo, video,
-  #   document, location or venue, or has listened to an audio file or voice note message).
-  # An {TD::Types::Update::MessageContentOpened} will be generated if something has changed.
+  # Informs TDLib that the message content has been opened (e.g., the user has opened a photo, video, document,
+  #   location or venue, or has listened to an audio file or voice note message).
+  # An updateMessageContentOpened update will be generated if something has changed.
   #
   # @param chat_id [Integer] Chat identifier of the message.
   # @param message_id [Integer] Identifier of the message with the opened content.
@@ -2055,7 +2350,8 @@ module TD::ClientMethods
               'message_id' => message_id)
   end
   
-  # Optimizes storage usage, i.e. deletes some files and returns new storage usage statistics.
+  # Optimizes storage usage, i.e.
+  # deletes some files and returns new storage usage statistics.
   # Secret thumbnails can't be deleted.
   #
   # @param size [Integer] Limit on the total size of files after deletion.
@@ -2068,17 +2364,16 @@ module TD::ClientMethods
   # @param immunity_delay [Integer] The amount of time after the creation of a file during which it can't be deleted,
   #   in seconds.
   #   Pass -1 to use the default value.
-  # @param file_types [Array<TD::Types::FileType>, nil] If not empty, only files with the given type(s) are considered.
+  # @param file_types [Array<TD::Types::FileType>] If not empty, only files with the given type(s) are considered.
   #   By default, all types except thumbnails, profile photos, stickers and wallpapers are deleted.
-  # @param chat_ids [Array<Integer>, nil] If not empty, only files from the given chats are considered.
+  # @param chat_ids [Array<Integer>] If not empty, only files from the given chats are considered.
   #   Use 0 as chat identifier to delete files not belonging to any chat (e.g., profile photos).
-  # @param exclude_chat_ids [Array<Integer>, nil] If not empty, files from the given chats are excluded.
+  # @param exclude_chat_ids [Array<Integer>] If not empty, files from the given chats are excluded.
   #   Use 0 as chat identifier to exclude all files not belonging to any chat (e.g., profile photos).
-  # @param chat_limit [Integer, nil] Same as in {#get_storage_statistics}.
+  # @param chat_limit [Integer] Same as in getStorageStatistics.
   #   Affects only returned statistics.
   # @return [TD::Types::StorageStatistics]
-  def optimize_storage(size: -1, ttl: -1, count: -1, immunity_delay: -1,
-                       file_types: nil, chat_ids: nil, exclude_chat_ids: nil, chat_limit: nil)
+  def optimize_storage(size, ttl, count, immunity_delay, file_types, chat_ids, exclude_chat_ids, chat_limit)
     broadcast('@type'            => 'optimizeStorage',
               'size'             => size,
               'ttl'              => ttl,
@@ -2104,15 +2399,15 @@ module TD::ClientMethods
               'parse_mode' => parse_mode)
   end
   
-  # Pins a message in a supergroup or channel; requires appropriate administrator rights in the supergroup or channel.
+  # Pins a message in a chat; requires can_pin_messages rights.
   #
-  # @param supergroup_id [Integer] Identifier of the supergroup or channel.
+  # @param chat_id [Integer] Identifier of the chat.
   # @param message_id [Integer] Identifier of the new pinned message.
   # @param disable_notification [Boolean] True, if there should be no notification about the pinned message.
   # @return [TD::Types::Ok]
-  def pin_supergroup_message(supergroup_id, message_id, disable_notification: false)
-    broadcast('@type'                => 'pinSupergroupMessage',
-              'supergroup_id'        => supergroup_id,
+  def pin_chat_message(chat_id, message_id, disable_notification)
+    broadcast('@type'                => 'pinChatMessage',
+              'chat_id'              => chat_id,
               'message_id'           => message_id,
               'disable_notification' => disable_notification)
   end
@@ -2128,16 +2423,17 @@ module TD::ClientMethods
               'proxy_id' => proxy_id)
   end
   
-  # Handles a DC_UPDATE push service notification.
+  # Handles a push notification.
+  # Returns error with code 406 if the push notification is not supported and connection to the server is required to
+  #   fetch new data.
   # Can be called before authorization.
   #
-  # @param dc [String] Value of the "dc" parameter of the notification.
-  # @param addr [String] Value of the "addr" parameter of the notification.
+  # @param payload [String] JSON-encoded push notification payload with all fields sent by the server, and
+  #   "google.sent_time" and "google.notification.sound" fields added.
   # @return [TD::Types::Ok]
-  def process_dc_update(dc, addr)
-    broadcast('@type' => 'processDcUpdate',
-              'dc'    => dc,
-              'addr'  => addr)
+  def process_push_notification(payload)
+    broadcast('@type'   => 'processPushNotification',
+              'payload' => payload)
   end
   
   # Marks all mentions in a chat as read.
@@ -2149,8 +2445,26 @@ module TD::ClientMethods
               'chat_id' => chat_id)
   end
   
+  # Reads a part of a file from the TDLib file cache and returns read bytes.
+  # This method is intended to be used only if the client has no direct access to TDLib's file system, because it is
+  #   usually slower than a direct read from the file.
+  #
+  # @param file_id [Integer] Identifier of the file.
+  #   The file must be located in the TDLib file cache.
+  # @param offset [Integer] The offset from which to read the file.
+  # @param count [Integer] Number of bytes to read.
+  #   An error will be returned if there are not enough bytes available in the file from the specified position.
+  #   Pass 0 to read all available data from the specified position.
+  # @return [TD::Types::FilePart]
+  def read_file_part(file_id, offset, count)
+    broadcast('@type'   => 'readFilePart',
+              'file_id' => file_id,
+              'offset'  => offset,
+              'count'   => count)
+  end
+  
   # Recovers the password with a password recovery code sent to an email address that was previously set up.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitPassword}.
+  # Works only when the current authorization state is authorizationStateWaitPassword.
   #
   # @param recovery_code [String] Recovery code to check.
   # @return [TD::Types::Ok]
@@ -2169,18 +2483,39 @@ module TD::ClientMethods
   end
   
   # Registers the currently used device for receiving push notifications.
+  # Returns a globally unique identifier of the push notification subscription.
   #
   # @param device_token [TD::Types::DeviceToken] Device token.
-  # @param other_user_ids [Array<Integer>] List of at most 100 user identifiers of other users currently using the
-  #   client.
-  # @return [TD::Types::Ok]
-  def register_device(device_token, other_user_ids = [])
+  # @param other_user_ids [Array<Integer>] List of user identifiers of other users currently using the client.
+  # @return [TD::Types::PushReceiverId]
+  def register_device(device_token, other_user_ids)
     broadcast('@type'          => 'registerDevice',
               'device_token'   => device_token,
               'other_user_ids' => other_user_ids)
   end
   
-  # Removes users from the contacts list.
+  # Finishes user registration.
+  # Works only when the current authorization state is authorizationStateWaitRegistration.
+  #
+  # @param first_name [String] The first name of the user; 1-64 characters.
+  # @param last_name [String] The last name of the user; 0-64 characters.
+  # @return [TD::Types::Ok]
+  def register_user(first_name, last_name)
+    broadcast('@type'      => 'registerUser',
+              'first_name' => first_name,
+              'last_name'  => last_name)
+  end
+  
+  # Removes background from the list of installed backgrounds.
+  #
+  # @param background_id [Integer] The background indentifier.
+  # @return [TD::Types::Ok]
+  def remove_background(background_id)
+    broadcast('@type'         => 'removeBackground',
+              'background_id' => background_id)
+  end
+  
+  # Removes users from the contact list.
   #
   # @param user_ids [Array<Integer>] Identifiers of users to be deleted.
   # @return [TD::Types::Ok]
@@ -2196,6 +2531,30 @@ module TD::ClientMethods
   def remove_favorite_sticker(sticker)
     broadcast('@type'   => 'removeFavoriteSticker',
               'sticker' => sticker)
+  end
+  
+  # Removes an active notification from notification list.
+  # Needs to be called only if the notification is removed by the current user.
+  #
+  # @param notification_group_id [Integer] Identifier of notification group to which the notification belongs.
+  # @param notification_id [Integer] Identifier of removed notification.
+  # @return [TD::Types::Ok]
+  def remove_notification(notification_group_id, notification_id)
+    broadcast('@type'                 => 'removeNotification',
+              'notification_group_id' => notification_group_id,
+              'notification_id'       => notification_id)
+  end
+  
+  # Removes a group of active notifications.
+  # Needs to be called only if the notification group is removed by the current user.
+  #
+  # @param notification_group_id [Integer] Notification group identifier.
+  # @param max_notification_id [Integer] Maximum identifier of removed notifications.
+  # @return [TD::Types::Ok]
+  def remove_notification_group(notification_group_id, max_notification_id)
+    broadcast('@type'                 => 'removeNotificationGroup',
+              'notification_group_id' => notification_group_id,
+              'max_notification_id'   => max_notification_id)
   end
   
   # Removes a proxy server.
@@ -2223,7 +2582,7 @@ module TD::ClientMethods
   #   or video files; pass false to remove the sticker from the list of recently sent stickers.
   # @param sticker [TD::Types::InputFile] Sticker file to delete.
   # @return [TD::Types::Ok]
-  def remove_recent_sticker(sticker, is_attached: false)
+  def remove_recent_sticker(is_attached, sticker)
     broadcast('@type'       => 'removeRecentSticker',
               'is_attached' => is_attached,
               'sticker'     => sticker)
@@ -2275,7 +2634,7 @@ module TD::ClientMethods
   #   ordinary sticker sets.
   # @param sticker_set_ids [Array<Integer>] Identifiers of installed sticker sets in the new correct order.
   # @return [TD::Types::Ok]
-  def reorder_installed_sticker_sets(sticker_set_ids, is_masks: false)
+  def reorder_installed_sticker_sets(is_masks, sticker_set_ids)
     broadcast('@type'           => 'reorderInstalledStickerSets',
               'is_masks'        => is_masks,
               'sticker_set_ids' => sticker_set_ids)
@@ -2289,7 +2648,7 @@ module TD::ClientMethods
   # @param reason [TD::Types::ChatReportReason] The reason for reporting the chat.
   # @param message_ids [Array<Integer>] Identifiers of reported messages, if any.
   # @return [TD::Types::Ok]
-  def report_chat(chat_id, reason, message_ids = [])
+  def report_chat(chat_id, reason, message_ids)
     broadcast('@type'       => 'reportChat',
               'chat_id'     => chat_id,
               'reason'      => reason,
@@ -2303,7 +2662,7 @@ module TD::ClientMethods
   # @param message_ids [Array<Integer>] Identifiers of messages sent in the supergroup by the user.
   #   This list must be non-empty.
   # @return [TD::Types::Ok]
-  def report_supergroup_spam(supergroup_id, user_id, message_ids = [])
+  def report_supergroup_spam(supergroup_id, user_id, message_ids)
     broadcast('@type'         => 'reportSupergroupSpam',
               'supergroup_id' => supergroup_id,
               'user_id'       => user_id,
@@ -2311,7 +2670,7 @@ module TD::ClientMethods
   end
   
   # Requests to send a password recovery code to an email address that was previously set up.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitPassword}.
+  # Works only when the current authorization state is authorizationStateWaitPassword.
   #
   # @return [TD::Types::Ok]
   def request_authentication_password_recovery
@@ -2326,8 +2685,8 @@ module TD::ClientMethods
   end
   
   # Re-sends an authentication code to the user.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitCode} and the
-  #   {TD::Types::AuthenticationCodeInfo#next_type} of the result is not nil.
+  # Works only when the current authorization state is authorizationStateWaitCode and the next_code_type of the result
+  #   is not null.
   #
   # @return [TD::Types::Ok]
   def resend_authentication_code
@@ -2335,7 +2694,7 @@ module TD::ClientMethods
   end
   
   # Re-sends the authentication code sent to confirm a new phone number for the user.
-  # Works only if the previously received {TD::Types::AuthenticationCodeInfo#next_type} was not nil.
+  # Works only if the previously received authenticationCodeInfo next_code_type was not null.
   #
   # @return [TD::Types::AuthenticationCodeInfo]
   def resend_change_phone_number_code
@@ -2347,6 +2706,23 @@ module TD::ClientMethods
   # @return [TD::Types::EmailAddressAuthenticationCodeInfo]
   def resend_email_address_verification_code
     broadcast('@type' => 'resendEmailAddressVerificationCode')
+  end
+  
+  # Resends messages which failed to send.
+  # Can be called only for messages for which messageSendingStateFailed.can_retry is true and after specified in
+  #   messageSendingStateFailed.retry_after time passed.
+  # If a message is re-sent, the corresponding failed to send message is deleted.
+  # Returns the sent messages in the same order as the message identifiers passed in message_ids.
+  # If a message can't be re-sent, null will be returned instead of the message.
+  #
+  # @param chat_id [Integer] Identifier of the chat to send messages.
+  # @param message_ids [Array<Integer>] Identifiers of the messages to resend.
+  #   Message identifiers must be in a strictly increasing order.
+  # @return [TD::Types::Messages]
+  def resend_messages(chat_id, message_ids)
+    broadcast('@type'       => 'resendMessages',
+              'chat_id'     => chat_id,
+              'message_ids' => message_ids)
   end
   
   # Resends phone number confirmation code.
@@ -2363,12 +2739,26 @@ module TD::ClientMethods
     broadcast('@type' => 'resendPhoneNumberVerificationCode')
   end
   
+  # Resends the 2-step verification recovery email address verification code.
+  #
+  # @return [TD::Types::PasswordState]
+  def resend_recovery_email_address_code
+    broadcast('@type' => 'resendRecoveryEmailAddressCode')
+  end
+  
   # Resets all notification settings to their default values.
   # By default, all chats are unmuted, the sound is set to "default" and message previews are shown.
   #
   # @return [TD::Types::Ok]
   def reset_all_notification_settings
     broadcast('@type' => 'resetAllNotificationSettings')
+  end
+  
+  # Resets list of installed backgrounds to its default value.
+  #
+  # @return [TD::Types::Ok]
+  def reset_backgrounds
+    broadcast('@type' => 'resetBackgrounds')
   end
   
   # Resets all network data usage statistics to zero.
@@ -2379,8 +2769,32 @@ module TD::ClientMethods
     broadcast('@type' => 'resetNetworkStatistics')
   end
   
+  # Saves application log event on the server.
+  # Can be called before authorization.
+  #
+  # @param type [String] Event type.
+  # @param chat_id [Integer] Optional chat identifier, associated with the event.
+  # @param data [TD::Types::JsonValue] The log event data.
+  # @return [TD::Types::Ok]
+  def save_application_log_event(type, chat_id, data)
+    broadcast('@type'   => 'saveApplicationLogEvent',
+              'type'    => type,
+              'chat_id' => chat_id,
+              'data'    => data)
+  end
+  
+  # Searches for a background by its name.
+  #
+  # @param name [String] The name of the background.
+  # @return [TD::Types::Background]
+  def search_background(name)
+    broadcast('@type' => 'searchBackground',
+              'name'  => name)
+  end
+  
   # Searches for call messages.
-  # Returns the results in reverse chronological order (i.e., in order of decreasing message_id).
+  # Returns the results in reverse chronological order (i.
+  # e., in order of decreasing message_id).
   # For optimal performance the number of returned messages is chosen by the library.
   #
   # @param from_message_id [Integer] Identifier of the message from which to search; use 0 to get results from the last
@@ -2390,7 +2804,7 @@ module TD::ClientMethods
   #   reached.
   # @param only_missed [Boolean] If true, returns only messages with missed calls.
   # @return [TD::Types::Messages]
-  def search_call_messages(from_message_id, limit = 100, only_missed: false)
+  def search_call_messages(from_message_id, limit, only_missed)
     broadcast('@type'           => 'searchCallMessages',
               'from_message_id' => from_message_id,
               'limit'           => limit,
@@ -2401,12 +2815,12 @@ module TD::ClientMethods
   # Requires administrator rights in channels.
   #
   # @param chat_id [Integer] Chat identifier.
-  # @param query [String, nil] Query to search for.
+  # @param query [String] Query to search for.
   # @param limit [Integer] The maximum number of users to be returned.
   # @param filter [TD::Types::ChatMembersFilter] The type of users to return.
-  #   By default, {TD::Types::ChatMembersFilter::Members}.
+  #   By default, chatMembersFilterMembers.
   # @return [TD::Types::ChatMembers]
-  def search_chat_members(chat_id, limit = 100, query: nil, filter: ChatMembersFilter::Members.new)
+  def search_chat_members(chat_id, query, limit, filter)
     broadcast('@type'   => 'searchChatMembers',
               'chat_id' => chat_id,
               'query'   => query,
@@ -2415,13 +2829,14 @@ module TD::ClientMethods
   end
   
   # Searches for messages with given words in the chat.
-  # Returns the results in reverse chronological order, i.e. in order of decreasing message_id.
+  # Returns the results in reverse chronological order, i.e.
+  # in order of decreasing message_id.
   # Cannot be used in secret chats with a non-empty query (searchSecretMessages should be used instead), or without an
   #   enabled message database.
   # For optimal performance the number of returned messages is chosen by the library.
   #
   # @param chat_id [Integer] Identifier of the chat in which to search messages.
-  # @param query [String, nil] Query to search for.
+  # @param query [String] Query to search for.
   # @param sender_user_id [Integer] If not 0, only messages sent by the specified user will be returned.
   #   Not supported in secret chats.
   # @param from_message_id [Integer] Identifier of the message starting from which history must be fetched; use 0 to
@@ -2435,8 +2850,7 @@ module TD::ClientMethods
   #   reached.
   # @param filter [TD::Types::SearchMessagesFilter] Filter for message content in the search results.
   # @return [TD::Types::Messages]
-  def search_chat_messages(chat_id, offset = 0, limit = 100,
-                           query: nil, sender_user_id: 0, from_message_id: 0, filter: SearchMessagesFilter::Empty.new)
+  def search_chat_messages(chat_id, query, sender_user_id, from_message_id, offset, limit, filter)
     broadcast('@type'           => 'searchChatMessages',
               'chat_id'         => chat_id,
               'query'           => query,
@@ -2453,7 +2867,7 @@ module TD::ClientMethods
   # @param chat_id [Integer] Chat identifier.
   # @param limit [Integer] Maximum number of messages to be returned.
   # @return [TD::Types::Messages]
-  def search_chat_recent_location_messages(chat_id, limit = 100)
+  def search_chat_recent_location_messages(chat_id, limit)
     broadcast('@type'   => 'searchChatRecentLocationMessages',
               'chat_id' => chat_id,
               'limit'   => limit)
@@ -2462,11 +2876,11 @@ module TD::ClientMethods
   # Searches for the specified query in the title and username of already known chats, this is an offline request.
   # Returns chats in the order seen in the chat list.
   #
-  # @param query [String, nil] Query to search for.
+  # @param query [String] Query to search for.
   #   If the query is empty, returns up to 20 recently found chats.
   # @param limit [Integer] Maximum number of chats to be returned.
   # @return [TD::Types::Chats]
-  def search_chats(query = nil, limit = 100)
+  def search_chats(query, limit)
     broadcast('@type' => 'searchChats',
               'query' => query,
               'limit' => limit)
@@ -2478,7 +2892,7 @@ module TD::ClientMethods
   # @param query [String] Query to search for.
   # @param limit [Integer] Maximum number of chats to be returned.
   # @return [TD::Types::Chats]
-  def search_chats_on_server(query, limit = 100)
+  def search_chats_on_server(query, limit)
     broadcast('@type' => 'searchChatsOnServer',
               'query' => query,
               'limit' => limit)
@@ -2486,21 +2900,33 @@ module TD::ClientMethods
   
   # Searches for the specified query in the first names, last names and usernames of the known user contacts.
   #
-  # @param query [String, nil] Query to search for; can be empty to return all contacts.
+  # @param query [String, nil] Query to search for; may be empty to return all contacts.
   # @param limit [Integer] Maximum number of users to be returned.
   # @return [TD::Types::Users]
-  def search_contacts(query = nil, limit = 100)
+  def search_contacts(query = nil, limit)
     broadcast('@type' => 'searchContacts',
               'query' => query,
               'limit' => limit)
   end
   
+  # Searches for emojis by keywords.
+  # Supported only if the file database is enabled.
+  #
+  # @param text [String] Text to search for.
+  # @param exact_match [Boolean] True, if only emojis, which exactly match text needs to be returned.
+  # @return [TD::Types::Emojis]
+  def search_emojis(text, exact_match)
+    broadcast('@type'       => 'searchEmojis',
+              'text'        => text,
+              'exact_match' => exact_match)
+  end
+  
   # Searches for recently used hashtags by their prefix.
   #
-  # @param prefix [String, nil] Hashtag prefix to search for.
+  # @param prefix [String] Hashtag prefix to search for.
   # @param limit [Integer] Maximum number of hashtags to be returned.
   # @return [TD::Types::Hashtags]
-  def search_hashtags(prefix = nil, limit = 100)
+  def search_hashtags(prefix, limit)
     broadcast('@type'  => 'searchHashtags',
               'prefix' => prefix,
               'limit'  => limit)
@@ -2509,10 +2935,10 @@ module TD::ClientMethods
   # Searches for installed sticker sets by looking for specified query in their title and name.
   #
   # @param is_masks [Boolean] Pass true to return mask sticker sets; pass false to return ordinary sticker sets.
-  # @param query [String, nil] Query to search for.
+  # @param query [String] Query to search for.
   # @param limit [Integer] Maximum number of sticker sets to return.
   # @return [TD::Types::StickerSets]
-  def search_installed_sticker_sets(query = nil, limit = 100, is_masks: false)
+  def search_installed_sticker_sets(is_masks, query, limit)
     broadcast('@type'    => 'searchInstalledStickerSets',
               'is_masks' => is_masks,
               'query'    => query,
@@ -2532,7 +2958,7 @@ module TD::ClientMethods
   #   Fewer messages may be returned than specified by the limit, even if the end of the message history has not been
   #   reached.
   # @return [TD::Types::Messages]
-  def search_messages(query, limit = 100, offset_date: 0, offset_chat_id: 0, offset_message_id: 0)
+  def search_messages(query, offset_date, offset_chat_id, offset_message_id, limit)
     broadcast('@type'             => 'searchMessages',
               'query'             => query,
               'offset_date'       => offset_date,
@@ -2572,7 +2998,7 @@ module TD::ClientMethods
   # @param chat_id [Integer] Identifier of the chat in which to search.
   #   Specify 0 to search in all secret chats.
   # @param query [String] Query to search for.
-  #   If empty, {#search_chat_messages} should be used instead.
+  #   If empty, searchChatMessages should be used instead.
   # @param from_search_id [Integer] The identifier from the result of a previous request, use 0 to get results from the
   #   last message.
   # @param limit [Integer] Maximum number of messages to be returned; up to 100.
@@ -2580,7 +3006,7 @@ module TD::ClientMethods
   #   reached.
   # @param filter [TD::Types::SearchMessagesFilter] A filter for the content of messages in the search results.
   # @return [TD::Types::FoundMessages]
-  def search_secret_messages(chat_id, query, limit = 100, from_search_id: 0, filter: SearchMessagesFilter::Empty.new)
+  def search_secret_messages(chat_id, query, from_search_id, limit, filter)
     broadcast('@type'          => 'searchSecretMessages',
               'chat_id'        => chat_id,
               'query'          => query,
@@ -2611,9 +3037,9 @@ module TD::ClientMethods
   # Searches for stickers from public sticker sets that correspond to a given emoji.
   #
   # @param emoji [String] String representation of emoji; must be non-empty.
-  # @param limit [Integer] Maximum number of stickers to be returned.
+  # @param limit [Integer, nil] Maximum number of stickers to be returned.
   # @return [TD::Types::Stickers]
-  def search_stickers(emoji, limit = 100)
+  def search_stickers(emoji, limit = nil)
     broadcast('@type' => 'searchStickers',
               'emoji' => emoji,
               'limit' => limit)
@@ -2622,13 +3048,14 @@ module TD::ClientMethods
   # Invites a bot to a chat (if it is not yet a member) and sends it the /start command.
   # Bots can't be invited to a private chat other than the chat with the bot.
   # Bots can't be invited to channels (although they can be added as admins) and secret chats.
+  # Returns the sent message.
   #
   # @param bot_user_id [Integer] Identifier of the bot.
   # @param chat_id [Integer] Identifier of the target chat.
-  # @param parameter [String, nil] A hidden parameter sent to the bot for deep linking purposes
-  # @see https://api.telegram.org/bots#deep-linking
-  # @return [TD::Types::Message] the sent message.
-  def send_bot_start_message(bot_user_id, chat_id, parameter = nil)
+  # @param parameter [String] A hidden parameter sent to the bot for deep linking purposes
+  #   (https://core.telegram.org/bots#deep-linking).
+  # @return [TD::Types::Message]
+  def send_bot_start_message(bot_user_id, chat_id, parameter)
     broadcast('@type'       => 'sendBotStartMessage',
               'bot_user_id' => bot_user_id,
               'chat_id'     => chat_id,
@@ -2650,13 +3077,16 @@ module TD::ClientMethods
   #
   # @param call_id [Integer] Call identifier.
   # @param rating [Integer] Call rating; 1-5.
-  # @param comment [String, nil] An optional user comment if the rating is less than 5.
+  # @param comment [String] An optional user comment if the rating is less than 5.
+  # @param problems [Array<TD::Types::CallProblem>] List of the exact types of problems with the call, specified by the
+  #   user.
   # @return [TD::Types::Ok]
-  def send_call_rating(call_id, rating, comment = nil)
-    broadcast('@type'   => 'sendCallRating',
-              'call_id' => call_id,
-              'rating'  => rating,
-              'comment' => comment)
+  def send_call_rating(call_id, rating, comment, problems)
+    broadcast('@type'    => 'sendCallRating',
+              'call_id'  => call_id,
+              'rating'   => rating,
+              'comment'  => comment,
+              'problems' => problems)
   end
   
   # Sends a notification about user activity in a chat.
@@ -2723,30 +3153,35 @@ module TD::ClientMethods
   # @param from_background [Boolean] Pass true if the message is sent from background.
   # @param query_id [Integer] Identifier of the inline query.
   # @param result_id [String] Identifier of the inline result.
+  # @param hide_via_bot [Boolean] If true, there will be no mention of a bot, via which the message is sent.
+  #   Can be used only for bots GetOption("animation_search_bot_username"), GetOption("photo_search_bot_username") and
+  #   GetOption("venue_search_bot_username").
   # @return [TD::Types::Message]
-  def send_inline_query_result_message(chat_id, query_id, result_id,
-                                       reply_to_message_id: 0, disable_notification: false, from_background: false)
+  def send_inline_query_result_message(chat_id, reply_to_message_id, disable_notification, from_background, query_id,
+                                       result_id, hide_via_bot)
     broadcast('@type'                => 'sendInlineQueryResultMessage',
               'chat_id'              => chat_id,
               'reply_to_message_id'  => reply_to_message_id,
               'disable_notification' => disable_notification,
               'from_background'      => from_background,
               'query_id'             => query_id,
-              'result_id'            => result_id)
+              'result_id'            => result_id,
+              'hide_via_bot'         => hide_via_bot)
   end
   
   # Sends a message.
+  # Returns the sent message.
   #
   # @param chat_id [Integer] Target chat.
   # @param reply_to_message_id [Integer] Identifier of the message to reply to or 0.
   # @param disable_notification [Boolean] Pass true to disable notification for the message.
   #   Not supported in secret chats.
   # @param from_background [Boolean] Pass true if the message is sent from the background.
-  # @param reply_markup [TD::Types::ReplyMarkup, nil] Markup for replying to the message; for bots only.
+  # @param reply_markup [TD::Types::ReplyMarkup] Markup for replying to the message; for bots only.
   # @param input_message_content [TD::Types::InputMessageContent] The content of the message to be sent.
-  # @return [TD::Types::Message] the sent message.
-  def send_message(chat_id, input_message_content,
-                   reply_to_message_id: 0, disable_notification: false, from_background: false, reply_markup: nil)
+  # @return [TD::Types::Message]
+  def send_message(chat_id, reply_to_message_id, disable_notification, from_background, reply_markup,
+                   input_message_content)
     broadcast('@type'                 => 'sendMessage',
               'chat_id'               => chat_id,
               'reply_to_message_id'   => reply_to_message_id,
@@ -2758,6 +3193,7 @@ module TD::ClientMethods
   
   # Sends messages grouped together into an album.
   # Currently only photo and video messages can be grouped into an album.
+  # Returns sent messages.
   #
   # @param chat_id [Integer] Target chat.
   # @param reply_to_message_id [Integer] Identifier of a message to reply to or 0.
@@ -2765,9 +3201,8 @@ module TD::ClientMethods
   #   Not supported in secret chats.
   # @param from_background [Boolean] Pass true if the messages are sent from the background.
   # @param input_message_contents [Array<TD::Types::InputMessageContent>] Contents of messages to be sent.
-  # @return [TD::Types::Messages] the sent messages.
-  def send_message_album(chat_id, input_message_contents,
-                         reply_to_message_id: 0, disable_notification: false, from_background: false)
+  # @return [TD::Types::Messages]
+  def send_message_album(chat_id, reply_to_message_id, disable_notification, from_background, input_message_contents)
     broadcast('@type'                  => 'sendMessageAlbum',
               'chat_id'                => chat_id,
               'reply_to_message_id'    => reply_to_message_id,
@@ -2777,6 +3212,8 @@ module TD::ClientMethods
   end
   
   # Sends a Telegram Passport authorization form, effectively sharing data with the service.
+  # This method must be called after getPassportAuthorizationFormAvailableElements if some previously available
+  #   elements need to be used.
   #
   # @param autorization_form_id [Integer] Authorization form identifier.
   # @param types [Array<TD::Types::PassportElementType>] Types of Telegram Passport elements chosen by user to complete
@@ -2792,11 +3229,11 @@ module TD::ClientMethods
   #
   # @param chat_id [Integer] Chat identifier of the Invoice message.
   # @param message_id [Integer] Message identifier.
-  # @param order_info_id [String] Identifier returned by {#validate_order_info}, or an empty string.
-  # @param shipping_option_id [String, nil] Identifier of a chosen shipping option, if applicable.
+  # @param order_info_id [String] Identifier returned by ValidateOrderInfo, or an empty string.
+  # @param shipping_option_id [String] Identifier of a chosen shipping option, if applicable.
   # @param credentials [TD::Types::InputCredentials] The credentials chosen by user for payment.
   # @return [TD::Types::PaymentResult]
-  def send_payment_form(chat_id, message_id, credentials, order_info_id: "", shipping_option_id: nil)
+  def send_payment_form(chat_id, message_id, order_info_id, shipping_option_id, credentials)
     broadcast('@type'              => 'sendPaymentForm',
               'chat_id'            => chat_id,
               'message_id'         => message_id,
@@ -2811,32 +3248,26 @@ module TD::ClientMethods
   #
   # @param hash [String] Value of the "hash" parameter from the link.
   # @param phone_number [String] Value of the "phone" parameter from the link.
-  # @param allow_flash_call [Boolean] Pass true if the authentication code may be sent via flash call to the specified
-  #   phone number.
-  # @param is_current_phone_number [Boolean] Pass true if the phone number is used on the current device.
-  #   Ignored if allow_flash_call is false.
+  # @param settings [TD::Types::PhoneNumberAuthenticationSettings] Settings for the authentication of the user's phone
+  #   number.
   # @return [TD::Types::AuthenticationCodeInfo]
-  def send_phone_number_confirmation_code(hash, phone_number, allow_flash_call: false, is_current_phone_number: false)
-    broadcast('@type'                   => 'sendPhoneNumberConfirmationCode',
-              'hash'                    => hash,
-              'phone_number'            => phone_number,
-              'allow_flash_call'        => allow_flash_call,
-              'is_current_phone_number' => is_current_phone_number)
+  def send_phone_number_confirmation_code(hash, phone_number, settings)
+    broadcast('@type'        => 'sendPhoneNumberConfirmationCode',
+              'hash'         => hash,
+              'phone_number' => phone_number,
+              'settings'     => settings)
   end
   
   # Sends a code to verify a phone number to be added to a user's Telegram Passport.
   #
   # @param phone_number [String] The phone number of the user, in international format.
-  # @param allow_flash_call [Boolean] Pass true if the authentication code may be sent via flash call to the specified
-  #   phone number.
-  # @param is_current_phone_number [Boolean] Pass true if the phone number is used on the current device.
-  #   Ignored if allow_flash_call is false.
+  # @param settings [TD::Types::PhoneNumberAuthenticationSettings] Settings for the authentication of the user's phone
+  #   number.
   # @return [TD::Types::AuthenticationCodeInfo]
-  def send_phone_number_verification_code(phone_number, allow_flash_call: false, is_current_phone_number: false)
-    broadcast('@type'                   => 'sendPhoneNumberVerificationCode',
-              'phone_number'            => phone_number,
-              'allow_flash_call'        => allow_flash_call,
-              'is_current_phone_number' => is_current_phone_number)
+  def send_phone_number_verification_code(phone_number, settings)
+    broadcast('@type'        => 'sendPhoneNumberVerificationCode',
+              'phone_number' => phone_number,
+              'settings'     => settings)
   end
   
   # Changes the period of inactivity after which the account of the current user will automatically be deleted.
@@ -2860,19 +3291,43 @@ module TD::ClientMethods
   end
   
   # Sets the phone number of the user and sends an authentication code to the user.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitPhoneNumber}.
+  # Works only when the current authorization state is authorizationStateWaitPhoneNumber, or if there is no pending
+  #   authentication query and the current authorization state is authorizationStateWaitCode or
+  #   authorizationStateWaitPassword.
   #
   # @param phone_number [String] The phone number of the user, in international format.
-  # @param allow_flash_call [Boolean] Pass true if the authentication code may be sent via flash call to the specified
-  #   phone number.
-  # @param is_current_phone_number [Boolean] Pass true if the phone number is used on the current device.
-  #   Ignored if allow_flash_call is false.
+  # @param settings [TD::Types::PhoneNumberAuthenticationSettings] Settings for the authentication of the user's phone
+  #   number.
   # @return [TD::Types::Ok]
-  def set_authentication_phone_number(phone_number, allow_flash_call: false, is_current_phone_number: false)
-    broadcast('@type'                   => 'setAuthenticationPhoneNumber',
-              'phone_number'            => phone_number,
-              'allow_flash_call'        => allow_flash_call,
-              'is_current_phone_number' => is_current_phone_number)
+  def set_authentication_phone_number(phone_number, settings)
+    broadcast('@type'        => 'setAuthenticationPhoneNumber',
+              'phone_number' => phone_number,
+              'settings'     => settings)
+  end
+  
+  # Sets auto-download settings.
+  #
+  # @param settings [TD::Types::AutoDownloadSettings] New user auto-download settings.
+  # @param type [TD::Types::NetworkType] Type of the network for which the new settings are applied.
+  # @return [TD::Types::Ok]
+  def set_auto_download_settings(settings, type)
+    broadcast('@type'    => 'setAutoDownloadSettings',
+              'settings' => settings,
+              'type'     => type)
+  end
+  
+  # Changes the background selected by the user; adds background to the list of installed backgrounds.
+  #
+  # @param background [TD::Types::InputBackground] The input background to use, null for solid backgrounds.
+  # @param type [TD::Types::BackgroundType] Background type; null for default background.
+  #   The method will return error 404 if type is null.
+  # @param for_dark_theme [Boolean] True, if the background is chosen for dark theme.
+  # @return [TD::Types::Background]
+  def set_background(background, type, for_dark_theme)
+    broadcast('@type'          => 'setBackground',
+              'background'     => background,
+              'type'           => type,
+              'for_dark_theme' => for_dark_theme)
   end
   
   # Changes the bio of the current user.
@@ -2907,10 +3362,23 @@ module TD::ClientMethods
               'client_data' => client_data)
   end
   
+  # Changes information about a chat.
+  # Available for basic groups, supergroups, and channels.
+  # Requires can_change_info rights.
+  #
+  # @param chat_id [Integer] Identifier of the chat.
+  # @param description [String] New chat description; 0-255 characters.
+  # @return [TD::Types::Ok]
+  def set_chat_description(chat_id, description)
+    broadcast('@type'       => 'setChatDescription',
+              'chat_id'     => chat_id,
+              'description' => description)
+  end
+  
   # Changes the draft message in a chat.
   #
   # @param chat_id [Integer] Chat identifier.
-  # @param draft_message [TD::Types::DraftMessage, nil] New draft message.
+  # @param draft_message [TD::Types::DraftMessage, nil] New draft message; may be null.
   # @return [TD::Types::Ok]
   def set_chat_draft_message(chat_id, draft_message = nil)
     broadcast('@type'         => 'setChatDraftMessage',
@@ -2919,7 +3387,7 @@ module TD::ClientMethods
   end
   
   # Changes the status of a chat member, needs appropriate privileges.
-  # This function is currently not suitable for adding new members to the chat; instead, use {#add_chat_member}.
+  # This function is currently not suitable for adding new members to the chat; instead, use addChatMember.
   # The chat member status will not be changed until it has been synchronized with the server.
   #
   # @param chat_id [Integer] Chat identifier.
@@ -2944,17 +3412,30 @@ module TD::ClientMethods
               'notification_settings' => notification_settings)
   end
   
+  # Changes the chat members permissions.
+  # Supported only for basic groups and supergroups.
+  # Requires can_restrict_members administrator right.
+  #
+  # @param chat_id [Integer] Chat identifier.
+  # @param permissions [TD::Types::ChatPermissions] New non-administrator members permissions in the chat.
+  # @return [TD::Types::Ok]
+  def set_chat_permissions(chat_id, permissions)
+    broadcast('@type'       => 'setChatPermissions',
+              'chat_id'     => chat_id,
+              'permissions' => permissions)
+  end
+  
   # Changes the photo of a chat.
   # Supported only for basic groups, supergroups and channels.
-  # Requires administrator rights in basic groups and the appropriate administrator rights in supergroups and channels.
+  # Requires can_change_info rights.
   # The photo will not be changed before request to the server has been completed.
   #
   # @param chat_id [Integer] Chat identifier.
   # @param photo [TD::Types::InputFile] New chat photo.
-  #   You can use a zero {TD::Types::InputFile::Id} to delete the chat photo.
+  #   You can use a zero InputFileId to delete the chat photo.
   #   Files that are accessible only by HTTP URL are not acceptable.
   # @return [TD::Types::Ok]
-  def set_chat_photo(chat_id, photo = InputFile::Id.new(id: 0))
+  def set_chat_photo(chat_id, photo)
     broadcast('@type'   => 'setChatPhoto',
               'chat_id' => chat_id,
               'photo'   => photo)
@@ -2962,11 +3443,11 @@ module TD::ClientMethods
   
   # Changes the chat title.
   # Supported only for basic groups, supergroups and channels.
-  # Requires administrator rights in basic groups and the appropriate administrator rights in supergroups and channels.
+  # Requires can_change_info rights.
   # The title will not be changed until the request to the server has been completed.
   #
   # @param chat_id [Integer] Chat identifier.
-  # @param title [String] New title of the chat; 1-255 characters.
+  # @param title [String] New title of the chat; 1-128 characters.
   # @return [TD::Types::Ok]
   def set_chat_title(chat_id, title)
     broadcast('@type'   => 'setChatTitle',
@@ -2974,11 +3455,12 @@ module TD::ClientMethods
               'title'   => title)
   end
   
-  # Adds or changes a custom language pack to the current localization target.
+  # Adds or changes a custom local language pack to the current localization target.
   #
   # @param info [TD::Types::LanguagePackInfo] Information about the language pack.
   #   Language pack ID must start with 'X', consist only of English letters, digits and hyphens, and must not exceed 64
   #   characters.
+  #   Can be called before authorization.
   # @param strings [Array<TD::Types::LanguagePackString>] Strings of the new language pack.
   # @return [TD::Types::Ok]
   def set_custom_language_pack(info, strings)
@@ -2987,10 +3469,11 @@ module TD::ClientMethods
               'strings' => strings)
   end
   
-  # Adds, edits or deletes a string in a custom language pack.
+  # Adds, edits or deletes a string in a custom local language pack.
+  # Can be called before authorization.
   #
-  # @param language_pack_id [String] Identifier of a previously added custom language pack in the current localization
-  #   target.
+  # @param language_pack_id [String] Identifier of a previously added custom local language pack in the current
+  #   localization target.
   # @param new_string [TD::Types::LanguagePackString] New language pack string.
   # @return [TD::Types::Ok]
   def set_custom_language_pack_string(language_pack_id, new_string)
@@ -3009,13 +3492,13 @@ module TD::ClientMethods
               'new_encryption_key' => new_encryption_key)
   end
   
-  # The next part of a file was generated.
+  # Informs TDLib on a file generation prograss.
   #
   # @param generation_id [Integer] The identifier of the generation process.
   # @param expected_size [Integer] Expected size of the generated file, in bytes; 0 if unknown.
   # @param local_prefix_size [Integer] The number of bytes already generated.
   # @return [TD::Types::Ok]
-  def set_file_generation_progress(generation_id, local_prefix_size, expected_size: 0)
+  def set_file_generation_progress(generation_id, expected_size, local_prefix_size)
     broadcast('@type'             => 'setFileGenerationProgress',
               'generation_id'     => generation_id,
               'expected_size'     => expected_size,
@@ -3024,7 +3507,7 @@ module TD::ClientMethods
   
   # Updates the game score of the specified user in the game; for bots only.
   #
-  # @param chat_id [Integer] The chat to which the message with the game.
+  # @param chat_id [Integer] The chat to which the message with the game belongs.
   # @param message_id [Integer] Identifier of the message.
   # @param edit_message [Boolean] True, if the message should be edited.
   # @param user_id [Integer] User identifier.
@@ -3032,7 +3515,7 @@ module TD::ClientMethods
   # @param force [Boolean] Pass true to update the score even if it decreases.
   #   If the score is 0, the user will be deleted from the high score table.
   # @return [TD::Types::Message]
-  def set_game_score(chat_id, message_id, user_id, score, edit_message: false, force: false)
+  def set_game_score(chat_id, message_id, edit_message, user_id, score, force)
     broadcast('@type'        => 'setGameScore',
               'chat_id'      => chat_id,
               'message_id'   => message_id,
@@ -3051,7 +3534,7 @@ module TD::ClientMethods
   # @param force [Boolean] Pass true to update the score even if it decreases.
   #   If the score is 0, the user will be deleted from the high score table.
   # @return [TD::Types::Ok]
-  def set_inline_game_score(inline_message_id, user_id, score, edit_message: false, force: false)
+  def set_inline_game_score(inline_message_id, edit_message, user_id, score, force)
     broadcast('@type'             => 'setInlineGameScore',
               'inline_message_id' => inline_message_id,
               'edit_message'      => edit_message,
@@ -3060,11 +3543,52 @@ module TD::ClientMethods
               'force'             => force)
   end
   
-  # Changes the first and last name of the current user.
-  # If something changes, {TD::Types::Update::User} will be sent.
+  # Sets new log stream for internal logging of TDLib.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
   #
-  # @param first_name [String] The new value of the first name for the user; 1-255 characters.
-  # @param last_name [String] The new value of the optional last name for the user; 0-255 characters.
+  # @param log_stream [TD::Types::LogStream] New log stream.
+  # @return [TD::Types::Ok]
+  def set_log_stream(log_stream)
+    broadcast('@type'      => 'setLogStream',
+              'log_stream' => log_stream)
+  end
+  
+  # Sets the verbosity level for a specified TDLib internal log tag.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @param tag [String] Logging tag to change verbosity level.
+  # @param new_verbosity_level [Integer] New verbosity level; 1-1024.
+  # @return [TD::Types::Ok]
+  def set_log_tag_verbosity_level(tag, new_verbosity_level)
+    broadcast('@type'               => 'setLogTagVerbosityLevel',
+              'tag'                 => tag,
+              'new_verbosity_level' => new_verbosity_level)
+  end
+  
+  # Sets the verbosity level of the internal logging of TDLib.
+  # This is an offline method.
+  # Can be called before authorization.
+  # Can be called synchronously.
+  #
+  # @param new_verbosity_level [Integer] New value of the verbosity level for logging.
+  #   Value 0 corresponds to fatal errors, value 1 corresponds to errors, value 2 corresponds to warnings and debug
+  #   warnings, value 3 corresponds to informational, value 4 corresponds to debug, value 5 corresponds to verbose debug,
+  #   value greater than 5 and up to 1023 can be used to enable even more logging.
+  # @return [TD::Types::Ok]
+  def set_log_verbosity_level(new_verbosity_level)
+    broadcast('@type'               => 'setLogVerbosityLevel',
+              'new_verbosity_level' => new_verbosity_level)
+  end
+  
+  # Changes the first and last name of the current user.
+  # If something changes, updateUser will be sent.
+  #
+  # @param first_name [String] The new value of the first name for the user; 1-64 characters.
+  # @param last_name [String] The new value of the optional last name for the user; 0-64 characters.
   # @return [TD::Types::Ok]
   def set_name(first_name, last_name)
     broadcast('@type'      => 'setName',
@@ -3080,20 +3604,19 @@ module TD::ClientMethods
   #   network data usage statistics.
   #
   # @param type [TD::Types::NetworkType] The new network type.
-  #   By default, {TD::Types::NetworkType::Other}.
+  #   By default, networkTypeOther.
   # @return [TD::Types::Ok]
-  def set_network_type(type = NetworkType::Other)
+  def set_network_type(type)
     broadcast('@type' => 'setNetworkType',
               'type'  => type)
   end
   
   # Sets the value of an option.
-  # Only writable options can be set.
+  # (Check the list of available options on https://core.telegram.org/tdlib/options.) Only writable options can be set.
   # Can be called before authorization.
   #
   # @param name [String] The name of the option.
   # @param value [TD::Types::OptionValue] The new value of the option.
-  # @see https://core.telegram.org/tdlib/options List of available options
   # @return [TD::Types::Ok]
   def set_option(name, value)
     broadcast('@type' => 'setOption',
@@ -3127,16 +3650,14 @@ module TD::ClientMethods
   end
   
   # Changes the password for the user.
-  # If a new recovery email address is specified, then the error EMAIL_UNCONFIRMED is returned and the password change
-  #   will not be applied until the new recovery email address has been confirmed.
-  # The application should periodically call {#get_password_state} to check whether the new email address has been
-  #   confirmed.
+  # If a new recovery email address is specified, then the change will not be applied until the new recovery email
+  #   address is confirmed.
   #
   # @param old_password [String] Previous password of the user.
   # @param new_password [String, nil] New password of the user; may be empty to remove the password.
-  # @param new_hint [String, nil] New password hint.
+  # @param new_hint [String, nil] New password hint; may be empty.
   # @param set_recovery_email_address [Boolean] Pass true if the recovery email address should be changed.
-  # @param new_recovery_email_address [String, nil] New recovery email address.
+  # @param new_recovery_email_address [String, nil] New recovery email address; may be empty.
   # @return [TD::Types::PasswordState]
   def set_password(old_password, new_password: nil, new_hint: nil, set_recovery_email_address: false,
                    new_recovery_email_address: nil)
@@ -3157,8 +3678,22 @@ module TD::ClientMethods
               'chat_ids' => chat_ids)
   end
   
+  # Changes user answer to a poll.
+  #
+  # @param chat_id [Integer] Identifier of the chat to which the poll belongs.
+  # @param message_id [Integer] Identifier of the message containing the poll.
+  # @param option_ids [Array<Integer>] 0-based identifiers of options, chosen by the user.
+  #   Currently user can't choose more than 1 option.
+  # @return [TD::Types::Ok]
+  def set_poll_answer(chat_id, message_id, option_ids)
+    broadcast('@type'      => 'setPollAnswer',
+              'chat_id'    => chat_id,
+              'message_id' => message_id,
+              'option_ids' => option_ids)
+  end
+  
   # Uploads a new profile photo for the current user.
-  # If something changes, {TD::Types::Update::User} will be sent.
+  # If something changes, updateUser will be sent.
   #
   # @param photo [TD::Types::InputFile] Profile photo to set.
   #   {TD::Types::InputFile::Id} and {TD::Types::InputFile::Remote} may still be unsupported.
@@ -3168,18 +3703,16 @@ module TD::ClientMethods
               'photo' => photo)
   end
   
-  # Changes the recovery email address of the user.
-  # If a new recovery email address is specified, then the error EMAIL_UNCONFIRMED is returned and the email address
-  #   will not be changed until the new email has been confirmed.
-  # The application should periodically call {#get_password_state} to check whether the email address has been
-  #   confirmed.
+  # Changes the 2-step verification recovery email address of the user.
+  # If a new recovery email address is specified, then the change will not be applied until the new recovery email
+  #   address is confirmed.
   # If new_recovery_email_address is the same as the email address that is currently set up, this call succeeds
   #   immediately and aborts all other requests waiting for an email confirmation.
   #
   # @param password [String] Password of the current user.
   # @param new_recovery_email_address [String] New recovery email address.
   # @return [TD::Types::PasswordState]
-  def set_recovery_email_address(new_recovery_email_address, password)
+  def set_recovery_email_address(password, new_recovery_email_address)
     broadcast('@type'                      => 'setRecoveryEmailAddress',
               'password'                   => password,
               'new_recovery_email_address' => new_recovery_email_address)
@@ -3209,24 +3742,13 @@ module TD::ClientMethods
               'position' => position)
   end
   
-  # Changes information about a supergroup or channel; requires appropriate administrator rights.
-  #
-  # @param supergroup_id [Integer] Identifier of the supergroup or channel.
-  # @param description [String] New supergroup or channel description; 0-255 characters.
-  # @return [TD::Types::Ok]
-  def set_supergroup_description(supergroup_id, description)
-    broadcast('@type'         => 'setSupergroupDescription',
-              'supergroup_id' => supergroup_id,
-              'description'   => description)
-  end
-  
-  # Changes the sticker set of a supergroup; requires appropriate rights in the supergroup.
+  # Changes the sticker set of a supergroup; requires can_change_info rights.
   #
   # @param supergroup_id [Integer] Identifier of the supergroup.
   # @param sticker_set_id [Integer] New value of the supergroup sticker set identifier.
   #   Use 0 to remove the supergroup sticker set.
   # @return [TD::Types::Ok]
-  def set_supergroup_sticker_set(supergroup_id, sticker_set_id = 0)
+  def set_supergroup_sticker_set(supergroup_id, sticker_set_id)
     broadcast('@type'          => 'setSupergroupStickerSet',
               'supergroup_id'  => supergroup_id,
               'sticker_set_id' => sticker_set_id)
@@ -3238,14 +3760,14 @@ module TD::ClientMethods
   # @param username [String] New value of the username.
   #   Use an empty string to remove the username.
   # @return [TD::Types::Ok]
-  def set_supergroup_username(supergroup_id, username = "")
+  def set_supergroup_username(supergroup_id, username)
     broadcast('@type'         => 'setSupergroupUsername',
               'supergroup_id' => supergroup_id,
               'username'      => username)
   end
   
   # Sets the parameters for TDLib initialization.
-  # Works only when the current authorization state is {TD::Types::AuthorizationState::WaitTdlibParameters}.
+  # Works only when the current authorization state is authorizationStateWaitTdlibParameters.
   #
   # @param parameters [TD::Types::TdlibParameters] Parameters.
   # @return [TD::Types::Ok]
@@ -3266,14 +3788,39 @@ module TD::ClientMethods
   end
   
   # Changes the username of the current user.
-  # If something changes, {TD::Types::Update::User} will be sent.
+  # If something changes, updateUser will be sent.
   #
   # @param username [String] The new value of the username.
   #   Use an empty string to remove the username.
   # @return [TD::Types::Ok]
-  def set_username(username = "")
+  def set_username(username)
     broadcast('@type'    => 'setUsername',
               'username' => username)
+  end
+  
+  # Stops a poll.
+  # A poll in a message can be stopped when the message has can_be_edited flag set.
+  #
+  # @param chat_id [Integer] Identifier of the chat to which the poll belongs.
+  # @param message_id [Integer] Identifier of the message containing the poll.
+  # @param reply_markup [TD::Types::ReplyMarkup] The new message reply markup; for bots only.
+  # @return [TD::Types::Ok]
+  def stop_poll(chat_id, message_id, reply_markup)
+    broadcast('@type'        => 'stopPoll',
+              'chat_id'      => chat_id,
+              'message_id'   => message_id,
+              'reply_markup' => reply_markup)
+  end
+  
+  # Fetches the latest versions of all strings from a language pack in the current localization target from the server.
+  # This method doesn't need to be called explicitly for the current used/base language packs.
+  # Can be called before authorization.
+  #
+  # @param language_pack_id [String] Language pack identifier.
+  # @return [TD::Types::Ok]
+  def synchronize_language_pack(language_pack_id)
+    broadcast('@type'            => 'synchronizeLanguagePack',
+              'language_pack_id' => language_pack_id)
   end
   
   # Terminates all other sessions of the current user.
@@ -3290,17 +3837,6 @@ module TD::ClientMethods
   def terminate_session(session_id)
     broadcast('@type'      => 'terminateSession',
               'session_id' => session_id)
-  end
-  
-  # Toggles the "All members are admins" setting in basic groups; requires creator privileges in the group.
-  #
-  # @param basic_group_id [Integer] Identifier of the basic group.
-  # @param everyone_is_administrator [Boolean] New value of everyone_is_administrator.
-  # @return [TD::Types::Ok]
-  def toggle_basic_group_administrators(basic_group_id, everyone_is_administrator)
-    broadcast('@type'                     => 'toggleBasicGroupAdministrators',
-              'basic_group_id'            => basic_group_id,
-              'everyone_is_administrator' => everyone_is_administrator)
   end
   
   # Changes the value of the default disable_notification parameter, used when a message is sent to a chat.
@@ -3337,20 +3873,7 @@ module TD::ClientMethods
               'is_pinned' => is_pinned)
   end
   
-  # Toggles whether all members of a supergroup can add new members; requires appropriate administrator rights in the
-  #   supergroup.
-  #
-  # @param supergroup_id [Integer] Identifier of the supergroup.
-  # @param anyone_can_invite [Boolean] New value of anyone_can_invite.
-  # @return [TD::Types::Ok]
-  def toggle_supergroup_invites(supergroup_id, anyone_can_invite)
-    broadcast('@type'             => 'toggleSupergroupInvites',
-              'supergroup_id'     => supergroup_id,
-              'anyone_can_invite' => anyone_can_invite)
-  end
-  
-  # Toggles whether the message history of a supergroup is available to new members; requires appropriate administrator
-  #   rights in the supergroup.
+  # Toggles whether the message history of a supergroup is available to new members; requires can_change_info rights.
   #
   # @param supergroup_id [Integer] The identifier of the supergroup.
   # @param is_all_history_available [Boolean] The new value of is_all_history_available.
@@ -3361,7 +3884,7 @@ module TD::ClientMethods
               'is_all_history_available' => is_all_history_available)
   end
   
-  # Toggles sender signatures messages sent in a channel; requires appropriate administrator rights in the channel.
+  # Toggles sender signatures messages sent in a channel; requires can_change_info rights.
   #
   # @param supergroup_id [Integer] Identifier of the channel.
   # @param sign_messages [Boolean] New value of sign_messages.
@@ -3381,18 +3904,17 @@ module TD::ClientMethods
               'user_id' => user_id)
   end
   
-  # Removes the pinned message from a supergroup or channel; requires appropriate administrator rights in the
-  #   supergroup or channel.
+  # Removes the pinned message from a chat; requires can_pin_messages rights in the group or channel.
   #
-  # @param supergroup_id [Integer] Identifier of the supergroup or channel.
+  # @param chat_id [Integer] Identifier of the chat.
   # @return [TD::Types::Ok]
-  def unpin_supergroup_message(supergroup_id)
-    broadcast('@type'         => 'unpinSupergroupMessage',
-              'supergroup_id' => supergroup_id)
+  def unpin_chat_message(chat_id)
+    broadcast('@type'   => 'unpinChatMessage',
+              'chat_id' => chat_id)
   end
   
-  # Creates a new supergroup from an existing basic group and sends a corresponding
-  #   {TD::Types::MessageContent::UpgradeTo} and {TD::Types::MessageContent::ChatUpgradeFrom}.
+  # Creates a new supergroup from an existing basic group and sends a corresponding messageChatUpgradeTo and
+  #   messageChatUpgradeFrom; requires creator privileges.
   # Deactivates the original basic group.
   #
   # @param chat_id [Integer] Identifier of the chat to upgrade.
@@ -3403,29 +3925,29 @@ module TD::ClientMethods
   end
   
   # Asynchronously uploads a file to the cloud without sending it in a message.
-  # {TD::Types::Update::File} will be used to notify about upload progress and successful completion of the upload.
+  # updateFile will be used to notify about upload progress and successful completion of the upload.
   # The file will not have a persistent remote identifier until it will be sent in a message.
   #
   # @param file [TD::Types::InputFile] File to upload.
   # @param file_type [TD::Types::FileType] File type.
   # @param priority [Integer] Priority of the upload (1-32).
   #   The higher the priority, the earlier the file will be uploaded.
-  #   If the priorities of two files are equal, then the first one for which {#upload_file} was called will be uploaded
+  #   If the priorities of two files are equal, then the first one for which uploadFile was called will be uploaded
   #   first.
   # @return [TD::Types::File]
-  def upload_file(file, file_type, priority = 1)
+  def upload_file(file, file_type, priority)
     broadcast('@type'     => 'uploadFile',
               'file'      => file,
               'file_type' => file_type,
               'priority'  => priority)
   end
   
-  # Uploads a PNG image with a sticker; for bots only 
+  # Uploads a PNG image with a sticker; for bots only; returns the uploaded file.
   #
   # @param user_id [Integer] Sticker file owner.
   # @param png_sticker [TD::Types::InputFile] PNG image with the sticker; must be up to 512 kB in size and fit in
   #   512x512 square.
-  # @return [TD::Types::File] the uploaded file.
+  # @return [TD::Types::File]
   def upload_sticker_file(user_id, png_sticker)
     broadcast('@type'       => 'uploadStickerFile',
               'user_id'     => user_id,
@@ -3440,7 +3962,7 @@ module TD::ClientMethods
   # @param order_info [TD::Types::OrderInfo] The order information, provided by the user.
   # @param allow_save [Boolean] True, if the order information can be saved.
   # @return [TD::Types::ValidatedOrderInfo]
-  def validate_order_info(chat_id, message_id, order_info, allow_save: false)
+  def validate_order_info(chat_id, message_id, order_info, allow_save)
     broadcast('@type'      => 'validateOrderInfo',
               'chat_id'    => chat_id,
               'message_id' => message_id,
@@ -3448,7 +3970,7 @@ module TD::ClientMethods
               'allow_save' => allow_save)
   end
   
-  # This method should be called if messages are being viewed by the user.
+  # Informs TDLib that messages are being viewed by the user.
   # Many useful activities depend on whether the messages are currently being viewed or not (e.g., marking messages as
   #   read, incrementing a view counter, updating a view counter, removing deleted messages in supergroups and channels).
   #
@@ -3456,7 +3978,7 @@ module TD::ClientMethods
   # @param message_ids [Array<Integer>] The identifiers of the messages being viewed.
   # @param force_read [Boolean] True, if messages in closed chats should be marked as read.
   # @return [TD::Types::Ok]
-  def view_messages(chat_id, message_ids, force_read: false)
+  def view_messages(chat_id, message_ids, force_read)
     broadcast('@type'       => 'viewMessages',
               'chat_id'     => chat_id,
               'message_ids' => message_ids,
@@ -3470,5 +3992,20 @@ module TD::ClientMethods
   def view_trending_sticker_sets(sticker_set_ids)
     broadcast('@type'           => 'viewTrendingStickerSets',
               'sticker_set_ids' => sticker_set_ids)
+  end
+  
+  # Writes a part of a generated file.
+  # This method is intended to be used only if the client has no direct access to TDLib's file system, because it is
+  #   usually slower than a direct write to the destination file.
+  #
+  # @param generation_id [Integer] The identifier of the generation process.
+  # @param offset [Integer] The offset from which to write the data to the file.
+  # @param data [String] The data to write.
+  # @return [TD::Types::Ok]
+  def write_generated_file_part(generation_id, offset, data)
+    broadcast('@type'         => 'writeGeneratedFilePart',
+              'generation_id' => generation_id,
+              'offset'        => offset,
+              'data'          => data)
   end
 end
