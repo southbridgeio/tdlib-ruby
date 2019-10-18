@@ -20,9 +20,11 @@ describe TD::Client do
   end
 
   around do |example|
-    example.run
-  ensure
-    client.dispose
+    begin
+      example.run
+    ensure
+      client.dispose
+    end
   end
 
   describe '#on_ready' do
