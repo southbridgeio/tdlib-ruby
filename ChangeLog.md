@@ -1,3 +1,8 @@
+### 2.1.0 / 2019-10-18
+
+* Support tdlib 1.5
+* Fix TD::Client#dispose race condition and client crash
+
 ### 2.0.0 / 2019-02-08
 
 * Generated types and client functions
