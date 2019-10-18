@@ -5,6 +5,7 @@ module TD::Types
       spam
       violence
       pornography
+      child_abuse
       copyright
       custom
     ].each do |type|

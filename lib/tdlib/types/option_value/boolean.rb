@@ -1,5 +1,5 @@
 module TD::Types
-  # Boolean option.
+  # Represents a boolean option.
   #
   # @attr value [Boolean] The value of the option.
   class OptionValue::Boolean < OptionValue

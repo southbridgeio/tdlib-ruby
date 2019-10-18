@@ -4,6 +4,7 @@ module TD::Types
     %w[
       message_edited
       message_deleted
+      poll_stopped
       message_pinned
       message_unpinned
       member_joined
@@ -12,6 +13,7 @@ module TD::Types
       member_promoted
       member_restricted
       title_changed
+      permissions_changed
       description_changed
       username_changed
       photo_changed

@@ -1,5 +1,5 @@
 module TD::Types
-  # The order of the chat in the chats list has changed.
+  # The order of the chat in the chat list has changed.
   # Instead of this update updateChatLastMessage, updateChatIsPinned or updateChatDraftMessage might be sent.
   #
   # @attr chat_id [Integer] Chat identifier.

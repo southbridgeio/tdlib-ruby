@@ -17,6 +17,7 @@ module TD::Types
       venue
       contact
       game
+      poll
       invoice
       call
       basic_group_chat_create

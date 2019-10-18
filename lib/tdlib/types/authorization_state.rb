@@ -6,6 +6,7 @@ module TD::Types
       wait_encryption_key
       wait_phone_number
       wait_code
+      wait_registration
       wait_password
       ready
       logging_out

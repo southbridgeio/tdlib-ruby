@@ -83,7 +83,7 @@ begin
     when :wait_phone_number
       puts 'Please, enter your phone number:'
       phone = STDIN.gets.strip
-      client.set_authentication_phone_number(phone).wait
+      client.set_authentication_phone_number(phone, nil).wait
     when :wait_code
       puts 'Please, enter code from SMS:'
       code = STDIN.gets.strip
@@ -153,6 +153,12 @@ Additional options can be passed to client:
 TD::Client.new(database_directory: 'will override value from config',
                files_directory: 'will override value from config')
 ```
+
+If the tdlib schema changes, then `./bin/parse` can be run to
+synchronize the Ruby types with the new schema. Please look through
+`lib/tdlib/client_methods.rb` carefully, especially the set_password
+method!
+
 
 ## License
 

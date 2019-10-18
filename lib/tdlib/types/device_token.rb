@@ -1,10 +1,10 @@
 module TD::Types
-  # Represents a data needed to subscribe for push notifications.
+  # Represents a data needed to subscribe for push notifications through registerDevice method.
   # To use specific push notification service, you must specify the correct application platform and upload valid
   #   server authentication data at https://my.telegram.org.
   class DeviceToken < Base
     %w[
-      google_cloud_messaging
+      firebase_cloud_messaging
       apple_push
       apple_push_vo_ip
       windows_push
