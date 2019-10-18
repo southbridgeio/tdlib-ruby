@@ -49,7 +49,7 @@ class TD::Client
       end
     end
 
-    @update_manager.run
+    @update_manager.run(callback: method(:handle_update))
     ready
   end
 
@@ -149,10 +149,7 @@ class TD::Client
   # Stops update manager and destroys TDLib client
   def dispose
     return if dead?
-    @update_manager.stop
-    @alive = false
-    @ready = false
-    TD::Api.client_destroy(@td_client)
+    close.then { get_authorization_state }
   end
 
   def alive?
@@ -168,6 +165,14 @@ class TD::Client
   end
 
   private
+
+  def handle_update(update)
+    return unless update.is_a?(TD::Types::AuthorizationState::Closed)
+    @alive = false
+    @ready = false
+    TD::Api.client_destroy(@td_client)
+    throw(:client_closed)
+  end
 
   def send_to_td_client(query)
     return unless alive?

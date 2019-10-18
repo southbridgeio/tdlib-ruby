@@ -8,7 +8,7 @@ Ruby bindings and client for TDLib (Telegram database library).
 
 ## Requirements
 
-* Ruby 2.3+
+* Ruby 2.4+
 * Compiled [tdlib](https://github.com/tdlib/td)
 
 We have precompiled versions for CentOS 6 & 7 in our repositories:

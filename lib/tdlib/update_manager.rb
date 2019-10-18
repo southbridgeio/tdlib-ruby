@@ -13,31 +13,24 @@ class TD::UpdateManager
 
   alias << add_handler
 
-  def run
+  def run(callback: nil)
     Thread.start do
-      loop { stopped? ? break : handle_update }
+      catch(:client_closed) { loop { handle_update(callback: callback) } }
+      @mutex.synchronize { @handlers = [] }
     end
-  end
-
-  def stop
-    @stopped = true
-    @mutex.synchronize { @handlers = [] }
-  end
-
-  def stopped?
-    !!@stopped
   end
 
   private
 
   attr_reader :handlers
 
-  def handle_update
+  def handle_update(callback: nil)
     update = TD::Api.client_receive(@td_client, TIMEOUT)
 
     unless update.nil?
       extra  = update.delete('@extra')
       update = TD::Types.wrap(update)
+      callback&.call(update)
 
       match_handlers!(update, extra).each { |h| h.async.run(update) }
     end
