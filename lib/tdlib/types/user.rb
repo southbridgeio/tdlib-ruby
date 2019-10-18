@@ -11,12 +11,14 @@ module TD::Types
   # @attr outgoing_link [TD::Types::LinkState] Relationship from the current user to the other user.
   # @attr incoming_link [TD::Types::LinkState] Relationship from the other user to the current user.
   # @attr is_verified [Boolean] True, if the user is verified.
+  # @attr is_support [Boolean] True, if the user is Telegram support account.
   # @attr restriction_reason [String] If non-empty, it contains the reason why access to this user must be restricted.
   #   The format of the string is "{type}: {description}".
   #   {type} contains the type of the restriction and at least one of the suffixes "-all", "-ios", "-android", or
   #   "-wp", which describe the platforms on which access should be restricted.
   #   (For example, "terms-ios-android".
   #   {description} contains a human-readable description of the restriction, which can be shown to the user).
+  # @attr is_scam [Boolean] True, if many users reported this user as a scam.
   # @attr have_access [Boolean] If false, the user is inaccessible, and the only information known about the user is
   #   inside this class.
   #   It can't be passed to any method except GetUser.
@@ -33,7 +35,9 @@ module TD::Types
     attribute :outgoing_link, TD::Types::LinkState
     attribute :incoming_link, TD::Types::LinkState
     attribute :is_verified, TD::Types::Bool
+    attribute :is_support, TD::Types::Bool
     attribute :restriction_reason, TD::Types::String
+    attribute :is_scam, TD::Types::Bool
     attribute :have_access, TD::Types::Bool
     attribute :type, TD::Types::UserType
     attribute :language_code, TD::Types::String

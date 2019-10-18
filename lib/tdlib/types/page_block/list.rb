@@ -1,10 +1,8 @@
 module TD::Types
-  # A list of texts.
+  # A list of data blocks.
   #
-  # @attr items [Array<TD::Types::RichText>] Texts.
-  # @attr is_ordered [Boolean] True, if the items should be marked with numbers.
+  # @attr items [Array<TD::Types::PageBlockListItem>] The items of the list.
   class PageBlock::List < PageBlock
-    attribute :items, TD::Types::Array.of(TD::Types::RichText)
-    attribute :is_ordered, TD::Types::Bool
+    attribute :items, TD::Types::Array.of(TD::Types::PageBlockListItem)
   end
 end

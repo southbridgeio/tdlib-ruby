@@ -11,6 +11,14 @@ module TD::Types
   # @attr use_default_show_preview [Boolean] If true, show_preview is ignored and the value for the relevant type of
   #   chat is used instead.
   # @attr show_preview [Boolean] True, if message content should be displayed in notifications.
+  # @attr use_default_disable_pinned_message_notifications [Boolean] If true, disable_pinned_message_notifications is
+  #   ignored and the value for the relevant type of chat is used instead.
+  # @attr disable_pinned_message_notifications [Boolean] If true, notifications for incoming pinned messages will be
+  #   created as for an ordinary unread message.
+  # @attr use_default_disable_mention_notifications [Boolean] If true, disable_mention_notifications is ignored and the
+  #   value for the relevant type of chat is used instead.
+  # @attr disable_mention_notifications [Boolean] If true, notifications for messages with mentions will be created as
+  #   for an ordinary unread message.
   class ChatNotificationSettings < Base
     attribute :use_default_mute_for, TD::Types::Bool
     attribute :mute_for, TD::Types::Integer
@@ -18,5 +26,9 @@ module TD::Types
     attribute :sound, TD::Types::String
     attribute :use_default_show_preview, TD::Types::Bool
     attribute :show_preview, TD::Types::Bool
+    attribute :use_default_disable_pinned_message_notifications, TD::Types::Bool
+    attribute :disable_pinned_message_notifications, TD::Types::Bool
+    attribute :use_default_disable_mention_notifications, TD::Types::Bool
+    attribute :disable_mention_notifications, TD::Types::Bool
   end
 end

@@ -6,6 +6,8 @@ module TD::Types
   # @attr type [TD::Types::ChatType] Type of the chat.
   # @attr title [String] Chat title.
   # @attr photo [TD::Types::ChatPhoto, nil] Chat photo; may be null.
+  # @attr permissions [TD::Types::ChatPermissions] Actions that non-administrator chat members are allowed to take in
+  #   the chat.
   # @attr last_message [TD::Types::Message, nil] Last message in the chat; may be null.
   # @attr order [Integer] Descending parameter by which chats are sorted in the main chat list.
   #   If the order number of two chats is the same, they must be sorted in descending order by ID.
@@ -13,6 +15,9 @@ module TD::Types
   # @attr is_pinned [Boolean] True, if the chat is pinned.
   # @attr is_marked_as_unread [Boolean] True, if the chat is marked as unread.
   # @attr is_sponsored [Boolean] True, if the chat is sponsored by the user's MTProxy server.
+  # @attr can_be_deleted_only_for_self [Boolean] True, if the chat messages can be deleted only for the current user
+  #   while other users will continue to see the messages.
+  # @attr can_be_deleted_for_all_users [Boolean] True, if the chat messages can be deleted for all users.
   # @attr can_be_reported [Boolean] True, if the chat can be reported to Telegram moderators through reportChat.
   # @attr default_disable_notification [Boolean] Default value of the disable_notification parameter, used when a
   #   message is sent to the chat.
@@ -21,6 +26,7 @@ module TD::Types
   # @attr last_read_outbox_message_id [Integer] Identifier of the last read outgoing message.
   # @attr unread_mention_count [Integer] Number of unread messages with a mention/reply in the chat.
   # @attr notification_settings [TD::Types::ChatNotificationSettings] Notification settings for this chat.
+  # @attr pinned_message_id [Integer] Identifier of the pinned message in the chat; 0 if none.
   # @attr reply_markup_message_id [Integer] Identifier of the message from which reply markup needs to be used; 0 if
   #   there is no default custom reply markup in the chat.
   # @attr draft_message [TD::Types::DraftMessage, nil] A draft of a message in the chat; may be null.
@@ -32,11 +38,14 @@ module TD::Types
     attribute :type, TD::Types::ChatType
     attribute :title, TD::Types::String
     attribute :photo, TD::Types::ChatPhoto.optional.default(nil)
+    attribute :permissions, TD::Types::ChatPermissions
     attribute :last_message, TD::Types::Message.optional.default(nil)
     attribute :order, TD::Types::Integer
     attribute :is_pinned, TD::Types::Bool
     attribute :is_marked_as_unread, TD::Types::Bool
     attribute :is_sponsored, TD::Types::Bool
+    attribute :can_be_deleted_only_for_self, TD::Types::Bool
+    attribute :can_be_deleted_for_all_users, TD::Types::Bool
     attribute :can_be_reported, TD::Types::Bool
     attribute :default_disable_notification, TD::Types::Bool
     attribute :unread_count, TD::Types::Integer
@@ -44,6 +53,7 @@ module TD::Types
     attribute :last_read_outbox_message_id, TD::Types::Integer
     attribute :unread_mention_count, TD::Types::Integer
     attribute :notification_settings, TD::Types::ChatNotificationSettings
+    attribute :pinned_message_id, TD::Types::Integer
     attribute :reply_markup_message_id, TD::Types::Integer
     attribute :draft_message, TD::Types::DraftMessage.optional.default(nil)
     attribute :client_data, TD::Types::String

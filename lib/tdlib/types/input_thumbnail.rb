@@ -4,9 +4,9 @@ module TD::Types
   #
   # @attr thumbnail [TD::Types::InputFile] Thumbnail file to send.
   #   Sending thumbnails by file_id is currently not supported.
-  # @attr width [Integer] Thumbnail width, usually shouldn't exceed 90.
+  # @attr width [Integer] Thumbnail width, usually shouldn't exceed 320.
   #   Use 0 if unknown.
-  # @attr height [Integer] Thumbnail height, usually shouldn't exceed 90.
+  # @attr height [Integer] Thumbnail height, usually shouldn't exceed 320.
   #   Use 0 if unknown.
   class InputThumbnail < Base
     attribute :thumbnail, TD::Types::InputFile

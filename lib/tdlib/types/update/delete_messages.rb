@@ -4,7 +4,7 @@ module TD::Types
   # @attr chat_id [Integer] Chat identifier.
   # @attr message_ids [Array<Integer>] Identifiers of the deleted messages.
   # @attr is_permanent [Boolean] True, if the messages are permanently deleted by a user (as opposed to just becoming
-  #   unaccessible).
+  #   inaccessible).
   # @attr from_cache [Boolean] True, if the messages are deleted only from the cache and can possibly be retrieved
   #   again in the future.
   class Update::DeleteMessages < Update

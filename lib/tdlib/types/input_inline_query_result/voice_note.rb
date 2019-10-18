@@ -5,10 +5,11 @@ module TD::Types
   # @attr title [String] Title of the voice note.
   # @attr voice_note_url [String] The URL of the voice note file.
   # @attr voice_note_duration [Integer] Duration of the voice note, in seconds.
-  # @attr reply_markup [TD::Types::ReplyMarkup::InlineKeyboard, nil] The message reply markup.
-  # @attr input_message_content [TD::Types::InputMessageContent::Text, TD::Types::InputMessageContent::VoiceNote,
-  #   TD::Types::InputMessageContent::Location, TD::Types::InputMessageContent::Venue,
-  #   TD::Types::InputMessageContent::Contact] The content of the message to be sent.
+  # @attr reply_markup [TD::Types::ReplyMarkup] The message reply markup.
+  #   Must be of type {TD::Types::ReplyMarkup::InlineKeyboard} or null.
+  # @attr input_message_content [TD::Types::InputMessageContent] The content of the message to be sent.
+  #   Must be one of the following types: InputMessageText, InputMessageVoiceNote, InputMessageLocation,
+  #   InputMessageVenue or InputMessageContact.
   class InputInlineQueryResult::VoiceNote < InputInlineQueryResult
     attribute :id, TD::Types::String
     attribute :title, TD::Types::String

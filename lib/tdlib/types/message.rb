@@ -3,12 +3,14 @@ module TD::Types
   #
   # @attr id [Integer] Message identifier, unique for the chat to which the message belongs.
   # @attr sender_user_id [Integer] Identifier of the user who sent the message; 0 if unknown.
-  #   It is unknown for channel posts.
+  #   Currently, it is unknown for channel posts and for channel posts automatically forwarded to discussion group.
   # @attr chat_id [Integer] Chat identifier.
   # @attr sending_state [TD::Types::MessageSendingState, nil] Information about the sending state of the message; may
   #   be null.
   # @attr is_outgoing [Boolean] True, if the message is outgoing.
   # @attr can_be_edited [Boolean] True, if the message can be edited.
+  #   For live location and poll messages this fields shows, whether editMessageLiveLocation or stopPoll can be used
+  #   with this message by the client.
   # @attr can_be_forwarded [Boolean] True, if the message can be forwarded.
   # @attr can_be_deleted_only_for_self [Boolean] True, if the message can be deleted only for the current user while
   #   other users will continue to see it.

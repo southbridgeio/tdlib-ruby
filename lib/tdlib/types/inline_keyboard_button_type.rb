@@ -3,6 +3,7 @@ module TD::Types
   class InlineKeyboardButtonType < Base
     %w[
       url
+      login_url
       callback
       callback_game
       switch_inline

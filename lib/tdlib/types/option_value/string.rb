@@ -1,5 +1,5 @@
 module TD::Types
-  # A string option.
+  # Represents a string option.
   #
   # @attr value [String] The value of the option.
   class OptionValue::String < OptionValue

@@ -7,6 +7,7 @@ module TD::Types
   # @attr height [Integer] Height of the animation.
   # @attr file_name [String] Original name of the file; as defined by the sender.
   # @attr mime_type [String] MIME type of the file, usually "image/gif" or "video/mp4".
+  # @attr minithumbnail [TD::Types::Minithumbnail, nil] Animation minithumbnail; may be null.
   # @attr thumbnail [TD::Types::PhotoSize, nil] Animation thumbnail; may be null.
   # @attr animation [TD::Types::File] File containing the animation.
   class Animation < Base
@@ -15,6 +16,7 @@ module TD::Types
     attribute :height, TD::Types::Integer
     attribute :file_name, TD::Types::String
     attribute :mime_type, TD::Types::String
+    attribute :minithumbnail, TD::Types::Minithumbnail.optional.default(nil)
     attribute :thumbnail, TD::Types::PhotoSize.optional.default(nil)
     attribute :animation, TD::Types::File
   end

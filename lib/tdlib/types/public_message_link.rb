@@ -1,5 +1,5 @@
 module TD::Types
-  # Contains a public HTTPS link to a message in a public supergroup or channel.
+  # Contains a public HTTPS link to a message in a public supergroup or channel with a username.
   #
   # @attr link [String] Message link.
   # @attr html [String] HTML-code for embedding the message.

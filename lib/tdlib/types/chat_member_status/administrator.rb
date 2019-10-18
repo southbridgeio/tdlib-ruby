@@ -12,9 +12,9 @@ module TD::Types
   # @attr can_delete_messages [Boolean] True, if the administrator can delete messages of other users.
   # @attr can_invite_users [Boolean] True, if the administrator can invite new users to the chat.
   # @attr can_restrict_members [Boolean] True, if the administrator can restrict, ban, or unban chat members.
-  # @attr can_pin_messages [Boolean] True, if the administrator can pin messages; applicable to supergroups only.
-  # @attr can_promote_members [Boolean] True, if the administrator can add new administrators with a subset of his own
-  #   privileges or demote administrators that were directly or indirectly promoted by him.
+  # @attr can_pin_messages [Boolean] True, if the administrator can pin messages; applicable to groups only.
+  # @attr can_promote_members [Boolean] True, if the administrator can add new administrators with a subset of their
+  #   own privileges or demote administrators that were directly or indirectly promoted by him.
   class ChatMemberStatus::Administrator < ChatMemberStatus
     attribute :can_be_edited, TD::Types::Bool
     attribute :can_change_info, TD::Types::Bool
