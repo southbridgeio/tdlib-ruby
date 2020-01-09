@@ -1,5 +1,5 @@
 module TD::Types
-  # A strike-through rich text.
+  # A strikethrough rich text.
   #
   # @attr text [TD::Types::RichText] Text.
   class RichText::Strikethrough < RichText

@@ -6,7 +6,7 @@ module TD::Types
   # @attr height [Integer] Video height; as defined by the sender.
   # @attr file_name [String] Original name of the file; as defined by the sender.
   # @attr mime_type [String] MIME type of the file; as defined by the sender.
-  # @attr has_stickers [Boolean] True, if stickers were added to the photo.
+  # @attr has_stickers [Boolean] True, if stickers were added to the video.
   # @attr supports_streaming [Boolean] True, if the video should be tried to be streamed.
   # @attr minithumbnail [TD::Types::Minithumbnail, nil] Video minithumbnail; may be null.
   # @attr thumbnail [TD::Types::PhotoSize, nil] Video thumbnail; as defined by the sender; may be null.

@@ -1,6 +1,6 @@
 module TD::Types
   # The last message of a chat was changed.
-  # If last_message is null then the last message in the chat became unknown.
+  # If last_message is null, then the last message in the chat became unknown.
   # Some new unknown messages might be added to the chat in this case.
   #
   # @attr chat_id [Integer] Chat identifier.

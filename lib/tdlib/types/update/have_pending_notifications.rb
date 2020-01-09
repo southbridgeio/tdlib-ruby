@@ -1,5 +1,5 @@
 module TD::Types
-  # Describes, whether there are some pending notification updates.
+  # Describes whether there are some pending notification updates.
   # Can be used to prevent application from killing, while there are some pending notifications.
   #
   # @attr have_delayed_notifications [Boolean] True, if there are some delayed notification updates, which will be sent
