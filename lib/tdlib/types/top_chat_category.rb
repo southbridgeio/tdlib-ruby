@@ -8,6 +8,7 @@ module TD::Types
       channels
       inline_bots
       calls
+      forward_chats
     ].each do |type|
       autoload TD::Types.camelize(type), "tdlib/types/top_chat_category/#{type}"
     end

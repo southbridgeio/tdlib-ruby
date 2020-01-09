@@ -18,8 +18,11 @@ module TD::Types
       username_changed
       photo_changed
       invites_toggled
+      linked_chat_changed
+      slow_mode_delay_changed
       sign_messages_toggled
       sticker_set_changed
+      location_changed
       is_all_history_available_toggled
     ].each do |type|
       autoload TD::Types.camelize(type), "tdlib/types/chat_event_action/#{type}"

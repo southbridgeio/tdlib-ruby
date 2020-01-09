@@ -1,6 +1,6 @@
 module TD::Types
   # Describes an audio file.
-  # Audio is usually in MP3 format.
+  # Audio is usually in MP3 or M4A format.
   #
   # @attr duration [Integer] Duration of the audio, in seconds; as defined by the sender.
   # @attr title [String] Title of the audio; as defined by the sender.

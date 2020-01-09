@@ -4,8 +4,8 @@ module TD::Types
   # @attr description [String] Group description.
   # @attr creator_user_id [Integer] User identifier of the creator of the group; 0 if unknown.
   # @attr members [Array<TD::Types::ChatMember>] Group members.
-  # @attr invite_link [String] Invite link for this group; available only for the group creator and only after it has
-  #   been generated at least once.
+  # @attr invite_link [String] Invite link for this group; available only after it has been generated at least once and
+  #   only for the group creator.
   class BasicGroupFullInfo < Base
     attribute :description, TD::Types::String
     attribute :creator_user_id, TD::Types::Integer

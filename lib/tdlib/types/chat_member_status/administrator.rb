@@ -4,6 +4,8 @@ module TD::Types
   #   members.
   # In supergroups and channels, there are more detailed options for administrator privileges.
   #
+  # @attr custom_title [String] A custom title of the administrator; 0-16 characters without emojis; applicable to
+  #   supergroups only.
   # @attr can_be_edited [Boolean] True, if the current user can edit the administrator privileges for the called user.
   # @attr can_change_info [Boolean] True, if the administrator can change the chat title, photo, and other settings.
   # @attr can_post_messages [Boolean] True, if the administrator can create channel posts; applicable to channels only.
@@ -14,8 +16,9 @@ module TD::Types
   # @attr can_restrict_members [Boolean] True, if the administrator can restrict, ban, or unban chat members.
   # @attr can_pin_messages [Boolean] True, if the administrator can pin messages; applicable to groups only.
   # @attr can_promote_members [Boolean] True, if the administrator can add new administrators with a subset of their
-  #   own privileges or demote administrators that were directly or indirectly promoted by him.
+  #   own privileges or demote administrators that were directly or indirectly promoted by them.
   class ChatMemberStatus::Administrator < ChatMemberStatus
+    attribute :custom_title, TD::Types::String
     attribute :can_be_edited, TD::Types::Bool
     attribute :can_change_info, TD::Types::Bool
     attribute :can_post_messages, TD::Types::Bool
