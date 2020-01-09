@@ -7,6 +7,7 @@ module TD::Types
       pornography
       child_abuse
       copyright
+      unrelated_location
       custom
     ].each do |type|
       autoload TD::Types.camelize(type), "tdlib/types/chat_report_reason/#{type}"

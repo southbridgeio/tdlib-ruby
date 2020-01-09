@@ -1,9 +1,9 @@
 module TD::Types
-  # Represents a link to a WEBP or a TGS sticker.
+  # Represents a link to a WEBP or TGS sticker.
   #
   # @attr id [String] Unique identifier of the query result.
   # @attr thumbnail_url [String] URL of the sticker thumbnail, if it exists.
-  # @attr sticker_url [String] The URL of the WEBP or a TGS sticker (sticker file size must not exceed 5MB).
+  # @attr sticker_url [String] The URL of the WEBP or TGS sticker (sticker file size must not exceed 5MB).
   # @attr sticker_width [Integer] Width of the sticker.
   # @attr sticker_height [Integer] Height of the sticker.
   # @attr reply_markup [TD::Types::ReplyMarkup] The message reply markup.

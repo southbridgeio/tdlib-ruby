@@ -8,16 +8,13 @@ module TD::Types
   # @attr phone_number [String] Phone number of the user.
   # @attr status [TD::Types::UserStatus] Current online status of the user.
   # @attr profile_photo [TD::Types::ProfilePhoto, nil] Profile photo of the user; may be null.
-  # @attr outgoing_link [TD::Types::LinkState] Relationship from the current user to the other user.
-  # @attr incoming_link [TD::Types::LinkState] Relationship from the other user to the current user.
+  # @attr is_contact [Boolean] The user is a contact of the current user.
+  # @attr is_mutual_contact [Boolean] The user is a contact of the current user and the current user is a contact of
+  #   the user.
   # @attr is_verified [Boolean] True, if the user is verified.
   # @attr is_support [Boolean] True, if the user is Telegram support account.
-  # @attr restriction_reason [String] If non-empty, it contains the reason why access to this user must be restricted.
-  #   The format of the string is "{type}: {description}".
-  #   {type} contains the type of the restriction and at least one of the suffixes "-all", "-ios", "-android", or
-  #   "-wp", which describe the platforms on which access should be restricted.
-  #   (For example, "terms-ios-android".
-  #   {description} contains a human-readable description of the restriction, which can be shown to the user).
+  # @attr restriction_reason [String] If non-empty, it contains a human-readable description of the reason why access
+  #   to this user must be restricted.
   # @attr is_scam [Boolean] True, if many users reported this user as a scam.
   # @attr have_access [Boolean] If false, the user is inaccessible, and the only information known about the user is
   #   inside this class.
@@ -32,8 +29,8 @@ module TD::Types
     attribute :phone_number, TD::Types::String
     attribute :status, TD::Types::UserStatus
     attribute :profile_photo, TD::Types::ProfilePhoto.optional.default(nil)
-    attribute :outgoing_link, TD::Types::LinkState
-    attribute :incoming_link, TD::Types::LinkState
+    attribute :is_contact, TD::Types::Bool
+    attribute :is_mutual_contact, TD::Types::Bool
     attribute :is_verified, TD::Types::Bool
     attribute :is_support, TD::Types::Bool
     attribute :restriction_reason, TD::Types::String

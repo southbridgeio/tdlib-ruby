@@ -1,5 +1,5 @@
 module TD::Types
-  # Returns the creator and administrators.
+  # Returns the owner and administrators.
   class SupergroupMembersFilter::Administrators < SupergroupMembersFilter
   end
 end

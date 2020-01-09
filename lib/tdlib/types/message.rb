@@ -7,9 +7,11 @@ module TD::Types
   # @attr chat_id [Integer] Chat identifier.
   # @attr sending_state [TD::Types::MessageSendingState, nil] Information about the sending state of the message; may
   #   be null.
+  # @attr scheduling_state [TD::Types::MessageSchedulingState, nil] Information about the scheduling state of the
+  #   message; may be null.
   # @attr is_outgoing [Boolean] True, if the message is outgoing.
   # @attr can_be_edited [Boolean] True, if the message can be edited.
-  #   For live location and poll messages this fields shows, whether editMessageLiveLocation or stopPoll can be used
+  #   For live location and poll messages this fields shows whether editMessageLiveLocation or stopPoll can be used
   #   with this message by the client.
   # @attr can_be_forwarded [Boolean] True, if the message can be forwarded.
   # @attr can_be_deleted_only_for_self [Boolean] True, if the message can be deleted only for the current user while
@@ -31,6 +33,8 @@ module TD::Types
   # @attr views [Integer] Number of times this message was viewed.
   # @attr media_album_id [Integer] Unique identifier of an album this message belongs to.
   #   Only photos and videos can be grouped together in albums.
+  # @attr restriction_reason [String] If non-empty, contains a human-readable description of the reason why access to
+  #   this message must be restricted.
   # @attr content [TD::Types::MessageContent] Content of the message.
   # @attr reply_markup [TD::Types::ReplyMarkup, nil] Reply markup for the message; may be null.
   class Message < Base
@@ -38,6 +42,7 @@ module TD::Types
     attribute :sender_user_id, TD::Types::Integer
     attribute :chat_id, TD::Types::Integer
     attribute :sending_state, TD::Types::MessageSendingState.optional.default(nil)
+    attribute :scheduling_state, TD::Types::MessageSchedulingState.optional.default(nil)
     attribute :is_outgoing, TD::Types::Bool
     attribute :can_be_edited, TD::Types::Bool
     attribute :can_be_forwarded, TD::Types::Bool
@@ -55,6 +60,7 @@ module TD::Types
     attribute :author_signature, TD::Types::String.optional.default(nil)
     attribute :views, TD::Types::Integer
     attribute :media_album_id, TD::Types::Integer
+    attribute :restriction_reason, TD::Types::String
     attribute :content, TD::Types::MessageContent
     attribute :reply_markup, TD::Types::ReplyMarkup.optional.default(nil)
   end

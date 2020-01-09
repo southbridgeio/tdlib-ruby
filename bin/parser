@@ -1,9 +1,8 @@
 #!/usr/bin/env ruby
-require 'open-uri'
 require 'active_support/all'
 
 AUTOLOAD_BASE_DIR  = 'tdlib/types'
-TD_API_TL_LOCATION = "https://raw.githubusercontent.com/tdlib/td/v1.5.0/td/generate/scheme/td_api.tl"
+TD_API_TL_LOCATION = 'td/td/generate/scheme/td_api.tl'
 
 
 def parse_tl_type(type)
@@ -221,7 +220,7 @@ klass = <<-RUBY
 module TD::Types
   class Base < Dry::Struct
     # throw an error when unknown keys provided
-    input input.strict
+    schema schema.strict
     
     # convert string keys to symbols
     transform_keys(&:to_sym)

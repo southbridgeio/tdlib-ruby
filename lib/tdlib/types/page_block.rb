@@ -20,6 +20,7 @@ module TD::Types
       audio
       photo
       video
+      voice_note
       cover
       embedded
       embedded_post
