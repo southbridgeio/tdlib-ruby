@@ -27,7 +27,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'ffi',              '~> 1.0'
 
   gem.add_development_dependency 'bundler', '~> 2.0'
-  gem.add_development_dependency 'rake', '~> 12.3'
+  gem.add_development_dependency 'rake', '~> 13.0'
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'rubygems-tasks', '~> 0.2'
   gem.add_development_dependency 'yard', '~> 0.9'
