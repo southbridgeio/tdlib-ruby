@@ -3,7 +3,7 @@ require 'dry-types'
 
 module TD::Types
   include Dry::Types.module
-  
+
   LOOKUP_TABLE = {
       'error'                                           => 'Error',
       'ok'                                              => 'Ok',
@@ -64,6 +64,9 @@ module TD::Types
       'venue'                                           => 'Venue',
       'game'                                            => 'Game',
       'poll'                                            => 'Poll',
+      'PollType'                                        => 'PollType',
+      'pollTypeRegular'                                 => 'PollType::Regular',
+      'pollTypeQuiz'                                    => 'PollType::Quiz',
       'profilePhoto'                                    => 'ProfilePhoto',
       'chatPhoto'                                       => 'ChatPhoto',
       'UserType'                                        => 'UserType',
@@ -831,9 +834,9 @@ module TD::Types
       'logVerbosityLevel'                               => 'LogVerbosityLevel',
       'logTags'                                         => 'LogTags'
   }.freeze
-  
+
   module_function
-  
+
   # Recursively wraps a hash into typed classes
   def wrap(object)
     # Wrapping each entry in array
@@ -841,32 +844,32 @@ module TD::Types
       object.map { |o| wrap(o) }
     elsif object.kind_of?(::Hash)
       type = object.delete('@type')
-      
+
       object.each do |key, val|
         if val.respond_to?(:each)
           object[key] = wrap(val)
         end
       end
-      
+
       unless type
         return object
       end
-      
+
       if (klass = LOOKUP_TABLE[type])
         const_get(klass).new(object)
       else
         raise ArgumentError.new("Can't find class for #{type}")
       end
-    else 
+    else
       object
     end
   end
-  
+
   # Simple implementation for internal use only.
   def camelize(str)
     str.gsub(/(?:_|(\/)|^)([a-z\d]*)/i) { "#{$1}#{$2.capitalize}" }
   end
-  
+
   %w[
     account_ttl
     address
@@ -1036,6 +1039,7 @@ module TD::Types
     photo_size
     poll
     poll_option
+    poll_type
     profile_photo
     proxies
     proxy
