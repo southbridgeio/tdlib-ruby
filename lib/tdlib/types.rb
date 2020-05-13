@@ -163,6 +163,7 @@ module TD::Types
       'keyboardButtonTypeText'                          => 'KeyboardButtonType::Text',
       'keyboardButtonTypeRequestPhoneNumber'            => 'KeyboardButtonType::RequestPhoneNumber',
       'keyboardButtonTypeRequestLocation'               => 'KeyboardButtonType::RequestLocation',
+      'keyboardButtonTypeRequestPoll'                   => 'KeyboardButtonType::RequestPoll',
       'keyboardButton'                                  => 'KeyboardButton',
       'InlineKeyboardButtonType'                        => 'InlineKeyboardButtonType',
       'inlineKeyboardButtonTypeUrl'                     => 'InlineKeyboardButtonType::Url',
