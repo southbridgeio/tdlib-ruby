@@ -1,7 +1,9 @@
 language: ruby
 rvm:
-- 2.4.9
-- 2.7.0
+- 2.6.7
+- 2.7.3
+- 3.0.1
+
 addons:
   apt:
     sources:
@@ -21,6 +23,7 @@ env:
 before_install:
 - gem install -v 2.1.2 bundler
 - set -e
+- git clone https://github.com/tdlib/td.git
 - cd td
 - mkdir -p build
 - cd build

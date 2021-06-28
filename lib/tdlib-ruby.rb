@@ -1,5 +1,6 @@
 require 'tdlib/version'
 require 'dry/configurable'
+require 'concurrent-ruby'
 
 module TD
   extend Dry::Configurable
@@ -15,7 +16,7 @@ module TD
   setting :encryption_key
 
   setting :client do
-    setting :api_id
+    setting :api_id, &:to_i
     setting :api_hash
     setting :use_test_dc, false
     setting :database_directory, "#{Dir.home}/.tdlib-ruby/db"
@@ -33,10 +34,9 @@ module TD
   end
 end
 
+require 'tdlib-schema'
 require 'tdlib/errors'
 require 'tdlib/api'
-require 'tdlib/types'
-require 'tdlib/client_methods'
 require 'tdlib/client'
 require 'tdlib/update_handler'
 require 'tdlib/update_manager'

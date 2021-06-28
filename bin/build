@@ -7,6 +7,6 @@ set -e
 cd td
 mkdir -p build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release #{'-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1/' if RbConfig::CONFIG['host_os'] =~ /darwin|mac os/} ..
-cmake --build . -j #{Etc.nprocessors}
+cmake -DCMAKE_BUILD_TYPE=Release #{'-DOPENSSL_ROOT_DIR=/opt/homebrew/Cellar/openssl@1.1/1.1.1k/' if RbConfig::CONFIG['host_os'] =~ /darwin|mac os/} -DCMAKE_INSTALL_PREFIX:PATH=../tdlib ..
+cmake --build . --target install -j #{Etc.nprocessors}
 `
