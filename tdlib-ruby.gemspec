@@ -21,10 +21,9 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.add_runtime_dependency 'dry-configurable', '~> 0.9'
-  gem.add_runtime_dependency 'dry-struct',       '~> 1.2.0'
-  gem.add_runtime_dependency 'dry-types',        '~> 1.2.0'
   gem.add_runtime_dependency 'concurrent-ruby',  '~> 1.1'
   gem.add_runtime_dependency 'ffi',              '~> 1.0'
+  gem.add_runtime_dependency 'tdlib-schema'
 
   gem.add_development_dependency 'bundler', '~> 2.0'
   gem.add_development_dependency 'rake', '~> 13.0'
@@ -32,5 +31,4 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rubygems-tasks', '~> 0.2'
   gem.add_development_dependency 'yard', '~> 0.9'
   gem.add_development_dependency 'pry', '~> 0.11'
-  gem.add_development_dependency 'activesupport', '~> 5.2'
 end
