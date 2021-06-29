@@ -167,9 +167,10 @@ class TD::Client
   private
 
   def handle_update(update)
-    return unless update.is_a?(TD::Types::AuthorizationState::Closed)
+    return unless update.is_a?(TD::Types::Update::AuthorizationState) && update.authorization_state.is_a?(TD::Types::AuthorizationState::Closed)
     @alive = false
     @ready = false
+    sleep 0.001
     TD::Api.client_destroy(@td_client)
     throw(:client_closed)
   end

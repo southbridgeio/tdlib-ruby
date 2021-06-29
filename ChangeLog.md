@@ -1,3 +1,11 @@
+### 3.0.1 / 2020-06-29
+
+* Fix client dispose
+
+### 3.0.0 / 2020-06-28
+
+* Extract schema to separate gem
+
 ### 2.1.0 / 2019-10-18
 
 * Support tdlib 1.5
