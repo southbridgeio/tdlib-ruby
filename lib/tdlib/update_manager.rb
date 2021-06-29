@@ -15,7 +15,7 @@ class TD::UpdateManager
 
   def run(callback: nil)
     Thread.start do
-      catch(:client_closed) { loop { handle_update(callback: callback) } }
+      catch(:client_closed) { loop { handle_update(callback: callback); sleep 0.001 } }
       @mutex.synchronize { @handlers = [] }
     end
   end
@@ -34,6 +34,8 @@ class TD::UpdateManager
 
       match_handlers!(update, extra).each { |h| h.async.run(update) }
     end
+  rescue StandardError => e
+    warn("Uncaught exception in update manager: #{e.message}")
   end
 
   def match_handlers!(update, extra)
