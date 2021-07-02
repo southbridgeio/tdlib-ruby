@@ -32,6 +32,13 @@ http://rpms.southbridge.ru/rhel6/stable/SRPMS/
 | 2.1           | → | 1.5           |
 | 2.2           | → | 1.6           |
 
+IMPORTANT: From version 3.0 types schema is extracted to a separate gem: https://github.com/southbridgeio/tdlib-schema
+If you want to support specific tdlib version, just set a dependency in your Gemfile:
+
+```ruby
+gem 'tdlib-schema', '~> 1.7.0'
+```
+
 ## Install
 
 Add to your gemfile:
@@ -85,15 +92,15 @@ begin
     when :wait_phone_number
       puts 'Please, enter your phone number:'
       phone = STDIN.gets.strip
-      client.set_authentication_phone_number(phone, nil).wait
+      client.set_authentication_phone_number(phone_number: phone, settings: nil).wait
     when :wait_code
       puts 'Please, enter code from SMS:'
       code = STDIN.gets.strip
-      client.check_authentication_code(code).wait
+      client.check_authentication_code(code: code).wait
     when :wait_password
       puts 'Please, enter 2FA password:'
       password = STDIN.gets.strip
-      client.check_authentication_password(password).wait
+      client.check_authentication_password(password: password).wait
     when :ready
       client.get_me.then { |user| @me = user }.rescue { |err| puts "error: #{err}" }.wait
       break
