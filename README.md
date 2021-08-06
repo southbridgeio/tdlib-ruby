@@ -121,7 +121,7 @@ Client methods are being executed asynchronously and return Concurrent::Promises
 
 ```ruby
 TD.configure do |config|
-  config.lib_path = 'path/to/dir_containing_libtdjson' # libtdson will be searched in this directory (*.so, *.dylib, *.dll are valid extensions). For Rails projects, if not set, will be considered as project_root_path/vendor. If not set and file doesn't exist in vendor, it will try to find lib by ldconfig (only on Linux).
+  config.lib_path = 'path/to/dir_containing_libtdjson' # libtdjson will be searched in this directory (*.so, *.dylib, *.dll are valid extensions). For Rails projects, if not set, will be considered as project_root_path/vendor. If not set and file doesn't exist in vendor, it will try to find lib by ldconfig (only on Linux).
   config.encryption_key = 'your_encryption_key' # it's not required
 
   config.client.api_id = 12345
