@@ -16,7 +16,7 @@ module TD
   setting :encryption_key
 
   setting :client do
-    setting :api_id, &:to_i
+    setting :api_id, constructor: ->(v) { v.to_i }
     setting :api_hash
     setting :use_test_dc, default: false
     setting :database_directory, default: "#{Dir.home}/.tdlib-ruby/db"
