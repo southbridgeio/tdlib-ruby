@@ -18,19 +18,19 @@ module TD
   setting :client do
     setting :api_id, &:to_i
     setting :api_hash
-    setting :use_test_dc, false
-    setting :database_directory, "#{Dir.home}/.tdlib-ruby/db"
-    setting :files_directory, "#{Dir.home}/.tdlib-ruby/data"
-    setting :use_file_database, true
-    setting :use_chat_info_database, true
-    setting :use_secret_chats, true
-    setting :use_message_database, true
-    setting :system_language_code, 'en'
-    setting :device_model, 'Ruby TD client'
-    setting :system_version, 'Unknown'
-    setting :application_version, '1.0'
-    setting :enable_storage_optimizer, true
-    setting :ignore_file_names, false
+    setting :use_test_dc, default: false
+    setting :database_directory, default: "#{Dir.home}/.tdlib-ruby/db"
+    setting :files_directory, default: "#{Dir.home}/.tdlib-ruby/data"
+    setting :use_file_database, default: true
+    setting :use_chat_info_database, default: true
+    setting :use_secret_chats, default: true
+    setting :use_message_database, default: true
+    setting :system_language_code, default: 'en'
+    setting :device_model, default: 'Ruby TD client'
+    setting :system_version, default: 'Unknown'
+    setting :application_version, default: '1.0'
+    setting :enable_storage_optimizer, default: true
+    setting :ignore_file_names, default: false
   end
 end
 
