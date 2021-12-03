@@ -70,7 +70,7 @@ class TD::Client
       result = nil
       mutex = Mutex.new
 
-      @update_manager << TD::UpdateHandler.new(TD::Types::Base, extra, disposable: true) do |update|
+      @update_manager << TD::UpdateHandler.new(TD::Types::Base, extra, true) do |update|
         mutex.synchronize do
           result = update
           condition.signal
