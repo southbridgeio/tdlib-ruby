@@ -1,3 +1,7 @@
+## 3.0.3 / 2024-08-29
+
+* Remove the verification encryption key and unnecessary configurations
+
 ### 3.0.2 / 2020-06-29
 
 * Rescue exceptions in update manager thread

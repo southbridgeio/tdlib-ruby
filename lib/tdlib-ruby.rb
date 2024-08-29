@@ -29,8 +29,6 @@ module TD
     setting :device_model, 'Ruby TD client'
     setting :system_version, 'Unknown'
     setting :application_version, '1.0'
-    setting :enable_storage_optimizer, true
-    setting :ignore_file_names, false
   end
 end
 
