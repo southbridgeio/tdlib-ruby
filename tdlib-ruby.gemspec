@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency 'dry-configurable', '~> 0.9'
   gem.add_runtime_dependency 'concurrent-ruby',  '~> 1.1'
-  gem.add_runtime_dependency 'ffi',              '~> 1.0'
+  gem.add_runtime_dependency 'ffi',              '~> 1.15.0'
   gem.add_runtime_dependency 'tdlib-schema'
 
   gem.add_development_dependency 'bundler', '~> 2.0'

@@ -1,4 +1,8 @@
-## 3.0.3 / 2024-08-29
+### 3.0.4 / 2024-09-05
+
+* Change ffi gem version to '~> 1.15.0'
+
+### 3.0.3 / 2024-08-29
 
 * Remove the verification encryption key and unnecessary configurations
 
