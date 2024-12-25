@@ -1,4 +1,4 @@
 module TD
   # tdlib-ruby version
-  VERSION = "3.0.4"
+  VERSION = "3.1.0"
 end
