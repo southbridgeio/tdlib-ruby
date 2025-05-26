@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ['lib']
 
-  gem.add_runtime_dependency 'dry-configurable', '~> 0.13'
+  gem.add_runtime_dependency 'dry-configurable', '~> 1.0'
   gem.add_runtime_dependency 'concurrent-ruby',  '~> 1.1'
   gem.add_runtime_dependency 'ffi',              '~> 1.15.0'
   gem.add_runtime_dependency 'tdlib-schema'
